@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "sistec-plugins",
+  "description": "Marketplace di plugin Claude Code del team Sistec",
+  "version": "0.1.0",
+  "owner": {
+    "name": "Sistec",
+    "email": "marco.manfrin04@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "hello-sistec",
+      "source": "./plugins/hello-sistec",
+      "description": "Plugin di esempio: skill, agent e hook per partire velocemente",
+      "version": "0.1.0",
+      "author": {
+        "name": "Sistec"
+      },
+      "category": "examples",
+      "keywords": ["example", "starter", "template"]
+    }
+  ]
+}

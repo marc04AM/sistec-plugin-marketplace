@@ -1,0 +1,10 @@
+{
+  "name": "hello-sistec",
+  "description": "Plugin di esempio con una skill, un agent e un hook",
+  "version": "0.1.0",
+  "author": {
+    "name": "Sistec"
+  },
+  "homepage": "https://github.com/sistec/sistec-plugin-marketplace",
+  "license": "MIT"
+}
