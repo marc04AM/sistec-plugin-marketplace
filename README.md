@@ -2,6 +2,16 @@
 
 Marketplace di plugin per [Claude Code](https://code.claude.com/docs) del team Sistec.
 
+Repository: <https://github.com/marc04AM/sistec-plugin-marketplace>
+
+## Plugin disponibili
+
+| Plugin | Cosa fa |
+| :----- | :------ |
+| `hello-sistec` | Plugin di esempio: skill, agent e hook per partire velocemente |
+| `technical-writer` | Genera manuali operatore HMI in italiano dalle control narrative (Markdown + HTML) |
+| `hmi-developer` | Assistente di sviluppo per la solution Sistec.HMI (.NET 8 / WinForms): Clean Architecture, ciclo TDD, regole C# e hook di progetto |
+
 ## Struttura del repository
 
 ```
@@ -53,12 +63,14 @@ sistec-plugin-marketplace/
 ```shell
 # Aggiungi il marketplace (in locale per testare, o da GitHub)
 /plugin marketplace add ./sistec-plugin-marketplace
-/plugin marketplace add sistec/sistec-plugin-marketplace   # da GitHub
+/plugin marketplace add marc04AM/sistec-plugin-marketplace   # da GitHub
 
 # Installa un plugin
 /plugin install hello-sistec@sistec-plugins
+/plugin install technical-writer@sistec-plugins
+/plugin install hmi-developer@sistec-plugins
 
-# Prova la skill (namespaced con il nome del plugin)
+# Prova una skill (namespaced con il nome del plugin)
 /hello-sistec:hello Marco
 ```
 
