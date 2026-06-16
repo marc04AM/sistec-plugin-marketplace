@@ -29,6 +29,17 @@
       },
       "category": "documentation",
       "keywords": ["documentation", "manuale", "hmi", "technical-writing", "markdown", "html"]
+    },
+    {
+      "name": "hmi-developer",
+      "source": "./plugins/hmi-developer",
+      "description": "Assistente di sviluppo per la solution Sistec.HMI (.NET 8 / WinForms): Clean Architecture, ciclo TDD, regole C# e hook di progetto",
+      "version": "0.1.0",
+      "author": {
+        "name": "Sistec"
+      },
+      "category": "development",
+      "keywords": ["development", "csharp", "dotnet", "winforms", "clean-architecture", "tdd", "hmi"]
     }
   ]
 }

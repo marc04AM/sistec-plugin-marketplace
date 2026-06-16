@@ -1,0 +1,10 @@
+{
+  "name": "hmi-developer",
+  "description": "Assistente di sviluppo per la solution Sistec.HMI (.NET 8 / WinForms): persona da Senior .NET Architect, regole di Clean Architecture e Clean Code, ciclo TDD, comandi e hook di progetto",
+  "version": "0.1.0",
+  "author": {
+    "name": "Sistec"
+  },
+  "homepage": "https://github.com/sistec/sistec-plugin-marketplace",
+  "license": "MIT"
+}

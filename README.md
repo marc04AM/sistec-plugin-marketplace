@@ -20,13 +20,25 @@ sistec-plugin-marketplace/
 │   │   ├── hooks/
 │   │   │   └── hooks.json        # Hook su eventi (PostToolUse, ...)
 │   │   └── README.md
-│   └── technical-writer/         # Genera manuali operatore HMI dalle control narrative
+│   ├── technical-writer/         # Genera manuali operatore HMI dalle control narrative
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
+│   │   ├── skills/
+│   │   │   └── technical-writer/
+│   │   │       └── SKILL.md
+│   │   ├── assets/               # Manuale di esempio, style.css, template indice/immagini
+│   │   └── README.md
+│   └── hmi-developer/            # Sviluppo solution Sistec.HMI (.NET/WinForms): regole, TDD, hook
 │       ├── .claude-plugin/
 │       │   └── plugin.json
 │       ├── skills/
-│       │   └── technical-writer/
+│       │   ├── hmi-developer/    # Project brain: persona, workflow, mappa file→regola
+│       │   │   └── SKILL.md
+│       │   └── tdd/
 │       │       └── SKILL.md
-│       ├── assets/               # Manuale di esempio, style.css, template indice/immagini
+│       ├── commands/             # add-doc, archive
+│       ├── hooks/                # hooks.json + script Python (build/graphify/archive)
+│       ├── assets/rules/         # Regole C#/HMI (architettura, async, business logic, UI, ...)
 │       └── README.md
 ├── LICENSE
 └── README.md
