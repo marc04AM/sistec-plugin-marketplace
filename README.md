@@ -9,16 +9,24 @@ sistec-plugin-marketplace/
 ├── .claude-plugin/
 │   └── marketplace.json          # Catalogo del marketplace (lista dei plugin)
 ├── plugins/
-│   └── hello-sistec/             # Un plugin
+│   ├── hello-sistec/             # Plugin di esempio
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json       # Manifest del plugin
+│   │   ├── skills/
+│   │   │   └── hello/
+│   │   │       └── SKILL.md      # Skill (invocabile come /hello-sistec:hello)
+│   │   ├── agents/
+│   │   │   └── code-reviewer.md  # Agent custom
+│   │   ├── hooks/
+│   │   │   └── hooks.json        # Hook su eventi (PostToolUse, ...)
+│   │   └── README.md
+│   └── technical-writer/         # Genera manuali operatore HMI dalle control narrative
 │       ├── .claude-plugin/
-│       │   └── plugin.json       # Manifest del plugin
+│       │   └── plugin.json
 │       ├── skills/
-│       │   └── hello/
-│       │       └── SKILL.md      # Skill (invocabile come /hello-sistec:hello)
-│       ├── agents/
-│       │   └── code-reviewer.md  # Agent custom
-│       ├── hooks/
-│       │   └── hooks.json        # Hook su eventi (PostToolUse, ...)
+│       │   └── technical-writer/
+│       │       └── SKILL.md
+│       ├── assets/               # Manuale di esempio, style.css, template indice/immagini
 │       └── README.md
 ├── LICENSE
 └── README.md

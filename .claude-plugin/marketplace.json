@@ -18,6 +18,17 @@
       },
       "category": "examples",
       "keywords": ["example", "starter", "template"]
+    },
+    {
+      "name": "technical-writer",
+      "source": "./plugins/technical-writer",
+      "description": "Genera manuali operatore HMI in italiano dalle control narrative, con resa Markdown e HTML",
+      "version": "0.1.0",
+      "author": {
+        "name": "Sistec"
+      },
+      "category": "documentation",
+      "keywords": ["documentation", "manuale", "hmi", "technical-writing", "markdown", "html"]
     }
   ]
 }

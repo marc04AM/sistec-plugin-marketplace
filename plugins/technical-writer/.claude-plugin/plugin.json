@@ -1,0 +1,10 @@
+{
+  "name": "technical-writer",
+  "description": "Genera manuali operatore HMI in italiano a partire dalle control narrative, seguendo struttura, tono e stile di un manuale di esempio",
+  "version": "0.1.0",
+  "author": {
+    "name": "Sistec"
+  },
+  "homepage": "https://github.com/sistec/sistec-plugin-marketplace",
+  "license": "MIT"
+}
