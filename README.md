@@ -61,9 +61,8 @@ sistec-plugin-marketplace/
 ## Uso (per gli utenti)
 
 ```shell
-# Aggiungi il marketplace (in locale per testare, o da GitHub)
-/plugin marketplace add ./sistec-plugin-marketplace
-/plugin marketplace add marc04AM/sistec-plugin-marketplace   # da GitHub
+# Aggiungi il marketplace
+/plugin marketplace add marc04AM/sistec-plugin-marketplace
 
 # Installa un plugin
 /plugin install hello-sistec@sistec-plugins
