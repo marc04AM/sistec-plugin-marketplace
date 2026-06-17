@@ -1,0 +1,10 @@
+{
+  "name": "device-spy",
+  "description": "Ispettori read-only secret-driven con script helper: /codesySpy (progetto CODESYS cifrato → PLCopen XML + sorgente POU + analisi) e /ubiquitySpy (snapshot della config di un router Ubiquiti). Le password viaggiano via env/STDIN, mai su disco o riga di comando",
+  "version": "0.1.0",
+  "author": {
+    "name": "Sistec"
+  },
+  "homepage": "https://github.com/marc04AM/sistec-plugin-marketplace",
+  "license": "MIT"
+}

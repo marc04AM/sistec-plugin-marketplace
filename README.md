@@ -11,6 +11,9 @@ Repository: <https://github.com/marc04AM/sistec-plugin-marketplace>
 | `hello-sistec` | Plugin di esempio: skill, agent e hook per partire velocemente |
 | `technical-writer` | Genera manuali operatore HMI in italiano dalle control narrative (Markdown + HTML) |
 | `hmi-developer` | Assistente di sviluppo per la solution Sistec.HMI (.NET 8 / WinForms): Clean Architecture, ciclo TDD, regole C# e hook di progetto |
+| `git-release` | Rilascio multi-repo: `/gitize` (diff → Conventional-Commits o split staged) e `/versionize` (release note dai DLL buildati + git, packaging zip) |
+| `log-forensics` | Forensics read-only di log/capture PLC/HMI: `/analyzeCrash` (timeline + root-cause) e `/trackTiming` (consistenza timing ed event-chain Fael/HMI) |
+| `device-spy` | Ispettori read-only secret-driven: `/codesySpy` (CODESYS cifrato → sorgente + analisi) e `/ubiquitySpy` (snapshot config router Ubiquiti) |
 
 ## Struttura del repository
 
@@ -38,17 +41,33 @@ sistec-plugin-marketplace/
 │   │   │       └── SKILL.md
 │   │   ├── assets/               # Manuale di esempio, style.css, template indice/immagini
 │   │   └── README.md
-│   └── hmi-developer/            # Sviluppo solution Sistec.HMI (.NET/WinForms): regole, TDD, hook
+│   ├── hmi-developer/            # Sviluppo solution Sistec.HMI (.NET/WinForms): regole, TDD, hook
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
+│   │   ├── skills/
+│   │   │   ├── hmi-developer/    # Project brain: persona, workflow, mappa file→regola
+│   │   │   │   └── SKILL.md
+│   │   │   └── tdd/
+│   │   │       └── SKILL.md
+│   │   ├── commands/             # add-doc, archive
+│   │   ├── hooks/                # hooks.json + script Python (build/graphify/archive)
+│   │   ├── assets/rules/         # Regole C#/HMI (architettura, async, business logic, UI, ...)
+│   │   └── README.md
+│   ├── git-release/              # Rilascio multi-repo (cache repo-set condivisa)
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
+│   │   ├── commands/             # gitize, versionize
+│   │   └── README.md
+│   ├── log-forensics/            # Forensics read-only di log/capture PLC/HMI
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
+│   │   ├── commands/             # analyzeCrash, trackTiming
+│   │   └── README.md
+│   └── device-spy/               # Ispettori read-only secret-driven (helper bundlati)
 │       ├── .claude-plugin/
 │       │   └── plugin.json
-│       ├── skills/
-│       │   ├── hmi-developer/    # Project brain: persona, workflow, mappa file→regola
-│       │   │   └── SKILL.md
-│       │   └── tdd/
-│       │       └── SKILL.md
-│       ├── commands/             # add-doc, archive
-│       ├── hooks/                # hooks.json + script Python (build/graphify/archive)
-│       ├── assets/rules/         # Regole C#/HMI (architettura, async, business logic, UI, ...)
+│       ├── commands/             # codesySpy, ubiquitySpy
+│       ├── assets/               # codesySpy/resources/*, ubiquitySpy/resources/* (env-driven)
 │       └── README.md
 ├── LICENSE
 └── README.md
@@ -68,6 +87,9 @@ sistec-plugin-marketplace/
 /plugin install hello-sistec@sistec-plugins
 /plugin install technical-writer@sistec-plugins
 /plugin install hmi-developer@sistec-plugins
+/plugin install git-release@sistec-plugins
+/plugin install log-forensics@sistec-plugins
+/plugin install device-spy@sistec-plugins
 
 # Prova una skill (namespaced con il nome del plugin)
 /hello-sistec:hello Marco

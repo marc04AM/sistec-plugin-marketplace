@@ -1,0 +1,10 @@
+{
+  "name": "git-release",
+  "description": "Strumenti di rilascio per le solution multi-repo Sistec: /gitize (diff → messaggio Conventional-Commits o split dello staged) e /versionize (release note dai DLL buildati + git, con packaging zip)",
+  "version": "0.1.0",
+  "author": {
+    "name": "Sistec"
+  },
+  "homepage": "https://github.com/marc04AM/sistec-plugin-marketplace",
+  "license": "MIT"
+}
