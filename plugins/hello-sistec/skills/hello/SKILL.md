@@ -1,4 +1,5 @@
 ---
+name: hello
 description: Saluta l'utente con un messaggio personalizzato. Usala quando l'utente vuole un saluto o vuole testare il plugin.
 disable-model-invocation: true
 ---

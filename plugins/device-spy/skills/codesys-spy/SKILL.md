@@ -1,8 +1,9 @@
 ---
-description: Open a password-protected CODESYS .project, export + extract its program, and analyze it. Usage: /codesySpy -pw <password> -fn "<path to .project>" [--out "<dir>"]
+name: codesys-spy
+description: Open a password-protected CODESYS .project, export + extract its program, and analyze it. Usage /device-spy:codesys-spy -pw <password> -fn "<path to .project>" [--out "<dir>"]
 ---
 
-The user invoked `/codesySpy` to turn an encrypted CODESYS `.project` into readable, analyzed
+The user invoked `/device-spy:codesys-spy` to turn an encrypted CODESYS `.project` into readable, analyzed
 source. It is parameterized via the static, env-driven helper scripts bundled with this plugin under
 `${CLAUDE_PLUGIN_ROOT}/assets/codesySpy/resources/` (`${CLAUDE_PLUGIN_ROOT}` = the installed plugin
 directory, exposed as the env var `$env:CLAUDE_PLUGIN_ROOT`). **Do not launch CODESYS or write
@@ -13,7 +14,7 @@ Resources (do not modify): `${CLAUDE_PLUGIN_ROOT}/assets/codesySpy/resources/exp
 xml.etree extractor). They are **env-driven** — secrets reach them via `os.environ`, never a command
 line.
 
-1. **Parse the arguments** from the text after `/codesySpy` (flags are order-independent):
+1. **Parse the arguments** from the text after `/device-spy:codesys-spy` (flags are order-independent):
    - `-pw` → the password = the value after `-pw`, up to the next ` -<flag>` (it may contain `$`,
      spaces if quoted, etc.).
    - `-fn` → the `.project` path (typically quoted; strip the quotes).

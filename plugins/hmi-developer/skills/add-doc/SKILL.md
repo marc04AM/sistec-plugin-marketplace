@@ -1,7 +1,7 @@
 ---
 name: add-doc
 description: Add XML documentation to selected project
-disable-model-invocations: false
+disable-model-invocation: false
 ---
 
 Add XML documentation to all classes, records, structs and their public and protected members in the project at "<project full path>".

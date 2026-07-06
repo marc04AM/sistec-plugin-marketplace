@@ -44,7 +44,7 @@
     {
       "name": "git-release",
       "source": "./plugins/git-release",
-      "description": "Strumenti di rilascio multi-repo: /gitize (diff → Conventional-Commits o split dello staged) e /versionize (release note dai DLL buildati + git, con packaging zip)",
+      "description": "Strumenti di rilascio multi-repo: /git-release:gitize (diff → Conventional-Commits o split dello staged) e /git-release:versionize (release note dai DLL buildati + git, con packaging zip)",
       "version": "0.1.0",
       "author": {
         "name": "Sistec"
@@ -55,7 +55,7 @@
     {
       "name": "log-forensics",
       "source": "./plugins/log-forensics",
-      "description": "Analisi forense read-only di log e capture PLC/HMI: /analyzeCrash (timeline correlata + root-cause) e /trackTiming (consistenza timing ed event-chain di un log Fael/HMI)",
+      "description": "Analisi forense read-only di log e capture PLC/HMI: /log-forensics:analyze-crash (timeline correlata + root-cause) e /log-forensics:track-timing (consistenza timing ed event-chain di un log Fael/HMI)",
       "version": "0.1.0",
       "author": {
         "name": "Sistec"
@@ -66,7 +66,7 @@
     {
       "name": "device-spy",
       "source": "./plugins/device-spy",
-      "description": "Ispettori read-only secret-driven: /codesySpy (CODESYS cifrato → PLCopen XML + sorgente POU + analisi) e /ubiquitySpy (snapshot config di un router Ubiquiti). Password via env/STDIN, mai su disco",
+      "description": "Ispettori read-only secret-driven: /device-spy:codesys-spy (CODESYS cifrato → PLCopen XML + sorgente POU + analisi) e /device-spy:ubiquity-spy (snapshot config di un router Ubiquiti). Password via env/STDIN, mai su disco",
       "version": "0.1.0",
       "author": {
         "name": "Sistec"

@@ -1,9 +1,10 @@
 ---
-description: Track timing & event-chain consistency of a Fael/HMI application log (+ sibling PLC report JSONs). Catalogs all artifacts first (asks if an unknown one stays unclear), reconstructs per-job event chains (lifecycle → first press program → subsequent RobotFollow programs → handshakes → punch/track cycles), flags every broken/missing/out-of-order link, builds timing + device-health tables, and reports. Usage: /trackTiming -fn "<log-or-folder>" [-prod] [--baseline "<SystemCoordination.md>"] [--out "<dir>"]
+name: track-timing
+description: Track timing & event-chain consistency of a Fael/HMI application log (+ sibling PLC report JSONs). Catalogs all artifacts first (asks if an unknown one stays unclear), reconstructs per-job event chains (lifecycle → first press program → subsequent RobotFollow programs → handshakes → punch/track cycles), flags every broken/missing/out-of-order link, builds timing + device-health tables, and reports. Usage /log-forensics:track-timing -fn "<log-or-folder>" [-prod] [--baseline "<SystemCoordination.md>"] [--out "<dir>"]
 ---
 
-The user invoked `/trackTiming` to verify the **runtime timing and event-chain consistency**
-of the Fael (`5309_FAEL`) HMI/PLC coordination from its own logs. It complements `/analyzeCrash`
+The user invoked `/log-forensics:track-timing` to verify the **runtime timing and event-chain consistency**
+of the Fael (`5309_FAEL`) HMI/PLC coordination from its own logs. It complements `/log-forensics:analyze-crash`
 (crash-capture focused) — this one is **production-timing / chain-consistency** focused.
 **Read-only** except the report (under `--out`) and, optionally, project memory. v3.25 builds use
 the symbol map (`CellALogic`→`PlcPunchingTeam`/`PressRobotTeam`, …) — recall it from memory if

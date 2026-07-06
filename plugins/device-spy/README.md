@@ -5,12 +5,12 @@ Entrambi i comandi usano script helper **env-driven** bundlati nel plugin: i seg
 helper via `os.environ` / STDIN, **mai** come argomento di riga di comando e **mai** su disco, e
 vengono azzerati subito dopo l'uso. Entrambi hanno un **approval gate** prima di lanciare/connettersi.
 
-## Comandi
+## Skill
 
-| Comando | Cosa fa | Scrive |
-| :------ | :------ | :----- |
-| `/codesySpy -pw <password> -fn "<.project>" [--out "<dir>"]` | progetto CODESYS cifrato → export PLCopen XML (headless) → estrazione sorgente per-POU (ST/SFC/LD/FBD decodificati) → analisi con subagent Explore | `--out` (default `./codesySpy-out/`) |
-| `/ubiquitySpy -ip <ip> -user <user> -pw <password> [--out "<dir>"]` | login + GET read-only su un router Ubiquiti "System Manager" → cattura il dashboard server-rendered → report fedele della config corrente (`field → value` per ogni pannello) | `--out` (default `./ubiquity-out/`) |
+| Skill | Cosa fa | Scrive |
+| :---- | :------ | :----- |
+| `/device-spy:codesys-spy -pw <password> -fn "<.project>" [--out "<dir>"]` | progetto CODESYS cifrato → export PLCopen XML (headless) → estrazione sorgente per-POU (ST/SFC/LD/FBD decodificati) → analisi con subagent Explore | `--out` (default `./codesySpy-out/`) |
+| `/device-spy:ubiquity-spy -ip <ip> -user <user> -pw <password> [--out "<dir>"]` | login + GET read-only su un router Ubiquiti "System Manager" → cattura il dashboard server-rendered → report fedele della config corrente (`field → value` per ogni pannello) | `--out` (default `./ubiquity-out/`) |
 
 ## Resource bundlate
 
@@ -24,8 +24,8 @@ assets/
 
 ## Note
 
-- `/codesySpy` lancia CODESYS headless (pesante) → conferma all'approval gate. `/ubiquitySpy` è
-  login + GET soltanto, **mai** un POST che cambia la config.
+- `/device-spy:codesys-spy` lancia CODESYS headless (pesante) → conferma all'approval gate.
+  `/device-spy:ubiquity-spy` è login + GET soltanto, **mai** un POST che cambia la config.
 - **Gestione segreti:** la password è effimera (env → child process / STDIN), azzerata dopo l'uso,
   mai persistita né riecheggiata.
 - Permessi (`cmd /c`, `CODESYS.exe`, `python`, `powershell`, `curl`, scritture file) approvati caso

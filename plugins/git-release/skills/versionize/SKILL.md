@@ -1,12 +1,13 @@
 ---
-description: Create and maintain a release note (ReleaseNote.md) for a Sistec solution or project — a 4-section snapshot (Versions, Cell AB, Cell C, Libraries). `-new` builds the first issue from the target's repos; `-upd` prepends a changelog of features/fixes since the last release; `--zip` packages the solution's git-clean source + each executable project's build output (under `Release/<App>/…`) + the release note into a versioned zip (with optional `--skip` to drop named folders). Artifact versions + authors are read from the already-built DLLs (no rebuild); repos + commits come from git. Usage: /versionize -new|-upd|--zip "<.sln, project file, or folder>" [--out <path>] [--rel <release-note>] [--skip "f1","f2",…]
+name: versionize
+description: Create and maintain a release note (ReleaseNote.md) for a Sistec solution or project — a 4-section snapshot (Versions, Cell AB, Cell C, Libraries). `-new` builds the first issue from the target's repos; `-upd` prepends a changelog of features/fixes since the last release; `--zip` packages the solution's git-clean source + each executable project's build output (under `Release/<App>/…`) + the release note into a versioned zip (with optional `--skip` to drop named folders). Artifact versions + authors are read from the already-built DLLs (no rebuild); repos + commits come from git. Usage /git-release:versionize -new|-upd|--zip "<.sln, project file, or folder>" [--out <path>] [--rel <release-note>] [--skip "f1","f2",…]
 ---
 
-The user invoked `/versionize` to **create and maintain a release note** for a Sistec solution.
+The user invoked `/git-release:versionize` to **create and maintain a release note** for a Sistec solution.
 The release note (`ReleaseNote.md`) is a **snapshot** of the solution at a point in time with **four
 fixed sections, in order: `Versions`, `Cell AB`, `Cell C`, `Libraries`**. Many Sistec solutions are
 **multi-repo workspaces** (the solution root is not a git repo; each subfolder is its own) — this
-command reuses the `/gitize` repo-set discovery/cache. It is **read-only on git** and reads
+command reuses the `/git-release:gitize` repo-set discovery/cache. It is **read-only on git** and reads
 **already-built DLLs** for versions; it **never builds, stages, or commits**. Its only write is the
 output file.
 
@@ -24,10 +25,10 @@ output file.
      Collect every token after `--skip` up to the next flag; **strip surrounding quotes and commas**;
      case-insensitive. A name matches a **whole repo** (e.g. `Test`) **or any folder segment** anywhere
      in a file's path (e.g. a nested `Test\` / `Resources\`). Empty by default.
-   - Usage on error: `/versionize -new|-upd|--zip "<.sln, project file, or folder>" [--out <path>]
+   - Usage on error: `/git-release:versionize -new|-upd|--zip "<.sln, project file, or folder>" [--out <path>]
      [--rel <release-note>] [--skip "f1","f2",…]`.
 
-2. **Resolve the target → root, stem, and repo set** (same shapes as `/gitize`):
+2. **Resolve the target → root, stem, and repo set** (same shapes as `/git-release:gitize`):
    - **`.sln` file** (or a **folder** with exactly one `.sln`) → **solution target**: root = its
      folder, `<stem>` = the `.sln` name. Get the repo set via Step 3.
    - **project file / in-repo path** → **single-repo target**: resolve the one enclosing repo with
@@ -36,7 +37,7 @@ output file.
 3. **Get the git-repo set from memory; discover + persist if absent** *(solution targets only)* —
    recall a memory slugged `git-repos-<stem>` (for `Sistec.5309AB-C` → `git-repos-sistec-5309abc`).
    If absent, discover (root `.git` + immediate subfolders with `.git`) and record it in memory under
-   `git-repos-<stem>`, exactly like `/gitize` step 1 (shared cache).
+   `git-repos-<stem>`, exactly like `/git-release:gitize` step 1 (shared cache).
 
 4. **Locate the build outputs — follow each app project's output redirection, then trust the
    youngest build.** Do **not** assume a fixed folder name, and do **not** default to the
@@ -161,4 +162,4 @@ Notes: global command — operates on the `<target>`, independent of any working
 gate** (read-only git + reads of built DLLs + a single doc write — or, for `--zip`, one zip written to
 the `repos` folder, overwriting a prior same-name zip; it never builds/stages/commits).
 `git` may prompt for permission the first time — handle case-by-case, don't pre-add allow-rules.
-The repo-set memory (`git-repos-<stem>`) is shared with `/gitize`.
+The repo-set memory (`git-repos-<stem>`) is shared with `/git-release:gitize`.

@@ -1,8 +1,9 @@
 ---
-description: Summarize the pending git changes of a solution into one Conventional-Commits message and copy it to the clipboard. Multi-repo aware (caches the repo set in memory). Accepts a .sln, a project file, or a folder. With --split, instead splits the STAGED changes into several impact-grouped commits and interactively stages+commits them. Usage: /gitize -fn "<path to .sln, project file, or folder>" [--split]
+name: gitize
+description: Summarize the pending git changes of a solution into one Conventional-Commits message and copy it to the clipboard. Multi-repo aware (caches the repo set in memory). Accepts a .sln, a project file, or a folder. With --split, instead splits the STAGED changes into several impact-grouped commits and interactively stages+commits them. Usage /git-release:gitize -fn "<path to .sln, project file, or folder>" [--split]
 ---
 
-The user invoked `/gitize` to turn the **pending git changes of a solution** into a single,
+The user invoked `/git-release:gitize` to turn the **pending git changes of a solution** into a single,
 ready-to-paste **Conventional-Commits** message on the **clipboard**. Many Sistec solutions are
 **multi-repo workspaces** — the solution root is not a git repo; each subfolder is its own. So
 gitize aggregates the diffs of **every changed sub-repo** into **one** message. This is read-only
@@ -16,7 +17,7 @@ on the repos (git status/diff) plus a clipboard write — **it never commits or 
      impact-grouped commits and interactively stage+commit them. Default (no `--split`) is the
      read-only single-message + clipboard behaviour of steps 6–8.
    - If `-fn` is missing, or the path does not exist, print the usage
-     (`/gitize -fn "<.sln, project file, or folder>" [--split]`) and **stop**.
+     (`/git-release:gitize -fn "<.sln, project file, or folder>" [--split]`) and **stop**.
 
 2. **Resolve the target → root + stem.** Three target shapes (this also picks the Step-3 mode):
    - **`.sln` file** → root = its containing folder; `<stem>` = the `.sln` name without extension.
@@ -148,4 +149,4 @@ write). **`--split` mode commits** and is therefore gated by the explicit per-co
 Step 9 (the user OKs the plan, then each commit); never reset/commit without them. `git` /
 `Set-Clipboard` (and `git reset`/`apply`/`commit` in split mode) may prompt for permission the first
 time — handle case-by-case, don't pre-add allow-rules. The repo-set memory keeps the solution's
-layout discoverable for later runs (and for sibling commands like `/versionize`).
+layout discoverable for later runs (and for sibling commands like `/git-release:versionize`).

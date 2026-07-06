@@ -1,8 +1,9 @@
 ---
-description: Inspect a Ubiquiti "System Manager" router READ-ONLY — log in and save a faithful report of its complete current configuration (interfaces / DHCP / networking / VPN / users). Usage: /ubiquitySpy -ip <ip> -user <user> -pw <password> [--out "<dir>"]
+name: ubiquity-spy
+description: Inspect a Ubiquiti "System Manager" router READ-ONLY — log in and save a faithful report of its complete current configuration (interfaces / DHCP / networking / VPN / users). Usage /device-spy:ubiquity-spy -ip <ip> -user <user> -pw <password> [--out "<dir>"]
 ---
 
-The user invoked `/ubiquitySpy` to log into a Ubiquiti **"System Manager"** router and **save a
+The user invoked `/device-spy:ubiquity-spy` to log into a Ubiquiti **"System Manager"** router and **save a
 faithful report of its complete current configuration** — every pane (system/identity, interfaces
 WAN/LAN, DHCP, networking: internet sharing / NAT / routing, VPN / remote-access settings, users).
 The job is **pure configuration extraction**: capture every setting as `field → value` — it does
@@ -17,7 +18,7 @@ env-driven login + authenticated-dashboard fetch (the dashboard is server-render
 inline in its HTML), bundled with this plugin and resolved from the env var
 `$env:CLAUDE_PLUGIN_ROOT` (the installed plugin directory).
 
-1. **Parse the arguments** from the text after `/ubiquitySpy` (flags order-independent):
+1. **Parse the arguments** from the text after `/device-spy:ubiquity-spy` (flags order-independent):
    - `-ip` → the router IP/host.
    - `-user` → the admin username.
    - `-pw` → the password = everything after `-pw` up to the next ` -<flag>` (may contain `$`,

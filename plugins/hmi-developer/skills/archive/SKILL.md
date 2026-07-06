@@ -1,7 +1,7 @@
 ---
 name: archive
 description: Write a claude-archive change summary for the current session's work
-disable-model-invocations: false
+disable-model-invocation: false
 ---
 
 Write a summary of the work done in this session to `.claude/claude-archive/<YYYY-MM-DD>-<slug>.md`.

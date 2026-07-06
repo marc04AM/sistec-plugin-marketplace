@@ -11,9 +11,9 @@ Repository: <https://github.com/marc04AM/sistec-plugin-marketplace>
 | `hello-sistec` | Plugin di esempio: skill, agent e hook per partire velocemente |
 | `technical-writer` | Genera manuali operatore HMI in italiano dalle control narrative (Markdown + HTML) |
 | `hmi-developer` | Assistente di sviluppo per la solution Sistec.HMI (.NET 8 / WinForms): Clean Architecture, ciclo TDD, regole C# e hook di progetto |
-| `git-release` | Rilascio multi-repo: `/gitize` (diff → Conventional-Commits o split staged) e `/versionize` (release note dai DLL buildati + git, packaging zip) |
-| `log-forensics` | Forensics read-only di log/capture PLC/HMI: `/analyzeCrash` (timeline + root-cause) e `/trackTiming` (consistenza timing ed event-chain Fael/HMI) |
-| `device-spy` | Ispettori read-only secret-driven: `/codesySpy` (CODESYS cifrato → sorgente + analisi) e `/ubiquitySpy` (snapshot config router Ubiquiti) |
+| `git-release` | Rilascio multi-repo: `/git-release:gitize` (diff → Conventional-Commits o split staged) e `/git-release:versionize` (release note dai DLL buildati + git, packaging zip) |
+| `log-forensics` | Forensics read-only di log/capture PLC/HMI: `/log-forensics:analyze-crash` (timeline + root-cause) e `/log-forensics:track-timing` (consistenza timing ed event-chain Fael/HMI) |
+| `device-spy` | Ispettori read-only secret-driven: `/device-spy:codesys-spy` (CODESYS cifrato → sorgente + analisi) e `/device-spy:ubiquity-spy` (snapshot config router Ubiquiti) |
 
 ## Struttura del repository
 
@@ -47,26 +47,29 @@ sistec-plugin-marketplace/
 │   │   ├── skills/
 │   │   │   ├── hmi-developer/    # Project brain: persona, workflow, mappa file→regola
 │   │   │   │   └── SKILL.md
-│   │   │   └── tdd/
+│   │   │   ├── tdd/
+│   │   │   │   └── SKILL.md
+│   │   │   ├── add-doc/
+│   │   │   │   └── SKILL.md
+│   │   │   └── archive/
 │   │   │       └── SKILL.md
-│   │   ├── commands/             # add-doc, archive
 │   │   ├── hooks/                # hooks.json + script Python (build/graphify/archive)
 │   │   ├── assets/rules/         # Regole C#/HMI (architettura, async, business logic, UI, ...)
 │   │   └── README.md
 │   ├── git-release/              # Rilascio multi-repo (cache repo-set condivisa)
 │   │   ├── .claude-plugin/
 │   │   │   └── plugin.json
-│   │   ├── commands/             # gitize, versionize
+│   │   ├── skills/                # gitize, versionize
 │   │   └── README.md
 │   ├── log-forensics/            # Forensics read-only di log/capture PLC/HMI
 │   │   ├── .claude-plugin/
 │   │   │   └── plugin.json
-│   │   ├── commands/             # analyzeCrash, trackTiming
+│   │   ├── skills/                # analyze-crash, track-timing
 │   │   └── README.md
 │   └── device-spy/               # Ispettori read-only secret-driven (helper bundlati)
 │       ├── .claude-plugin/
 │       │   └── plugin.json
-│       ├── commands/             # codesySpy, ubiquitySpy
+│       ├── skills/                # codesys-spy, ubiquity-spy
 │       ├── assets/               # codesySpy/resources/*, ubiquitySpy/resources/* (env-driven)
 │       └── README.md
 ├── LICENSE

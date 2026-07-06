@@ -1,8 +1,9 @@
 ---
-description: Analyze a crash/diagnostic capture folder (HMI/app logs, PLC/controller logs, Windows events, PerfMon/ETL, network) — catalog the artifacts, build a time-correlated issue timeline over the main log's lifetime, root-cause, and report. Generalized across PLC and HMI software. Usage: /analyzeCrash -fn "<capture folder>" [--out "<dir>"]
+name: analyze-crash
+description: Analyze a crash/diagnostic capture folder (HMI/app logs, PLC/controller logs, Windows events, PerfMon/ETL, network) — catalog the artifacts, build a time-correlated issue timeline over the main log's lifetime, root-cause, and report. Generalized across PLC and HMI software. Usage /log-forensics:analyze-crash -fn "<capture folder>" [--out "<dir>"]
 ---
 
-The user invoked `/analyzeCrash` to analyze a machine/controller crash-or-incident **capture
+The user invoked `/log-forensics:analyze-crash` to analyze a machine/controller crash-or-incident **capture
 folder** and produce a correlated root-cause report. **Read-only** on the capture (the only writes
 are the report under `--out` plus, optionally, project memory). Do **not** hardcode a specific
 PLC/HMI — detect artifact types by pattern/content and apply the matching parser; state assumptions

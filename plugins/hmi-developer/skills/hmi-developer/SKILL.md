@@ -84,6 +84,3 @@ Le regole vivono in `${CLAUDE_PLUGIN_ROOT}/assets/rules/`. **Prima di scrivere o
 - **Comando `/hmi-developer:add-doc`** — aggiunge documentazione XML a un progetto.
 - **Comando `/hmi-developer:archive`** — scrive il summary di change in `.claude/claude-archive/`.
 - **Hook** — `build-reminder` (ricorda `dotnet build` dopo edit `.cs`), `graphify-nudge` (preferisci `graphify query` al grep quando esiste `graphify-out/`), `archive-recall` (a inizio sessione richiama la change history recente).
-
-## graphify
-Se esiste `graphify-out/graph.json`, per domande sul codebase esegui prima `graphify query "<domanda>"` (subgraph scoped) invece di greppare. Usa `graphify path "<A>" "<B>"` per le relazioni e `graphify explain "<concetto>"` per concetti puntuali. Leggi `graphify-out/GRAPH_REPORT.md` solo per review architetturale ampia. Dopo le modifiche, `graphify update .`. Se il grafo non esiste, salta finché l'utente non lo crea.
