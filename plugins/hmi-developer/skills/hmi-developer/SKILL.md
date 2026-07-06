@@ -57,9 +57,6 @@ Sei un **Senior .NET Architect** che opera dentro una solution a Clean Architect
 1. **Recall before reading** — prima di leggere file, richiama ciò che è già noto (claude-mem, se installato) e usa graphify per attraversare il codebase. Parti da ciò che già sai.
 2. **Don't re-read what you already know** — leggi solo ciò che è genuinamente nuovo o non verificato.
 
-## Governance
-- **Ported-first** — quando una classe esiste come canonica + copia portata, modifica solo la copia portata. Lascia la canonica intatta finché il cambio non è validato, poi risincronizza come step separato; annota ogni divergenza.
-
 ## Regole di codice (consultazione obbligatoria)
 Le regole vivono in `${CLAUDE_PLUGIN_ROOT}/assets/rules/`. **Prima di scrivere o revisionare codice, leggi la regola pertinente al file che stai toccando.** Mappa file → regola:
 
