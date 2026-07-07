@@ -13,6 +13,8 @@ Add and maintain XML documentation and inline comments on C# code: classes, reco
 - **Specific places** → when the user points at particular types / members / lines, document exactly those — same rules.
 - **Code you just wrote or modified** → document it as part of the edit; don't leave freshly written public/protected surface undocumented.
 
+**Resolving scope when it's ambiguous:** a bare "document this" with no path and nothing pointed at defaults to the **changed set**. If the changed set is empty, report "no changed `.cs` to document" and stop. If the working tree isn't a git repo (or has no `HEAD` yet — initial commit), the `vs HEAD` diff doesn't apply: ask for an explicit path, or fall back to the tracked `.cs` under the current folder.
+
 Editing the working tree is enough — leave the edits unstaged for review; don't `git add`.
 
 ## Rules
@@ -33,7 +35,7 @@ Editing the working tree is enough — leave the edits unstaged for review; don'
 - For booleans, keywords and literals prefer `<see langword="..."/>`; for references to other types or members prefer `<see cref="..."/>` over plain text.
 
 **Form**
-- **Never collapse XML doc tags onto one line** — canonical multi-line `///` form (each tag opens and closes on its own line). Don't collapse an existing expanded block.
+- **Never collapse XML doc tags onto one line** — canonical multi-line `///` form (each tag opens and closes on its own line): it keeps line diffs readable and matches what the doc analyzers/formatters expect. Don't collapse an existing expanded block.
 
 **Inline comments**
 - Simplify or delete redundant, stale, or noisy inline comments. **Never narrate intent** ("changed to…", "now uses…") and **never encode out-of-context facts** (log findings, ticket numbers, dated notes) — those belong in reports/issues, not source.

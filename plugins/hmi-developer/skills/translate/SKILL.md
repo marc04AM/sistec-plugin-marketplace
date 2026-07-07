@@ -15,12 +15,16 @@ connette al database; l'esecuzione la fai tu.
 - Path dato → quello.
 - Nessun path → il `MissingTranslations.csv` **più recente** (per data di modifica) sotto la cartella
   di lavoro (tipicamente `**/bin/**/MissingTranslations.csv`). Nessuno trovato → segnala e fermati.
+- CSV vuoto o senza righe dati (0 chiavi) → segnala e fermati: non generare un `INSERT` vuoto.
 
 ## 2. Parsa → chiavi distinte
 
-Colonne del CSV: `Timestamp;Locale;Key;DefaultText;Module;Method`. Collassa a **una riga per `Key`
-distinta** (una chiave si logga una volta per locale). Tieni `DefaultText`, `Module`, `Method`:
-puntano al call-site per lo Step 3.
+Colonne del CSV (delimitatore `;`, in quest'ordine): `Timestamp;Locale;Key;DefaultText;Module;Method`.
+Se un campo contiene `;` o virgolette, gestisci il quoting CSV standard (campo tra `"…"`, `""` come
+escape) invece di splittare alla cieca. Collassa a **una riga per `Key` distinta** (una chiave si
+logga una volta per locale). Se la stessa `Key` compare con `DefaultText` **discordanti**, tieni
+quello col `Timestamp` più recente e **segnala il conflitto**. Tieni `DefaultText`, `Module`,
+`Method`: puntano al call-site per lo Step 3.
 
 ## 3. Ricava Italian + English dal call-site (il punto)
 
@@ -32,7 +36,9 @@ puliti:
   la traduzione naturale dell'altra;
 - disambigua dal contesto (titolo vs corpo, header di colonna, membro enum, unità di misura);
 - **preserva i placeholder `string.Format`** (`{0}`, `{1}`, …) verbatim in entrambe le lingue;
-- **segnala ogni valore indovinato** (nessun default leggibile nel codice) perché l'utente lo verifichi.
+- **segnala ogni valore indovinato** (nessun default leggibile nel codice) perché l'utente lo verifichi;
+- se il call-site **non si trova** (grep su `Module`/`Method` a vuoto), marca la chiave come *irrisolta*,
+  emetti comunque la riga col `DefaultText` come valore provvisorio flaggato, e mettila nell'elenco del report.
 
 ### Regola di correttezza n.1 — `StringName` = chiave esatta
 
@@ -56,11 +62,11 @@ ON DUPLICATE KEY UPDATE Italian = VALUES(Italian), English = VALUES(English);
 - `StringName` = chiave esatta (incl. `#`); lascia `TimeStamp`/`Other` ai loro default.
 - La coda `ON DUPLICATE KEY UPDATE … = VALUES(…)` rende l'INSERT rieseguibile senza errori di chiave
   duplicata e vale **sia su MySQL 5.7 sia 8.x** — nessun rilevamento di versione.
-- **Escape gli apici singoli** nei testi (`'` → `''`): l'italiano ne è pieno (`l'operatore` → `l''operatore`).
+- **Escape gli apici singoli** nei testi (`'` → `''`, escaping MySQL standard): l'italiano ne è pieno (`l'operatore` → `l''operatore`).
 - Intestazione a commento: CSV sorgente, tabella, e le regole (chiave-esatta, marcatore `#`,
   idempotenza). Raggruppa le tuple per area con un commento per gruppo; marca con un commento le righe
   il cui valore è **indovinato**.
-- Output di default: `<dir-del-csv>\MissingTranslations.sql` (o il path indicato).
+- Output di default: `<dir-del-csv>\MissingTranslations.sql` (o il path indicato). Se il file esiste già, avvisa prima di sovrascriverlo.
 
 ## 5. Report
 

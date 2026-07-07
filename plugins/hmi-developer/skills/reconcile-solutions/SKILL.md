@@ -29,8 +29,9 @@ Per ogni solution risolvi root + sub-repo (multi-repo → la root non è un repo
 `.git` lo è). Per ogni sub-repo su entrambi i lati registra: **branch** corrente, i **ref
 milestone/feature** rilevanti, un **MERGE_HEAD/rebase** in corso, la **dirtiness**. Poi classifica:
 
-- **SHARED** — stessa origin presente su entrambe le solution → candidato a git-merge.
-- **DISTINCT** — la controparte nella dest è un repo diverso → solo port manuale.
+- **SHARED** — stesso repo su entrambi i lati: stessa origin **oppure** storia condivisa (esiste un
+  `git merge-base`) → candidato a git-merge.
+- **DISTINCT** — controparte con origin diversa **e** nessuna storia condivisa → solo port manuale.
 
 Una dest **dirty** o con un **merge in corso** → chiudila/puliscila prima (vedi *Chiudere un merge in
 sicurezza*); se non si può finire in sicurezza → report e **stop**.
@@ -77,8 +78,21 @@ la dest** per il/i simbolo/i che la feature cambia/rimuove → enumera i **call 
 Presenta il piano completo — decisione merge/port per-repo, i gruppi di file (auto vs conferma), e il
 passo di verifica — e **gate** (`Proceed` / correggi / solo-piano). Read-only fino a qui.
 
+Struttura minima del piano (e del report finale allo Step 9):
+
+```
+## Riconciliazione: <purpose>   (SOURCE → DEST)
+### <repo> — [SHARED merge | SHARED cherry-pick | DISTINCT port | nessuna azione]
+- File auto: <elenco>
+- File da confermare: <elenco + perché>
+### Verifica
+- build dest 0 errori nuovi · 0 riferimenti residui · edit lasciati unstaged
+```
+
 ## 8. Esegui (dopo approvazione)
 
+- **Baseline di build della dest** — prima di editare, builda la dest e registra errori/warning
+  preesistenti, così a fine lavoro distingui i problemi **nuovi** da quelli già presenti.
 - **Pre-check dipendenze di build** — prima di aggiungere file portati, verifica che i tipi/extension
   che richiedono esistano già sul branch della dest (evita sorprese di build rotta).
 - **Auto-applica** il gruppo banale; per ogni **file condiviso divergente**, diffa la versione dest e
@@ -92,8 +106,9 @@ passo di verifica — e **gate** (`Proceed` / correggi / solo-piano). Read-only 
 
 ## 9. Verifica + report
 
-- **Builda la dest** (`dotnet build <dest .sln/.slnx>`), attesi 0 errori (nota l'eventuale baseline di
-  warning preesistenti).
+- **Builda la dest** (`dotnet build <dest .sln/.slnx>`), confrontando con la baseline dello Step 8:
+  attesi 0 errori **nuovi**. Se la build fallisce, riporta gli errori, **lascia gli edit unstaged** e
+  non auto-riparare oltre l'intento della feature (niente rifacimenti fuori ambito).
 - **Zero riferimenti residui** a un simbolo rimosso (una nota doc `<c>…</c>` è innocua).
 - **Lascia tutti gli edit unstaged** — riporta il change set (`git status --porcelain`) per la review.
 - **Riporta la divergenza** creata tra le due solution, per agevolare il sync successivo.

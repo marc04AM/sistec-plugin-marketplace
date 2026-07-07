@@ -21,16 +21,27 @@ helper ad-hoc nello scratchpad di sessione.
    aggiungi `_maintained`. Non sovrascrivere mai l'input.
 2. **Backup prima di editare.** Copia il manuale risolto nello scratchpad come `<stem>_pre-<modo>.docx`
    (punto di ripristino), poi copia sul path della nuova versione — tutte le modifiche vanno lì.
-3. **Preserva** conteggio immagini (registralo prima, verifica invariato alla fine), **etichette in
-   grassetto**, e imposta `<w:updateFields/>` così Word rigenera il TOC all'apertura.
+3. **Preserva** e **verifica** gli invarianti: conteggio immagini e conteggio titoli/voci-TOC
+   (registrali prima, controlla che restino invariati alla fine — segnala ogni delta con la causa);
+   **etichette in grassetto** (verifica a campione il conteggio dei run in grassetto, o dichiara che è
+   best-effort); e imposta `<w:updateFields/>` così Word rigenera il TOC all'apertura.
 
 ## 1. Risolvi il manuale target
 
 - Path `.docx` dato → quello. Inesistente → segnala e fermati.
 - Nessun path → il `.docx` **più recente** (per data di modifica) nella cartella di lavoro / progetto.
-  Nessuno trovato → segnala e fermati.
+  Nessuno trovato → segnala e fermati. (Il più recente potrebbe essere un backup/stray: il gate dello
+  Step 3 conferma il target prima di editare — è la rete di sicurezza.)
+- **Apri in sola lettura per validare**: se python-docx non riesce a caricarlo (file corrotto) o è
+  **bloccato da Word aperto**, segnala e fermati **prima** di qualsiasi backup o edit.
+- **Rileva i canali nascosti già presenti** (commenti Word, tracked-changes non risolte): registrali
+  ora; se ci sono e il modo scelto **non** è `port`, chiedi se accettarli/rifiutarli prima di editare
+  (editarci sopra può intrecciarli male).
 
-## 2. Scegli il modo (esattamente uno)
+## 2. Scegli il modo (uno per volta)
+
+Se la richiesta ne implica più d'uno (es. copyedit + style), eseguili **in sequenza**, ciascuno
+sull'output del precedente, con un gate a testa — non fonderli in un colpo solo.
 
 - **port `<external.docx>`** — porta le modifiche incrementali della copia esterna nel manuale,
   tenendo le modifiche già fatte nel manuale:
@@ -83,6 +94,6 @@ Struttura/immagini/tabelle preservate. Applica il modo scelto al punto 2.
 ## Note
 
 - I manuali sono documenti, non sorgente git — non fare staging di nulla.
-- `--audit` che rimanda lavoro aggiorna `manual-open-items.md` accanto al manuale.
+- Il modo `audit` che rimanda lavoro aggiorna `manual-open-items.md` accanto al manuale.
 - L'esecuzione di script python/python-docx può chiedere permesso la prima volta — l'utente approva
   caso per caso.

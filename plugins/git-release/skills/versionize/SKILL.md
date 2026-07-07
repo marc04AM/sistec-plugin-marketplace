@@ -1,6 +1,6 @@
 ---
 name: versionize
-description: Create and maintain a release note (ReleaseNote.md) for a Sistec solution or project — a 4-section snapshot (Versions, Cell AB, Cell C, Libraries). `-new` builds the first issue from the target's repos; `-upd` prepends a changelog of features/fixes since the last release; `--zip` packages the solution's git-clean source + each executable project's build output (under `Release/<App>/…`) + the release note into a versioned zip (with optional `--skip` to drop named folders, `--include`/`-i` to bundle extra folders); `--deploy`/`-d` appends a `/deploy` leg that pushes the just-built artifact into production (gated, not read-only). Before any note/package/deploy work a **pre-flight cleanliness gate** warns on unwanted conditions (dirty working tree, in-progress merge/rebase, stale build vs source HEAD) and offers to sanitize (`/gitize` / `/gitAlign`) or proceed; when sanitizing was necessary, the note is refreshed and the zip rebuilt AFTER the build so they match the just-deployed binaries. `-r`/`--repeat` replays the last recorded flow (one invocation per line in the state file, in order — e.g. a compound `-upd` then `--zip`). Artifact versions + authors are read from the already-built DLLs (no rebuild); repos + commits come from git. 
+description: Create and maintain a release note (ReleaseNote.md) for a Sistec solution or project — a 4-section snapshot (Versions, Cell AB, Cell C, Libraries). Use when the user wants to cut or update a release, generate or refresh a ReleaseNote for a solution/project, package a versioned source+build zip, or push a just-built artifact to production. `-new` builds the first issue from the target's repos; `-upd` prepends a changelog of features/fixes since the last release; `--zip` packages the solution's git-clean source + each executable project's build output (under `Release/<App>/…`) + the release note into a versioned zip (with optional `--skip` to drop named folders, `--include`/`-i` to bundle extra folders); `--deploy`/`-d` appends a `/deploy` leg that pushes the just-built artifact into production (gated, not read-only). Before any note/package/deploy work a **pre-flight cleanliness gate** warns on unwanted conditions (dirty working tree, in-progress merge/rebase, stale build vs source HEAD) and offers to sanitize (`/gitize` / `/gitAlign`) or proceed; when sanitizing was necessary, the note is refreshed and the zip rebuilt AFTER the build so they match the just-deployed binaries. `-r`/`--repeat` replays the last recorded flow (one invocation per line in the state file, in order — e.g. a compound `-upd` then `--zip`). Artifact versions + authors are read from the already-built DLLs (no rebuild); repos + commits come from git. 
 Usage: /versionize -new|-upd|--zip "<.sln, project file, or folder>" [--out <path>] [--rel <release-note>] [--skip "f1","f2",…] [--include "f1","f2",…] [--deploy|-d <deploy flags…>] | -r|--repeat
 ---
 
@@ -23,7 +23,8 @@ built artifact into production (gated by `/deploy`'s own confirmation; see Step 
      flow such as 5309's `-upd` → `--zip --include …` thus reproduces a **coherent snapshot** — it
      refreshes the note **first**, THEN packages it, so the zip never bundles a stale `ReleaseNote.md`.
      If the file is **missing or empty**, print usage and **stop**. **Echo each leg** before running
-     it. The replayed legs **do not re-record** (a flow's own legs are part of the replay, not new
+     it; if a replayed leg's target no longer resolves (moved/renamed path), echo the leg, report the
+     failure, and **stop** rather than replaying a broken flow. The replayed legs **do not re-record** (a flow's own legs are part of the replay, not new
      user calls) and `-r` itself is **never recorded** — so the saved flow is unchanged and a second
      `-r` repeats it identically. See `[[versionize-repeat-last-flow]]`.
    - **Mode** — exactly one of `-new` (create the first issue), `-upd` (prepend a changelog section
@@ -85,7 +86,8 @@ built artifact into production (gated by `/deploy`'s own confirmation; see Step 
    youngest build.** Do **not** assume a fixed folder name, and do **not** default to the
    solution-root `release\` tree — that is often a **stale *published* copy** (it bit the first run:
    the root `release\` DLLs were ~10 days older than the project build and predated HEAD). For each
-   application project (`Sistec.5309AB`, `Sistec.5309C`):
+   application project (here `Sistec.5309AB` / `Sistec.5309C` — this solution's example apps;
+   substitute the target's own executable projects):
    - **Read the `.csproj` for an output redirection** — `<OutputPath>` (or `<OutDir>` /
      `<BaseOutputPath>`). Sistec apps set `OutputPath = bin\$(Configuration)\$(_ProductFolderName)\`
      where `_ProductFolderName = "HMI v$(_AsmVerMajorMinor)"` (e.g. `bin\Release\HMI v3.25\`).
@@ -189,7 +191,9 @@ built artifact into production (gated by `/deploy`'s own confirmation; see Step 
 7. **For each repo, read git facts** (read-only): `git -C "<repo>" remote get-url origin`
    (the *repository address*), `git -C "<repo>" rev-parse --abbrev-ref HEAD` (active branch), and
    `git -C "<repo>" log -1 --format="%h|%s|%ci"` (the *last commit at the active branch*). **Run
-   these as a single loop over the repo set in one shell invocation** — not three calls per repo.
+   these as a single loop over the repo set in one shell invocation** — not three calls per repo. If a
+   repo in the set can't be read (missing/corrupt `.git`, not a repo), report which one and stop — a
+   release note built over a partial repo set would misstate the snapshot.
 
 8. **`-new` — write `ReleaseNote.md` with the 4 sections, in order.** **Recall before reading
    (P0):** pull `[[fael-solution]]` (project list, roles, frameworks, packages, library purposes) +
@@ -215,6 +219,17 @@ built artifact into production (gated by `/deploy`'s own confirmation; see Step 
    3. **`## Cell C`** — same shape for the line-C app (`Sistec.HMI\C`), noting what differs from AB.
    4. **`## Libraries`** — each Sistec library the cells depend on + its **purpose** (Core, Controls,
       UI, Common, Opc.Ua, Kuka.Client/KRC, Esa.Client/Modbus, EasyModbus, Bus).
+
+   Skeleton (keep this fixed section order):
+   ```markdown
+   # ReleaseNote — <target>   (<date>)
+   ## Versions
+   | Artifact | Repo address | Last commit | Assembly | Version | Author |
+   | --- | --- | --- | --- | --- | --- |
+   ## Cell AB
+   ## Cell C
+   ## Libraries
+   ```
    - Add a short header line with the generation date and the target, and **flag any drift** (e.g.
      release DLLs built from commits older than HEAD).
    - **Persist after writing (P0.4):** refresh the `fael-hmi-feature-catalog` memory (per-cell page
@@ -248,7 +263,9 @@ built artifact into production (gated by `/deploy`'s own confirmation; see Step 
     - **Version** = the HMI **app assembly major.minor** (`Sistec.5309AB` / `Sistec.5309C`, read from
       the youngest build located in Step 4) — e.g. `3.25`.
     - **Output path** = `<parent-of-root>\<root-leaf> v<version>.zip` (i.e. the workspace `repos`
-      folder: for `…\repos\5309_FAEL\…` → `…\repos\5309_FAEL v3.25.zip`). Overwrite if present.
+      folder: for `…\repos\5309_FAEL\…` → `…\repos\5309_FAEL v3.25.zip`). If a same-name zip already
+      exists it is **overwritten** — call that out in the Step 11 report so a prior package isn't
+      replaced unnoticed.
     - **Contents — source of every repo in the set, git-ignored files excluded:** for each repo run
       `git -C "<repo>" ls-files --cached --others --exclude-standard` (tracked + untracked-but-not-
       ignored; honours every `.gitignore`, so `bin\`/`obj\`/`.vs\` and the stale root `release\` tree
@@ -301,7 +318,9 @@ built artifact into production (gated by `/deploy`'s own confirmation; see Step 
 12. **`--deploy` / `-d` — append a `/deploy` leg (push the artifact into production).** Only when the
     flag is present, and only after the package step has produced the zip (so `--deploy` pairs with
     `--zip`; if used without `--zip`, the chained `/deploy` must carry its own `--release`/`--zip`).
-    Invoke **`/deploy`** with the tokens that followed `--deploy` on the command line, verbatim. When
+    Before handing off, **surface what will be deployed** — the resolved artifact + `major.minor`
+    version + the zip source — so the production push is explicit even though `/deploy` owns the
+    confirmation gate. Invoke **`/deploy`** with the tokens that followed `--deploy` on the command line, verbatim. When
     those tokens omit a binaries source (`--release`/`--zip`), `/deploy` defaults its source to **this
     run's `--zip` output** (`<repos>\<root-leaf> v<ver>.zip`). `/deploy` owns its own **production-write
     confirmation gate** — `/versionize` does not copy anything itself; it just hands off. Report the

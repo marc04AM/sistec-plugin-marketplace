@@ -1,6 +1,6 @@
 ---
 name: tdd
-description: Orchestrate the Red→Green→Refactor cycle for a C# task. Writes the failing test first, confirms it fails for the right reason, writes minimum production code, verifies green, then refactors. Use when starting any new feature, bug fix, or behaviour change in the Sistec.HMI solution.
+description: Drive a C# change in the Sistec.HMI solution through the Red→Green→Refactor TDD cycle — write the failing test first, confirm it fails for the right reason, add the minimum production code, verify green, then refactor. Use when starting any new feature, bug fix, or behaviour change in Sistec.HMI, or whenever the user wants to work test-first, do TDD, "write the test before the code", or add tests before implementing — even if they describe the change without naming TDD.
 ---
 
 # TDD Cycle Orchestrator
@@ -13,14 +13,17 @@ Executes the full Red→Green→Refactor cycle for the current task. Enforces `t
 
 ## Step 1 — Resolve project names
 
-Locate the `.sln` file and the `*.Tests.csproj`:
+Locate the `.sln` and the `*.Tests.csproj`:
 
-```bash
-Get-ChildItem -Recurse -Filter "*.sln" | Select-Object -First 1
-Get-ChildItem -Recurse -Filter "*.Tests.csproj" | Select-Object -First 1
+```powershell
+Get-ChildItem -Recurse -Filter "*.sln"
+Get-ChildItem -Recurse -Filter "*.Tests.csproj"
 ```
 
-If multiple solutions exist, ask the user which one to target.
+If **multiple** solutions or test projects match, ask the user which to target. If **no** test
+project exists, stop and report "no test project found" — there is nowhere to write the failing test.
+Bind the resolved names to the placeholders used below: `<Solution>` = the chosen `.sln`,
+`<Project>.Tests` = the chosen test project, `<Project>` = its production counterpart.
 
 ---
 
@@ -43,7 +46,7 @@ Trigger: `--spike` flag passed, OR the task involves an unfamiliar API (OPC UA, 
 1. Create a throwaway `*.Spikes` console project or xUnit project — never inside a production project.
 2. Write the minimum code to answer **one specific question** about the API/mechanic.
 3. Run it, observe the result.
-4. Discard the spike project.
+4. Discard the spike project — delete its folder (and remove it from the `.sln` if it was added); confirm it's untracked so it never lands in a commit.
 5. Promote the verified behaviour into the real locked test in Step 4.
 
 Skip this step if the mechanic is well-understood.
@@ -59,10 +62,12 @@ In `<Project>.Tests`, write the test(s) that encode the prompt's exact inputs an
 - Use AAA structure. Assert on specific values from the prompt — not just `IsSuccess`.
 - Do **not** write any production code yet.
 
-Run the tests to confirm red:
+Build first so the new test actually compiles, then run it — a bare `--no-build` would exercise stale
+binaries that don't yet contain the new test, so a "pass" or a compile error would both mislead:
 
-```bash
-dotnet test <Project>.Tests.csproj --no-build -- --filter "<TestClass>"
+```powershell
+dotnet build <Solution>.sln
+dotnet test <Project>.Tests.csproj --filter "<TestClass>"
 ```
 
 **Expected output:** all new tests fail. If a new test passes without production code, the test is wrong — fix it before continuing.
@@ -111,7 +116,7 @@ dotnet test <Project>.Tests.csproj
 
 A change is **done** only when all of the following hold:
 
-- [ ] `dotnet build` exits clean (0 warnings promoted to errors, 0 errors)
+- [ ] `dotnet build` exits clean: 0 errors (and, if the project sets `TreatWarningsAsErrors`, 0 warnings; otherwise report the warning count)
 - [ ] Every locked test passes
 - [ ] Each test's actual output matches the **starting parameters and expected output** from the prompt — not just exit code
 - [ ] No previously-passing test regressed
@@ -139,7 +144,7 @@ Production code: <files changed>
 Run result: <N> passed, 0 failed
 
 ### Refactor
-Changes: <description>
+Changes: <description, or "none needed">
 Run result: <N> passed, 0 failed
 
 ### Done

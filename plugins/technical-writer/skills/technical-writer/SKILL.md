@@ -1,6 +1,6 @@
 ---
 name: technical-writer
-description: Genera il manuale operatore di un'HMI in italiano a partire dalle control narrative dell'impianto, seguendo struttura, tono e formattazione di un manuale di esempio. Usala quando l'utente chiede di creare, redigere o aggiornare un manuale operatore / manuale HMI a partire da control narrative, indice delle sezioni e screenshot.
+description: Genera da ZERO il manuale operatore di un'HMI in italiano (Markdown → HTML) a partire dalle control narrative dell'impianto, replicando struttura, tono e formattazione di un manuale di esempio. Usala quando l'utente vuole creare, redigere o scrivere un NUOVO manuale operatore / manuale HMI partendo da control narrative, indice delle sezioni e screenshot. Per aggiornare, correggere o revisionare un manuale Word .docx GIÀ esistente usa invece la skill maintain-manual (non questa).
 ---
 
 # Technical Writer — Manuale operatore HMI
@@ -13,7 +13,8 @@ segnaposto immagine, reso poi in **HTML** con lo stile bundle `style.css`.
 ## Regola d'oro
 **Non inventare funzionalità.** Descrivi solo ciò che è documentato nelle control
 narrative o visibile negli screenshot. Se manca un'informazione, inserisci un
-marcatore `<!-- TODO: ... -->` invece di immaginarla.
+marcatore `<!-- TODO: ... -->` invece di immaginarla. Se due fonti si contraddicono,
+non scegliere in silenzio: marca il punto con `<!-- TODO: conflitto ... -->` e chiedi.
 
 ## Asset del plugin (riferimenti di forma e stile)
 Questi file vivono nel plugin, in `${CLAUDE_PLUGIN_ROOT}/assets/`. Sono **solo
@@ -42,7 +43,13 @@ effettivamente presente, non assumere nomi di file o sezioni.
    Markdown, l'`<head>` linka lo stile con `<link rel="stylesheet" href="style.css">`.
    I percorsi immagine restano `src/img/...`.
 3. `immagini-richieste.md` — elenco dei segnaposto immagine ancora da fornire,
-   allineato ai segnaposto presenti nel manuale.
+   allineato ai segnaposto presenti nel manuale. Una riga per segnaposto:
+   ```
+   - [ ] src/img/<nome>.png — <didascalia> — sezione <X.Y>
+   ```
+
+Se `ManualeHMI.md`/`.html` esistono già, chiedi prima di sovrascriverli: una rigenerazione
+cancellerebbe le modifiche fatte a mano al Markdown sorgente.
 
 ## Setup del workspace (se mancano i file)
 Se il progetto non è ancora predisposto, prepara lo scaffolding copiando gli asset:
@@ -55,7 +62,7 @@ Se il progetto non è ancora predisposto, prepara lo scaffolding copiando gli as
 Poi invita l'utente a: caricare le immagini in `src/img/`, compilare l'indice in
 `docs/struttura-manuale.md`, caricare le control narrative in `ControlNarrative/`.
 
-## Convenzioni di stile (obbligatorie)
+## Convenzioni di stile (per coerenza col manuale di esempio)
 - **Lingua**: italiano, forma impersonale ("premere", "verificare", "selezionare").
 - **Numerazione gerarchica**: `1.`, `1.1.`, `1.1.1.`. Titoli in MAIUSCOLO per i capitoli principali.
 - **Immagini**: ogni immagine come
@@ -75,14 +82,16 @@ Poi invita l'utente a: caricare le immagini in `src/img/`, compilare l'indice in
 1. Leggi `docs/struttura-manuale.md` per ottenere l'indice e, per ciascuna voce, la control narrative di origine.
 2. Leggi tutte le `ControlNarrative/*.md` presenti e l'elenco effettivo di `src/img/`.
 3. Consulta `${CLAUDE_PLUGIN_ROOT}/assets/exampleManual.md` come modello di **forma** (mai di contenuto).
-4. Redigi sezione per sezione seguendo l'indice; per ogni sezione attingi **solo** alla narrative indicata.
+4. Redigi sezione per sezione seguendo l'indice; per ogni sezione attingi **solo** alla narrative indicata. Se la narrative indicata manca o è vuota, inserisci `<!-- TODO: narrative mancante per <sezione> -->` e segnalala nel report invece di procedere a vuoto.
 5. Inserisci i segnaposto immagine dove servono screenshot; aggiorna `immagini-richieste.md`.
 6. Verifica coerenza terminologica.
 7. Marca con `<!-- TODO: ... -->` ogni lacuna informativa.
 8. Genera `ManualeHMI.html` linkando `style.css`.
 
 ## Resa in HTML
-Struttura minima:
+Converti `ManualeHMI.md` in HTML preservando la struttura (titoli, immagini con didascalia, tabelle):
+usa un convertitore Markdown→HTML (es. pandoc) se disponibile, altrimenti rendi a mano rispettando lo
+scheletro sotto. Struttura minima:
 ```html
 <!DOCTYPE html>
 <html lang="it">

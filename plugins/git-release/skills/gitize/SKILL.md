@@ -1,6 +1,7 @@
 ---
 name: gitize
-description: Summarize the pending git changes of a solution into one Conventional-Commits message and copy it to the clipboard. Multi-repo aware (caches the repo set in memory). Accepts a .sln, a project file, or a folder. With --split, instead splits the STAGED changes into several impact-grouped commits and interactively stages+commits them — a /gitAlign pre-flight runs first to clear any in-progress merge/rebase before splitting (splitting mid-merge would destroy the merge link). With --amend (-a), folds the STAGED changes into the existing (unpushed) commits they belong to, planning a new commit for anything independent/inconsistent; --amend --split amends the matching commits and creates coordinating commits in the other repos for a cross-repo set (also gitAlign-pre-flighted). If --scope is omitted, defaults to the active project's solution (resolved from its ledger). Usage: /gitize [--scope|-s "<path to .sln, project file, or folder>"] [--split] [--amend|-a]
+description: Summarize the pending git changes of a solution into one Conventional-Commits message and copy it to the clipboard. Multi-repo aware (caches the repo set in memory). Accepts a .sln, a project file, or a folder. With --split, instead splits the STAGED changes into several impact-grouped commits and interactively stages+commits them — a /gitAlign pre-flight runs first to clear any in-progress merge/rebase before splitting (splitting mid-merge would destroy the merge link). With --amend (-a), folds the STAGED changes into the existing (unpushed) commits they belong to, planning a new commit for anything independent/inconsistent; --amend --split amends the matching commits and creates coordinating commits in the other repos for a cross-repo set (also gitAlign-pre-flighted). If --scope is omitted, defaults to the active project's solution (resolved from its ledger). Use when the user wants a ready-to-paste Conventional-Commits message for a solution's pending (multi-repo) changes, or — with --split/--amend — wants staged changes organized into fresh commits or folded back into the existing ones they belong to. Usage: /gitize [--scope|-s "<path to .sln, project file, or folder>"] [--split] [--amend|-a]
+disable-model-invocation: true
 ---
 
 The user invoked `/gitize` to turn the **pending git changes of a solution** into a single,
@@ -41,7 +42,8 @@ on the repos (git status/diff) plus a clipboard write — **it never commits or 
      it as a **single-repo target**: resolve its enclosing repo as below.
    - **Project file or any in-repo path** (no solution to scan) → **single-repo target**: resolve the
      one enclosing git repo with `git -C "<dir>" rev-parse --show-toplevel` and scope the whole run
-     to **that single repo** (`<dir>` = the file's folder or the path itself). `<stem>` = the project
+     to **that single repo** (`<dir>` = the file's folder or the path itself). If the path is **not
+     inside any git repo** (`rev-parse` fails), report that and stop with usage. `<stem>` = the project
      filename without extension (or the repo-folder leaf). **Skip Step 3's recall/discover/persist**
      — the repo set is just this one repo. Note in the report that a single repo was targeted (and,
      when relevant, that the enclosing repo differs from / is nested beneath any parent solution root,
@@ -110,8 +112,20 @@ on the repos (git status/diff) plus a clipboard write — **it never commits or 
      (read the diffs — summarize intent, not just filenames).
    - **Footer** listing the touched repos, e.g. `Repos: Sistec.Controls, Sistec.Core, Sistec.HMI`.
 
+   Shape:
+   ```
+   type(scope): imperative summary
+
+   - <repo/area>: what changed and why
+   - <repo/area>: …
+
+   Repos: <repo1>, <repo2>
+   ```
+
 7. **Copy to the clipboard** with a single PowerShell call — `$msg | Set-Clipboard` (build `$msg`
-   from the text generated in step 6). Verify with `Get-Clipboard` if useful.
+   from the text generated in step 6). Verify with `Get-Clipboard` if useful. If `Set-Clipboard` is
+   unavailable (headless / no clipboard), don't fail — the message is still printed in full in Step 8;
+   just note it couldn't be copied so the user copies it manually.
 
 8. **Report** the full message in the chat, list which repos contributed, and confirm it is on the
    clipboard (the user pastes it into each changed repo's commit).
@@ -180,7 +194,8 @@ on the repos (git status/diff) plus a clipboard write — **it never commits or 
        then advance to the next segment.
    - **c. Done.** Report the commits made (per repo, with short hashes + subjects) and confirm the
      working tree's remaining unstaged changes are untouched. Keep the snapshot patches until the run
-     completes so the original staged set can be re-staged if the user aborts before further commits.
+     completes so the original staged set can be recovered if the user aborts before further commits —
+     to restore, re-apply each repo's kept snapshot with `git -C "<repo>" apply --cached "<snapshot.patch>"`.
 
 10. **`--amend` mode — fold the STAGED changes into the existing commits they belong to; plan a new
     commit for the rest.** Like split mode this **commits** (rewrites history via amend), so it is

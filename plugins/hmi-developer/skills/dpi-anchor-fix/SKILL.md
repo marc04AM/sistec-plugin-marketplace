@@ -1,6 +1,7 @@
 ---
 name: dpi-anchor-fix
 description: Diagnose and fix the .NET 8 WinForms bug where a control anchored Top|Bottom (a TableLayoutPanel or panel filling a region) collapses to Height 0 — showing up blank or missing — when the app is DPI-aware (PerMonitorV2) but the legacy anchor engine (System.Windows.Forms.AnchorLayoutV2) is off. Use whenever WinForms controls vanish, shrink to zero height, or leave a blank region at high DPI or after a .NET 8 migration, or when auditing which WinForms executable projects carry the risky DPI + anchor mix. A bundled deterministic scanner finds the affected projects; this skill interprets the verdict, recommends one of the two safe configurations, and applies it under confirmation.
+disable-model-invocation: true
 ---
 
 # WinForms DPI / anchor collapse fix
@@ -55,8 +56,11 @@ For each project state the verdict plainly:
 - **SAFE (HighDpiMode + AnchorLayoutV2)** — no issue.
 - **ISSUE PRESENT (DPI-aware + AnchorLayoutV2 off)** — the broken mix; this is what to fix.
 
-If no project shows `ISSUE PRESENT`, say so and stop — there is nothing to repair (offer to
-standardize a config only if the user explicitly asks).
+If the scanner is missing or exits with an error, report that and stop — never hand-edit
+manifests/`.csproj` as a fallback (those edits are error-prone by hand). If the scan finds **no
+WinForms executable projects at all**, say there was nothing to scan (distinct from "scanned, all
+safe"). If projects were scanned but none shows `ISSUE PRESENT`, say so and stop — there is nothing
+to repair (offer to standardize a config only if the user explicitly asks).
 
 ## Step 3 — Recommend a config and gate the fix
 
@@ -86,8 +90,11 @@ report path.
 ## Step 5 — Rebuild and verify
 
 DPI/anchor settings are baked at build time, so the fix has **no effect until a rebuild**. Rebuild
-the affected project(s) (`dotnet build`), then confirm the previously-collapsing control now renders
-at its expected height on a high-DPI monitor.
+the affected project(s) (`dotnet build`). If the rebuild **fails**, restore each edited file from its
+`<file>.bak`, report the failure, and stop — don't leave a half-applied config. The final visual
+check — the previously-collapsing control now renders at its expected height on a high-DPI monitor —
+is something **the user runs**; the agent confirms the build succeeded and asks the user to verify
+the rendering.
 
 ## Notes
 
