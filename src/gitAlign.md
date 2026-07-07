@@ -1,5 +1,6 @@
 ---
-description: Pre-flight + safe-reconciliation for a multi-repo solution's git state — survey every repo (branch, ahead/behind, in-progress merge/rebase/cherry-pick, dirtiness), report an alignment table, and safely FINISH a pending merge as a single two-parent merge commit (never split) under a gate. Run BEFORE /gitize --split, which is unsafe mid-merge. Reuses the /gitize repo-set cache. Usage: /gitAlign [--scope|-s "<.sln or folder>"] [--check-only]
+description: Pre-flight + safe-reconciliation for a multi-repo solution's git state — survey every repo (branch, ahead/behind, in-progress merge/rebase/cherry-pick, dirtiness), report an alignment table, and safely FINISH a pending merge as a single two-parent merge commit (never split) under a gate. Run BEFORE /gitize --split, which is unsafe mid-merge. Reuses the /gitize repo-set cache. 
+Usage: /gitAlign [--scope|-s "<.sln or folder>"] [--check-only]
 ---
 
 The user invoked **`/gitAlign`** to align the git state across a multi-repo solution **before**

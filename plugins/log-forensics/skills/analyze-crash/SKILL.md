@@ -1,18 +1,20 @@
 ---
 name: analyze-crash
-description: Analyze a crash/diagnostic capture folder (HMI/app logs, PLC/controller logs, Windows events, PerfMon/ETL, network) — catalog the artifacts, build a time-correlated issue timeline over the main log's lifetime, root-cause, and report. Generalized across PLC and HMI software. Usage /log-forensics:analyze-crash -fn "<capture folder>" [--out "<dir>"]
+description: Analyze a crash/diagnostic capture folder (HMI/app logs, PLC/controller logs, Windows events, PerfMon/ETL, network) — catalog the artifacts, build a time-correlated issue timeline over the main log's lifetime, root-cause, and report. Generalized across PLC and HMI software. Usage: /analyzeCrash [-fn "<capture folder>"]
 ---
 
-The user invoked `/log-forensics:analyze-crash` to analyze a machine/controller crash-or-incident **capture
-folder** and produce a correlated root-cause report. **Read-only** on the capture (the only writes
-are the report under `--out` plus, optionally, project memory). Do **not** hardcode a specific
-PLC/HMI — detect artifact types by pattern/content and apply the matching parser; state assumptions
-when something is unfamiliar.
+The user invoked `/analyzeCrash` to analyze a machine/controller crash-or-incident **capture
+folder** and produce a correlated root-cause report. This generalizes the procedure proven on the
+`5309_FAEL-Diagnostics` captures (e.g. `Crash 20260608_1827`) — see
+`reports\Crash.20260608_1827.analysis.md` and memory [[time-analysis-job-pattern]],
+[[time-analysis-device-tracking]]. **Read-only** except the report + ledger + memory (no approval
+gate needed). Do **not** hardcode a specific PLC/HMI — detect artifact types by pattern/content and
+apply the matching parser; state assumptions when something is unfamiliar.
 
-1. **Resolve the capture folder.** `-fn "<path>"` (strip quotes) is required — the capture folder to
-   analyze. Read `_manifest.txt` if present (capture time, computer, channels, source dirs). If
-   `-fn` is missing or the path does not exist, say so and stop. `--out` (optional) = output
-   directory; default `./crash-out/`.
+1. **Resolve the capture folder.** `-fn "<path>"` if given (strip quotes); else the **newest**
+   `Crash *` / capture folder under the **active project**'s `external resources\`. Read
+   `_manifest.txt` if present (capture time, computer, channels, source dirs). If nothing resolves,
+   say so and stop.
 
 2. **Catalog every artifact** (deliverable §1) — one table: path · type · size · **time-coverage** ·
    parser · relevance. Detect and group by kind (a capture may have any subset):
@@ -48,24 +50,24 @@ when something is unfamiliar.
    - perfmon: CPU/mem/disk/handles in-window (flag if **post-crash**);
    - network: changes / device reachability.
 
-6. **Device tracking** — enumerate every device/peer disconnection or exception across the window,
-   with times.
+6. **Device tracking** (per [[time-analysis-device-tracking]]) — enumerate every device/peer
+   disconnection or exception across the window, with times.
 
 7. **Root cause** — correlate across **≥2 independent sources**; pin the incident to a faulting
    module + exception code + code path when identifiable; separate app vs controller vs OS vs
-   network, and **symptom vs cause**. Compare with the immediately-preceding capture if available.
+   network, and **symptom vs cause**. Compare with the immediately-preceding capture.
 
-8. **Parallelize when it pays:** for many/large logs, split into disjoint groups and spawn up to
-   **5 Explore subagents** (simpler model / lower effort) to mine in parallel, then synthesize.
+8. **Parallelize when it pays (P0.6/P0.7.c):** for many/large logs, split into disjoint groups and spawn
+   up to **5 Explore subagents** (simpler model / lower effort) to mine in parallel, then synthesize.
 
-9. **Deliverables** — write `<out>/Crash.<capture-id>.analysis.md` (capture-id = folder suffix):
+9. **Deliverables** — write `reports\Crash.<capture-id>.analysis.md` (capture-id = folder suffix):
    **§1 catalog**, **§2 timeline**, **root cause**, **device tracking**, **verdicts & actions**,
    cross-refs. Report concrete numbers (counts, counter values), not adjectives.
 
-10. **Memory (optional).** If project memory is in use, recall related findings before mining and
-    record any new, non-obvious finding (root causes, signal/bit mappings) as you discover it.
+10. **Ledger + memory** — append a `*.log.md` P2 entry for the request; update the project anchor +
+    relevant theme memories with any new, non-obvious finding.
 
-Notes: global command. Read-only on the capture; parsed CSV/XML go to `$env:TEMP`, never the output
-dir. If a parser/permission prompt appears, the user approves case-by-case. Generalize — the same
-flow serves other PLCs (Beckhoff/Siemens/…) and HMIs by detecting their log/trace formats and
-applying the right parser.
+Notes: global command; outputs follow the **active project**. Read-only on the capture; parsed
+CSV/XML go to `$env:TEMP`, never the reports dir. If a parser/permission prompt appears, the user
+approves case-by-case (P6). Generalize — the same flow serves other PLCs (Beckhoff/Siemens/…) and
+HMIs by detecting their log/trace formats and applying the right parser.

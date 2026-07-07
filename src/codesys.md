@@ -1,5 +1,6 @@
 ---
-description: Manage the CODESYS Virtual Control PLC containers (Docker inside the Debian WSL distro) via the live codesys.sh lifecycle — up/down/restart/recreate/status/logs/list over one/many/all instances. Wraps `codesys\codesys.sh`; gates the destructive actions (down/recreate). Usage: /codesys [<action>] [<name1,name2,…|all>]
+description: Manage the CODESYS Virtual Control PLC containers (Docker inside the Debian WSL distro) via the live codesys.sh lifecycle — up/down/restart/recreate/status/logs/list over one/many/all instances. Wraps `codesys\codesys.sh`; gates the destructive actions (down/recreate). 
+Usage: /codesys [<action>] [<name1,name2,…|all>]
 ---
 
 The user invoked **`/codesys`** to manage the CODESYS PLC containers on Docker inside the
