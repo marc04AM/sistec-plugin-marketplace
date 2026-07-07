@@ -1,6 +1,6 @@
 ---
 name: codesys-spy
-description: Open a password-protected CODESYS .project, export + extract its program, and analyze it. Usage: /codesySpy -pw <password> -fn "<path to .project>" [--out "<dir>"]
+description: Open a password-protected CODESYS .project, export + extract its PLC program to readable source, then analyze it. Use when the user points at a CODESYS .project (often encrypted/password-protected) and wants its POUs/program extracted, made readable, reviewed, or analyzed without opening CODESYS by hand. Usage: /codesySpy -pw <password> -fn "<path to .project>" [--out "<dir>"]
 ---
 
 The user invoked `/codesySpy` to turn an encrypted CODESYS `.project` into readable, analyzed
@@ -24,14 +24,17 @@ Resources (do not modify), under `${CLAUDE_PLUGIN_ROOT}/assets/codesySpy/resourc
    - `<out>\<project-stem>\` — for the PLCopen XML, the per-POU `.txt` files, and the consolidated
      source (`<project-stem>` = the `.project` filename without extension).
    - `<out>\<project-stem>\reports\` — for the analysis report.
+   - Throughout the steps below, **`<out_dir>` = `<out>\<project-stem>\`** (the XML/txt/source path above).
    - Create the folders as needed.
 
 3. **Auto-detect the newest CODESYS install.** Run the pipe-free, allow-friendly command
    `Get-ChildItem -LiteralPath 'C:\Program Files' -Directory` (or `Get-ChildItem 'C:\Program Files\CODESYS *' -Directory`),
    pick the **newest-versioned** `CODESYS *` folder that contains `CODESYS\Common\CODESYS.exe`, and
    determine its installed **profile name** (the newest `.profile`; profiles live under the install
-   and/or `C:\ProgramData\CODESYS\...`). Known mapping (from `process.md`): install `3.5.21.40` →
-   profile `"CODESYS V3.5 SP21 Patch 4"`. If detection is ambiguous, state what you found and ask.
+   and/or `C:\ProgramData\CODESYS\...`). Example mapping only — **detect, don't assume**: install
+   `3.5.21.40` → profile `"CODESYS V3.5 SP21 Patch 4"`. If **no** `CODESYS *` install containing
+   `CODESYS\Common\CODESYS.exe` is found, report that and stop. If detection is ambiguous (several
+   installs/profiles), state what you found and ask.
 
 4. **Approval gate — APPLY/LAUNCH NOTHING YET.** Show an `AskUserQuestion` recap of: the `.project`
    file, the detected `CODESYS.exe` + profile, and the output directory; options **`Proceed`** /
@@ -51,23 +54,34 @@ Resources (do not modify), under `${CLAUDE_PLUGIN_ROOT}/assets/codesySpy/resourc
    The `cmd` child and CODESYS inherit the env, so `CODESYS_PW` reaches `export_project.py` via
    `os.environ` without ever being a shell argument. Confirm the output contains
    `Export done: …` and the XML file now exists. If it printed `ERROR: …` (e.g. wrong password),
-   surface it and stop.
+   surface it, drop the secret (`Remove-Item Env:\CODESYS_PW -ErrorAction SilentlyContinue`), and stop.
 
 6. **Extract the program.** Run:
    ```powershell
    python "$env:CLAUDE_PLUGIN_ROOT\assets\codesySpy\resources\extract_pous.py" "<out_dir>\<project-stem>.xml" "<out_dir>" "<out_dir>\program.<project-stem>.txt"
    ```
    Confirm it reports the POU count and wrote the per-POU `.txt` + the consolidated
-   `program.<project-stem>.txt`.
+   `program.<project-stem>.txt`. A POU count of **0** (or a script error) means the export hit the
+   wrong file or failed to decode — drop the secret
+   (`Remove-Item Env:\CODESYS_PW -ErrorAction SilentlyContinue`), report it, and stop before analysis.
 
-7. **Env hygiene.** Clear the secret from the session: `Remove-Item Env:\CODESYS_PW` (the password
-   was never written to disk; this just drops it from the live environment).
+7. **Env hygiene.** Clear the secret from the session:
+   `Remove-Item Env:\CODESYS_PW -ErrorAction SilentlyContinue` (the password was never written to
+   disk; this just drops it from the live environment). Clear it on **every** exit path — including
+   the error stops in steps 5–6 — so it never lingers in the session after the run.
 
 8. **Analyze.** List the per-POU `.txt` files; split them into up to **5 balanced groups** and spawn
-   that many **Explore** subagents (simpler model / lower effort, per P0.5), each reading its group
-   and returning a structured summary. Synthesize their findings into one Markdown report — machine
-   overview, startup/cycle flow, zone/structure breakdown, key globals — and save it to the
-   `reports\` location from step 2 (e.g. `<project-stem>.analysis.md`).
+   that many **Explore** subagents (use a simpler model / lower reasoning effort for these read-only
+   summarizers to save budget), each reading its group and returning a structured summary. Synthesize
+   their findings into one Markdown report saved to the `reports\` location from step 2
+   (e.g. `<project-stem>.analysis.md`), using this skeleton:
+   ```markdown
+   # <project-stem> — PLC program analysis
+   ## Machine overview
+   ## Startup & cycle flow
+   ## Zones / structure breakdown
+   ## Key global variables
+   ```
 
 9. **Report** every deliverable path: the XML, the per-POU folder, the consolidated source, and the
    analysis report.

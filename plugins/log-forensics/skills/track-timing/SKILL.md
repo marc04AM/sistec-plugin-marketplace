@@ -1,10 +1,12 @@
 ---
 name: track-timing
-description: Track timing & event-chain consistency of a Fael/HMI application log (+ sibling PLC report JSONs). Catalogs all artifacts first (asks if an unknown one stays unclear), reconstructs per-job event chains (lifecycle → first press program → subsequent RobotFollow programs → handshakes → punch/track cycles), flags every broken/missing/out-of-order link, builds timing + device-health tables, and reports. Generalizes the Time.analysis procedure. `-fn` accepts MULTIPLE paths (logs and/or folders) — they are merged into ONE unified time context and any issue is cross-correlated across every source. `--upd`/`-u <src…>` first incrementally refreshes the local log copies from the given source path(s) (append-only delta where possible, else full copy/create) before analyzing. Every run also maintains a cumulative parts-issued table (`reports\parts-issued.md`: IdBatch · ID_part · IssueTime · Length). Usage: /trackTiming [-fn "<log-or-folder>" ["<log-or-folder>" …]] [-prod] [--upd|-u ["<src>" …]]  (bare --upd reuses the last run's sources)
+description: Track timing & event-chain consistency of a Fael/HMI application log (+ sibling PLC report JSONs). Catalogs all artifacts first, reconstructs per-job event chains (lifecycle → press/RobotFollow programs → handshakes → punch/track cycles), flags every broken/missing/out-of-order link, builds timing + device-health tables, and reports. `-fn` accepts MULTIPLE paths (logs and/or folders) merged into ONE unified timeline with cross-source correlation. `--upd`/`-u <src…>` first refreshes the local log copies (append-only delta where possible) before analyzing. Every run also maintains a cumulative parts-issued table. Use when the user wants to verify runtime timing / event-chain consistency of a Fael/HMI log, spot broken or out-of-order job chains or device-health issues, or refresh and re-analyze those logs. Usage: /trackTiming [-fn "<log-or-folder>" …] [-prod] [--upd|-u ["<src>" …]]
+disable-model-invocation: true
 ---
 
 The user invoked `/trackTiming` to verify the **runtime timing and event-chain consistency**
-of the Fael (`5309_FAEL`) HMI/PLC coordination from its own logs. This distils the standing
+of the Fael HMI/PLC coordination from its own logs (`5309_FAEL`, the paths, and the IPs below are
+this deployment's values — swap them for the target project). This distils the standing
 "Time analysis" procedure (`5309_FAEL-Diagnostics\reports\Time.analysis.md`, memories
 [[time-analysis-job-pattern]], [[time-analysis-device-tracking]], [[time-analysis-doc]],
 [[zone1-handoff-timing]]) into a reusable command. It complements [[analyzecrash-command]]
@@ -38,8 +40,9 @@ paths are never written). v3.25 builds use the [[sistec-hmi-v325-renames]] symbo
      dictates (if the convention is ambiguous and no sibling folder fits, ASK where it belongs).
    - **Local exists & source is a strict append** (same head/prefix, source ≥ local size) →
      **append only the new tail** to the local copy (the bytes/lines past the local length).
-     Then per [[P14]] analyze **only** that appended slice and **merge** into the existing report
-     (advance the high-water mark) — do not re-read the whole file.
+     Then analyze **only** that appended slice — the **delta-only** rule ([[P14]]: only the new
+     bytes past the local length, never a full re-read) — and **merge** into the existing report
+     (advance the high-water mark).
    - **Source shrank / rotated / restarted** (smaller than local, head differs, or a new
      start-banner / earlier-than-HWM first timestamp) → **full-copy (overwrite)**, treat as a new
      file/restart: **full** analysis, **reset** the HWM, and note the rotation (P14 boundary case).
@@ -70,7 +73,9 @@ paths are never written). v3.25 builds use the [[sistec-hmi-v325-renames]] symbo
    role. For any artifact whose meaning/purpose isn't already known, **read it** (head/
    sample large files) to infer schema and role. **If reading still does not clarify what
    it is or how it relates to the analysis, STOP and ASK the user** — do not guess — then
-   record the answer in the catalog. Only proceed once every artifact is catalogued. Known
+   record the answer in the catalog. Only proceed once every artifact is catalogued. (A **known**
+   companion that fails to parse — e.g. a corrupt `plc_reports_*.json` — is noted as **unusable** and
+   the run continues; the STOP-and-ASK is only for genuinely unidentifiable artifacts.) Known
    companions to fold in:
    - **HMI/app log** `SPV_*.log` — the **primary** timeline (drives the run's window).
    - **PLC reports** `plc_reports_<YYYYMMDD>.json` — array of
@@ -84,7 +89,8 @@ paths are never written). v3.25 builds use the [[sistec-hmi-v325-renames]] symbo
 
 4. **Parse the primary log's shape** — never full-read a huge log: `wc -l`, `grep -c`,
    hourly histograms, `head`/`tail`. Capture build/version banner, start/end, restart count,
-   any log-flood.
+   any log-flood. If the primary log is empty or has no parseable banner/timestamps, say so and
+   stop; if it ends mid-chain (partial capture), mark the trailing chains **truncated**, not broken.
 
 5. **Reconstruct per-job event chains** keyed by `Job[id] / Order`:
    - **Lifecycle:** `FrmHMI Job(…) OnStatusChanged Ready → Start → Running → LoadProgram →
@@ -145,8 +151,9 @@ paths are never written). v3.25 builds use the [[sistec-hmi-v325-renames]] symbo
    A simultaneous multi-link drop ⇒ likely a [[site-network]] event, not an app fault.
 
 9. **Report (deliverable).** Save to the **active project**'s `reports\<base-name>.md` —
-   `<base-name>` = the single log's name (extension dropped) for one source, or a combined
-   stem for several (e.g. `SPV_5309AB+C_20260629` / `<folder>_merged_<date>`). Sections:
+   `<base-name>` = the single log's name (extension dropped) for one source; for several, a combined
+   stem — `SPV_5309AB+C_<date>` when merging same-family cell logs, `<folder>_merged_<date>` when
+   merging a whole folder of mixed logs. Sections:
    (1) artifact catalog (all sources); (2) consistency table vs `SystemCoordination.md`;
    (3) per-job chain table + anomaly list (tag each row with its source/cell); (4) timing table
    (Δ avg/σ/race-rate); (5) per-device health table (all sources); (6) headline findings. When
@@ -157,7 +164,8 @@ paths are never written). v3.25 builds use the [[sistec-hmi-v325-renames]] symbo
    incident; suffix the cell when per-cell, e.g. `-c`) and append the request/result to the
    active project's `*.log.md` ledger (P2).
 
-10. **Maintain the running parts-issued table (`reports\parts-issued.md`) — EVERY run.** Extract one
+10. **Maintain the running parts-issued table (`reports\parts-issued.md`) — on every run** (so the
+    cumulative ledger stays complete no matter which slice was analyzed). Extract one
     row per punched part from the analyzed slice — every `OnNewPart PunchedSheet[<IdBatch>] Length:
     <Length>, …, Count: <ID_part>/<n> Sheets` (parts come from the AB punching cell; the C log
     contributes none). Columns exactly **`| IdBatch | ID_part | IssueTime | Length |`** (IssueTime =

@@ -35,6 +35,9 @@ The report is **raw data with hint-notes, not a verdict.** Your job is the part 
 - `--targets "ip1,ip2,…"` → extra hosts to ping. The scanner **already auto-detects and pings the
   gateway(s)**; add the production servers / PLCs / any suspected-conflicting addresses here.
 
+These map to the scanner's Step-2 parameters: `--out`→`-OutFile`, `--days`→`-DaysBack`,
+`--targets`→`-PingTargets`.
+
 ## Step 2 — Run the probe (read-only)
 
 Single PowerShell call — it writes only the report; every section is independent and skips on
@@ -50,7 +53,9 @@ results.
 
 ## Step 3 — Read the report and surface the headline findings
 
-Read the generated report and lead with the signals that matter:
+First confirm the scanner actually wrote `<out>`; if the file is missing or empty (the scan errored
+before writing), report the scanner failure and stop — there's nothing to diagnose. Otherwise read
+the generated report and lead with the signals that matter:
 
 - **Duplicate IP / duplicate MAC** hits (the conflict source).
 - NICs with **Energy-Efficient Ethernet / Green Ethernet** enabled, **Flow Control**, non-forced
@@ -75,13 +80,25 @@ Correlate the findings — this is where the skill earns its keep:
 - **Reachability gaps.** A `NO REPLY` to the gateway vs. a production host narrows the fault to the
   local link, the switch, or the far host.
 
-State a clear conclusion (most-likely cause + evidence) and the concrete config changes to try.
+On a **non-Intel NIC** the `e1rexpress` events and Intel DEV-id decode won't apply — say so and fall
+back to the vendor-neutral evidence (link status, duplicate IP/MAC, EEE / power / speed-duplex
+properties, `Tcpip` events, reachability). State a clear conclusion (most-likely cause + evidence)
+and the concrete config changes to try.
 
 ## Step 5 — Report
 
-Give the report path and your diagnosis: headline findings, the ranked root-cause hypothesis with
-its evidence, and the recommended NIC/driver/config actions. The report is re-runnable — re-probe
-after a change to confirm the flaps/conflicts stopped.
+Give the report path, then the diagnosis in this shape:
+
+```markdown
+## Headline findings
+<duplicate IP/MAC, EEE / power / speed-duplex flags, NO REPLY targets, event counts>
+## Root cause (ranked)
+1. <most-likely cause> — evidence: <events / config that tie to it>
+## Recommended actions
+- <concrete NIC / driver / config change to try>
+```
+
+The report is re-runnable — re-probe after a change to confirm the flaps/conflicts stopped.
 
 ## Notes
 

@@ -1,14 +1,15 @@
 ---
 name: analyze-crash
-description: Analyze a crash/diagnostic capture folder (HMI/app logs, PLC/controller logs, Windows events, PerfMon/ETL, network) — catalog the artifacts, build a time-correlated issue timeline over the main log's lifetime, root-cause, and report. Generalized across PLC and HMI software. Usage: /analyzeCrash [-fn "<capture folder>"]
+description: Analyze a crash/diagnostic capture folder (HMI/app logs, PLC/controller logs, Windows events, PerfMon/ETL, network) — catalog the artifacts, build a time-correlated issue timeline over the main log's lifetime, root-cause, and report. Generalized across PLC and HMI software. Use when the user has a crash/incident capture folder from a machine or controller and wants its mixed logs catalogued, correlated on one timeline, and root-caused into a single report. Usage: /analyzeCrash [-fn "<capture folder>"]
+disable-model-invocation: true
 ---
 
 The user invoked `/analyzeCrash` to analyze a machine/controller crash-or-incident **capture
 folder** and produce a correlated root-cause report. This generalizes the procedure proven on the
-`5309_FAEL-Diagnostics` captures (e.g. `Crash 20260608_1827`) — see
+`5309_FAEL-Diagnostics` captures (**example only** — e.g. `Crash 20260608_1827`, see
 `reports\Crash.20260608_1827.analysis.md` and memory [[time-analysis-job-pattern]],
-[[time-analysis-device-tracking]]. **Read-only** except the report + ledger + memory (no approval
-gate needed). Do **not** hardcode a specific PLC/HMI — detect artifact types by pattern/content and
+[[time-analysis-device-tracking]]; treat these as illustrative, not required inputs). **Read-only**
+except the report + ledger + memory (no approval gate needed). Do **not** hardcode a specific PLC/HMI — detect artifact types by pattern/content and
 apply the matching parser; state assumptions when something is unfamiliar.
 
 1. **Resolve the capture folder.** `-fn "<path>"` if given (strip quotes); else the **newest**
@@ -17,7 +18,9 @@ apply the matching parser; state assumptions when something is unfamiliar.
    say so and stop.
 
 2. **Catalog every artifact** (deliverable §1) — one table: path · type · size · **time-coverage** ·
-   parser · relevance. Detect and group by kind (a capture may have any subset):
+   parser · relevance. Detect and group by kind (a capture may have any subset). If an artifact's
+   type stays unclear after sampling and it looks load-bearing, **stop and ask** before relying on
+   it — don't guess:
    - **HMI/app logs** — text `*.log` (e.g. `SPV_*.log`). Pick the **primary** one (largest / matches
      the line numbers of interest) → its lifetime drives the timeline.
    - **PLC/controller logs** — e.g. CODESYS `PlcLog*.csv` (UTC) + config `*.cfg` + audit `.Audit*.log`;
@@ -33,6 +36,8 @@ apply the matching parser; state assumptions when something is unfamiliar.
      `Disk Write Bytes/sec`, page faults, per-Process if captured).
    - `.etl` → `tracerpt "<file>.etl" -summary "$env:TEMP\sum.txt" -o "$env:TEMP\d.xml" -of XML -y`.
    - `.evtx` → PowerShell `Get-WinEvent -FilterHashtable @{ Path="<f>.evtx"; Id=… }` filtered by time.
+   - If a binary is empty/zero-length or the parser (`relog` / `tracerpt` / `Get-WinEvent`) errors,
+     note it as **unreadable** and continue with the remaining sources rather than aborting the run.
 
 4. **Establish the primary log's lifetime & shape** — never full-read a huge log: use `wc -l`,
    `grep -c`, `grep -oE '^\[[0-9]{2}'` hourly histograms, `head`/`tail`. Capture: build/version
@@ -40,7 +45,8 @@ apply the matching parser; state assumptions when something is unfamiliar.
    lines/hour) — a runaway log is itself an issue.
 
 5. **Mine each source and build ONE time-correlated timeline** (note timezones — e.g. CODESYS
-   PlcLog is UTC, HMI log local):
+   PlcLog is UTC, HMI log local — and reconcile any **clock skew/drift** between hosts before
+   aligning events; note the offset on the timeline):
    - app/HMI: exceptions/`unhandled`, comms error histograms (OPC `BadSecureChannelClosed`/
      `BadRequestInterrupted`/`BadConnectionClosed`, Modbus, etc.), watchdog, reconnect cycles, the flood;
    - controller: crashes/`double free`/heap, comm-cycle/task stalls (`alive=0`, watchdog), device errors;
@@ -55,14 +61,19 @@ apply the matching parser; state assumptions when something is unfamiliar.
 
 7. **Root cause** — correlate across **≥2 independent sources**; pin the incident to a faulting
    module + exception code + code path when identifiable; separate app vs controller vs OS vs
-   network, and **symptom vs cause**. Compare with the immediately-preceding capture.
+   network, and **symptom vs cause**. If only **one** source is available, root-cause from it and
+   flag the conclusion as **single-source / lower confidence**. Compare with the immediately-preceding
+   capture.
 
-8. **Parallelize when it pays (P0.6/P0.7.c):** for many/large logs, split into disjoint groups and spawn
-   up to **5 Explore subagents** (simpler model / lower effort) to mine in parallel, then synthesize.
+8. **Parallelize when it pays:** for many/large logs, split into disjoint groups and spawn up to
+   **5 Explore subagents** (use a simpler model / lower reasoning effort for these read-only miners)
+   in parallel, then synthesize.
 
 9. **Deliverables** — write `reports\Crash.<capture-id>.analysis.md` (capture-id = folder suffix):
    **§1 catalog**, **§2 timeline**, **root cause**, **device tracking**, **verdicts & actions**,
-   cross-refs. Report concrete numbers (counts, counter values), not adjectives.
+   cross-refs. Report concrete numbers (counts, counter values), not adjectives. Minimal shapes:
+   - timeline row: `time · source · event · severity`
+   - device row: `device · disconnects · first/last · affected tags · correlates-with`
 
 10. **Ledger + memory** — append a `*.log.md` P2 entry for the request; update the project anchor +
     relevant theme memories with any new, non-obvious finding.
