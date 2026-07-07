@@ -1,5 +1,6 @@
 ---
-description: Diagnose (and optionally fix) the WinForms "anchored control collapses to Height 0" DPI/anchor bug across a solution's WinForms exe projects — reports each project's DPI-awareness + AnchorLayoutV2 + at-risk anchored controls, then applies one of the two safe configs. Wraps Repair-WinFormsDpiAnchor.ps1; check is read-only, fixes are gated and left unstaged (P15). Usage: /dpiRepair [--scope|-s "<folder or .sln>"] [--mode check|highDpi|oldMode]
+description: Diagnose (and optionally fix) the WinForms "anchored control collapses to Height 0" DPI/dpanchor bug across a solution's WinForms exe projects — reports each project's DPI-awareness + AnchorLayoutV2 + at-risk anchored controls, then applies one of the two safe configs. Wraps Repair-WinFormsDpiAnchor.ps1; check is read-only, fixes are gated and left unstaged (P15). 
+Usage: /dpiRepair [--scope|-s "<folder or .sln>"] [--mode check|highDpi|oldMode]
 ---
 
 The user invoked **`/dpiRepair`** to check (and optionally fix) the WinForms anchored-control DPI

@@ -1,3 +1,5 @@
+a cosa serve? meta-authoring: registra la sessione (trace.md) per distillarla in un command con /skilliDo. l'authoring di skill è già coperto da skill-creator di Anthropic. qui è legato al framework privato (container commands\, .claude\commands, command.md §3 doc-sync, P0.7.e/P6/P11, anchor, work-dir stale Sistec 23) e il "recording" è solo comportamentale (CC non ha hook on-disk) → fragile, meta-infra interna, fuori dal marketplace.
+
 ---
 description: Record a session and distill it into a reusable slash-command. /skillify is the recorder; its partner /skilliDo is the producer. You invoke /skillify <skill-name> with a flag spec, perform the real task once (normally, with the agent), and skillify keeps a running trace of the actions/decisions/gates; then /skilliDo generalizes that trace into a new .claude\commands\<name>.md. The executable form of DEVELOPMENT.md P0.7.e (Skill Extraction) — author a command by DOING the procedure once, not by hand. Usage: /skillify <skill-name> [<flag-spec>…] | --note|-n "<text>" | --status|-s [<skill-name>] | --abort [<skill-name>]   (distill with /skilliDo [<skill-name>])
 ---

@@ -1,3 +1,5 @@
+a cosa serve? git fetch su N repo + tabella allineamento (ahead/behind, ref nuovi, dirty) + --pull ff-only gated. ma ogni passo è git puro (fetch, rev-list --left-right, status --porcelain, merge --ff-only): un loop/script lo fa meglio — ripetibile, corretto, zero non-determinismo. repo-set dalla cache /gitize+ledger (plumbing Sistec). l'LLM non aggiunge interpretazione (behind→pull/ahead→commit sono predicati). fuori dal marketplace → script/alias git.
+
 ---
 description: Fetch git/remote updates across a Sistec multi-repo solution in one pass — run `git fetch` over every repo in the solution's repo set, then report a per-repo alignment table (branch, ahead/behind vs upstream, new remote branches/tags, dirtiness). --branch/-b <branch> restricts the fetch to that one branch across all involved repos. Read-only by default (fetch touches only remote-tracking refs); optional --pull fast-forwards the clean, behind-only repos under a gate (never a merge commit, never a force). Reuses the /gitize repo-set cache. Usage: /fetch [--scope|-s "<.sln, project file, or folder>"] [--branch|-b <branch>] [--prune] [--pull]
 ---

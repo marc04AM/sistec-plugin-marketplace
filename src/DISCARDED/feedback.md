@@ -1,3 +1,5 @@
+a cosa serve? usa la plan mode nativa che fa esattamente la stessa cosa
+
 ---
 description: Triage an attached screenshot and/or written feedback — observe, diagnose, then propose a fix for approval before applying.
 ---
@@ -34,7 +36,7 @@ Work through these steps and **do not change anything until the approval gate (s
    - On **`Revise`** → refine the proposal and re-ask; still apply nothing.
 
 5. **On `Proceed`, apply** the change(s) and report the result faithfully (including anything
-   that didn't work). If the fix is declined / abandoned at the gate, apply nothing.
+   that didn't work). If the fix is declined / abandonedma s at the gate, apply nothing.
 
 6. **Log every triage — always.** Whatever the outcome — **fix applied**, **no fix needed**
    (step 3 success), or **fix declined** — append request + result to the **active project's**

@@ -16,8 +16,8 @@ built artifact into production (gated by `/deploy`'s own confirmation; see Step 
 1. **Parse the arguments** (flags order-independent):
    - **`--repeat` / `-r` — replay the last recorded flow (standalone mode, takes no other args).**
      Check for it **first**: read the saved flow from the state file
-     `commands\versionize\last-args.txt` (relative to the workspace root
-     `C:\Users\Sistec 23\source\repos\Claude\`). The file holds **one invocation per line** — a flow
+     `./.versionize/last-args.txt` (in the current working directory). The file holds **one
+     invocation per line** — a flow
      of one or more legs; **replay every line in order**, re-dispatching each **exactly as if**
      `/versionize` had been invoked with those arguments (same mode + target + every flag). A compound
      flow such as 5309's `-upd` → `--zip --include …` thus reproduces a **coherent snapshot** — it
@@ -58,7 +58,7 @@ built artifact into production (gated by `/deploy`'s own confirmation; see Step 
      recorded `--name`/`--release` use the `*`/root forms `/deploy`'s `--version` completion fills; Step 12).
    - **Record the invocation for `-r` (every non-`-r` run).** Once the arguments are parsed and
      validated, write the full resolved parameter set (mode + target + every flag and its values) as
-     **one re-runnable line** to `commands\versionize\last-args.txt` **before** executing the mode —
+     **one re-runnable line** to `./.versionize/last-args.txt` **before** executing the mode —
      so a later `/versionize -r` replays it. A lone normal run **overwrites** the file with its single
      line (flow = that one call). A **multi-leg flow** (one invocation per line, replayed in order by
      `-r`) is **seeded / maintained explicitly** — auto-recording does **not** detect flow boundaries,
@@ -327,6 +327,5 @@ mode when the tree is dirty / mid-op / the build is stale (offer sanitize / proc
 confirmation** (Step 12). Sanitize is always a hand-off to another (gated) command — `/versionize`
 itself never stages, commits, or builds.
 `git` may prompt for permission the first time — handle case-by-case, don't pre-add allow-rules.
-Writing `.claude\commands\*.md` is agent-config self-modification (see `[[cannot-self-edit-permissions]]`).
 The repo-set memory (`git-repos-<stem>`) is shared with `/gitize`. Anchor `[[commands-anchor]]`;
 detail `[[versionize-command]]`.

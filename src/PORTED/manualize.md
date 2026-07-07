@@ -1,3 +1,5 @@
+ported in maintain-manual
+
 ---
 description: Maintain a Word (.docx) user manual via python-docx — port external/working-copy edits (incl. hidden comment/tracked-change channels), copy-edit (typos/grammar/style), audit against the software & insert missing functions in-style, fix structure (blank-runs→page-breaks, numbering/indent), or add "controllare" review comments. Always edits a version-bumped COPY (master untouched) after a scratchpad backup; preserves images/bold-labels/TOC. Usage: /manualize [-fn "<manual.docx>"] (--port "<ext.docx>" | --copyedit | --audit [--code "<.sln>"] | --style | --comments)
 ---

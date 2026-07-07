@@ -1,3 +1,5 @@
+a cosa serve? pre-flight git multi-repo: survey (branch/ahead-behind/dirty/op-in-corso) + tabella + chiusura sicura di un merge già risolto (commit --no-edit gated), per non far passare un merge pendente da /gitize --split (che lo appiattirebbe). ma ogni passo è git puro (rev-parse, rev-list, status --porcelain, sentinelle MERGE_HEAD/rebase/CHERRY_PICK, commit --no-edit): uno script lo fa meglio. decisioni = predicati (unmerged→utente, risolto→commit), zero giudizio LLM. il guard "no --split a merge in corso" è un check da mettere in gitize, non una skill. fuori dal marketplace → script.
+
 ---
 description: Pre-flight + safe-reconciliation for a multi-repo solution's git state — survey every repo (branch, ahead/behind, in-progress merge/rebase/cherry-pick, dirtiness), report an alignment table, and safely FINISH a pending merge as a single two-parent merge commit (never split) under a gate. Run BEFORE /gitize --split, which is unsafe mid-merge. Reuses the /gitize repo-set cache. 
 Usage: /gitAlign [--scope|-s "<.sln or folder>"] [--check-only]

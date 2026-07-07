@@ -1,31 +1,29 @@
 ---
 name: codesys-spy
-description: Open a password-protected CODESYS .project, export + extract its program, and analyze it. Usage: /codesySpy -pw <password> -fn "<path to .project>"
+description: Open a password-protected CODESYS .project, export + extract its program, and analyze it. Usage: /codesySpy -pw <password> -fn "<path to .project>" [--out "<dir>"]
 ---
 
 The user invoked `/codesySpy` to turn an encrypted CODESYS `.project` into readable, analyzed
-source. This reproduces the procedure first done in `5309_FAEL-Coordination` (see its
-`scripts\process.md`), parameterized via the static, env-driven resources under
-`commands\codesySpy\resources\`. **Do not launch CODESYS or write anything until the approval
-gate (step 4).**
+source, via the static, env-driven helper scripts bundled under
+`${CLAUDE_PLUGIN_ROOT}/assets/codesySpy/resources/`. **Do not launch CODESYS or write anything
+until the approval gate (step 4).**
 
-Resources (do not modify): `commands\codesySpy\resources\export_project.py` (CODESYS IronPython
-export), `run_export.bat` (headless launcher), `extract_pous.py` (Python 3 xml.etree extractor).
+Resources (do not modify), under `${CLAUDE_PLUGIN_ROOT}/assets/codesySpy/resources/`:
+`export_project.py` (CODESYS IronPython export), `run_export.bat` (headless launcher),
+`extract_pous.py` (Python 3 xml.etree extractor).
 
 1. **Parse the arguments** from the text after `/codesySpy` (flags are order-independent):
    - `-pw` → the password = the value after `-pw`, up to the next ` -<flag>` (it may contain `$`,
      spaces if quoted, etc.).
    - `-fn` → the `.project` path (typically quoted; strip the quotes).
-   - If either flag is missing, or the `.project` file does not exist, report the exact problem and
-     stop — do not proceed.
+   - `--out` → optional output directory (strip quotes). Default `./codesySpy-out/`.
+   - If `-pw` or `-fn` is missing, or the `.project` file does not exist, report the exact problem
+     and stop — do not proceed.
 
-2. **Resolve output locations.** Use the **active project** tree:
-   - `<active-project>\external resources\codesySpy\<project-stem>\` — for the PLCopen XML, the
-     per-POU `.txt` files, and the consolidated source. (`<project-stem>` = the `.project` filename
-     without extension.)
-   - `<active-project>\reports\` — for the analysis report.
-   - If no project is active (chat / none), fall back to `commands\codesySpy\out\<project-stem>\`
-     and `commands\codesySpy\out\<project-stem>\reports\`.
+2. **Resolve output locations.** Under the output dir (`--out`, default `./codesySpy-out/`):
+   - `<out>\<project-stem>\` — for the PLCopen XML, the per-POU `.txt` files, and the consolidated
+     source (`<project-stem>` = the `.project` filename without extension).
+   - `<out>\<project-stem>\reports\` — for the analysis report.
    - Create the folders as needed.
 
 3. **Auto-detect the newest CODESYS install.** Run the pipe-free, allow-friendly command
@@ -44,11 +42,11 @@ export), `run_export.bat` (headless launcher), `extract_pous.py` (Python 3 xml.e
    ```powershell
    $env:CODESYS_EXE='<detected CODESYS.exe>'
    $env:CODESYS_PROFILE='<detected profile name>'
-   $env:CODESYS_SCRIPT='C:\Users\Sistec 23\source\repos\Claude\commands\codesySpy\resources\export_project.py'
+   $env:CODESYS_SCRIPT="$env:CLAUDE_PLUGIN_ROOT\assets\codesySpy\resources\export_project.py"
    $env:CODESYS_PROJECT='<-fn path>'
    $env:CODESYS_PW='<-pw value>'      # SINGLE quotes — keeps $ and friends literal
    $env:CODESYS_EXPORT_XML='<out_dir>\<project-stem>.xml'
-   cmd /c "C:\Users\Sistec 23\source\repos\Claude\commands\codesySpy\resources\run_export.bat"
+   cmd /c "$env:CLAUDE_PLUGIN_ROOT\assets\codesySpy\resources\run_export.bat"
    ```
    The `cmd` child and CODESYS inherit the env, so `CODESYS_PW` reaches `export_project.py` via
    `os.environ` without ever being a shell argument. Confirm the output contains
@@ -57,7 +55,7 @@ export), `run_export.bat` (headless launcher), `extract_pous.py` (Python 3 xml.e
 
 6. **Extract the program.** Run:
    ```powershell
-   python "C:\Users\Sistec 23\source\repos\Claude\commands\codesySpy\resources\extract_pous.py" "<out_dir>\<project-stem>.xml" "<out_dir>" "<out_dir>\program.<project-stem>.txt"
+   python "$env:CLAUDE_PLUGIN_ROOT\assets\codesySpy\resources\extract_pous.py" "<out_dir>\<project-stem>.xml" "<out_dir>" "<out_dir>\program.<project-stem>.txt"
    ```
    Confirm it reports the POU count and wrote the per-POU `.txt` + the consolidated
    `program.<project-stem>.txt`.
@@ -74,6 +72,6 @@ export), `run_export.bat` (headless launcher), `extract_pous.py` (Python 3 xml.e
 9. **Report** every deliverable path: the XML, the per-POU folder, the consolidated source, and the
    analysis report.
 
-Notes: this command is global; outputs follow the active project. It does not modify the canonical
-`5309_FAEL-Coordination` scripts. If a step triggers a permission prompt (`cmd /c`, `CODESYS.exe`,
-`python`, file writes), the user approves case-by-case — do not add allow-rules unilaterally (P6).
+Notes: outputs go under `--out` (default `./codesySpy-out/`). The bundled resource scripts are
+static — do not modify them. If a step triggers a permission prompt (`cmd /c`, `CODESYS.exe`,
+`python`, file writes), the user approves case-by-case — do not add allow-rules unilaterally.

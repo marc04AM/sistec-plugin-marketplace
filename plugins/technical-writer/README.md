@@ -1,15 +1,15 @@
 # technical-writer
 
-Plugin del marketplace Sistec per generare il **manuale operatore di un'HMI** in
-italiano, a partire dalle control narrative dell'impianto. Replica struttura, tono
-e formattazione del manuale di esempio incluso e produce sia Markdown sia HTML
-con stile dedicato.
+Plugin del marketplace Sistec per il **manuale operatore di un'HMI** in italiano, su due
+fronti: **generare** un manuale nuovo (Markdown → HTML) dalle control narrative, e **manutenere**
+un manuale Word (`.docx`) già esistente (revisioni, copy-edit, audit vs codice, struttura, commenti).
 
 ## Componenti
 
 | Componente | File | Cosa fa |
 | :--------- | :--- | :------ |
-| Skill | `skills/technical-writer/SKILL.md` | Redige il manuale dalle control narrative; invocabile come `/technical-writer:technical-writer` o automaticamente quando si chiede di creare un manuale HMI |
+| Skill | `skills/technical-writer/SKILL.md` | **Genera** il manuale (MD/HTML) dalle control narrative; invocabile come `/technical-writer:technical-writer` o automaticamente quando si chiede di creare un manuale HMI |
+| Skill | `skills/maintain-manual/SKILL.md` | **Manutiene** un manuale Word (`.docx`) esistente via python-docx: porta revisioni (inclusi commenti/tracked-changes nascosti), copy-edit, audit di copertura vs codice, fix struttura, commenti di revisione. Lavora su una copia versionata (master intatto) |
 | Asset | `assets/exampleManual.md` | Manuale di esempio: riferimento di **forma**, non di contenuto |
 | Asset | `assets/style.css` | Stile per la resa HTML finale |
 | Asset | `assets/struttura-manuale.template.md` | Template dell'indice delle sezioni |

@@ -1,6 +1,6 @@
 ---
 name: ubiquity-spy
-description: Inspect a Ubiquiti "System Manager" router READ-ONLY — log in and save a faithful report of its complete current configuration (interfaces / DHCP / networking / VPN / users). Usage: /ubiquitySpy -ip <ip> -user <user> -pw <password>
+description: Inspect a Ubiquiti "System Manager" router READ-ONLY — log in and save a faithful report of its complete current configuration (interfaces / DHCP / networking / VPN / users). Usage: /ubiquitySpy -ip <ip> -user <user> -pw <password> [--out "<dir>"]
 ---
 
 The user invoked `/ubiquitySpy` to log into a Ubiquiti **"System Manager"** router and **save a
@@ -13,20 +13,21 @@ inspection first done on `192.168.10.6` in the **network-configuration** project
 **Secret handling: per P9 the password is ephemeral — it rides `$env:UBQ_PW` → the helper's
 STDIN, never a command-line argument and never disk; clear it right after and never persist it.**
 
-Resource (do not modify): `commands\ubiquitySpy\resources\ubiquity_fetch.ps1` — env-driven login +
-authenticated-dashboard fetch (the dashboard is server-rendered, so all config is inline in its HTML).
+Resource (do not modify): `${CLAUDE_PLUGIN_ROOT}/assets/ubiquitySpy/resources/ubiquity_fetch.ps1` —
+env-driven login + authenticated-dashboard fetch (the dashboard is server-rendered, so all config is
+inline in its HTML).
 
 1. **Parse the arguments** from the text after `/ubiquitySpy` (flags order-independent):
    - `-ip` → the router IP/host.
    - `-user` → the admin username.
    - `-pw` → the password = everything after `-pw` up to the next ` -<flag>` (may contain `$`,
      spaces if quoted, etc.).
-   - Any flag missing → report the exact problem and stop.
+   - `--out` → optional output directory (strip quotes). Default `./ubiquity-out/`.
+   - Any required flag (`-ip`/`-user`/`-pw`) missing → report the exact problem and stop.
 
-2. **Resolve output locations** in the **active project** tree:
-   - `<active-project>\external resources\ubiquitySpy\<ip>\dashboard.html` — the captured config.
-   - `<active-project>\reports\ubiquitySpy.<ip>.md` — the **configuration report** (main deliverable).
-   - If no project is active (chat/none), fall back to `commands\ubiquitySpy\out\<ip>\`.
+2. **Resolve output locations** under the output dir (`--out`, default `./ubiquity-out/`):
+   - `<out>\<ip>\dashboard.html` — the captured config.
+   - `<out>\<ip>\ubiquitySpy.<ip>.md` — the **configuration report** (main deliverable).
    - Create the folders as needed.
 
 3. **Approval gate — CONNECT TO NOTHING YET.** Show an `AskUserQuestion` recap: the target `-ip`,
@@ -41,7 +42,7 @@ authenticated-dashboard fetch (the dashboard is server-rendered, so all config i
    $env:UBQ_USER='<-user>'
    $env:UBQ_PW='<-pw value>'      # SINGLE quotes — keeps $ and friends literal
    $env:UBQ_OUT='<out_dir>\dashboard.html'
-   powershell -NoProfile -ExecutionPolicy Bypass -File 'C:\Users\Sistec 23\source\repos\Claude\commands\ubiquitySpy\resources\ubiquity_fetch.ps1'
+   powershell -NoProfile -ExecutionPolicy Bypass -File "$env:CLAUDE_PLUGIN_ROOT\assets\ubiquitySpy\resources\ubiquity_fetch.ps1"
    ```
    The helper sends `UBQ_PW` to `curl` over **STDIN** (`--data-binary @-`), so it is never a shell
    argument and never touches disk. Confirm the output shows `DEVICE_TITLE: …`, `LOGIN_OK`, and
@@ -70,7 +71,7 @@ authenticated-dashboard fetch (the dashboard is server-rendered, so all config i
    - **Users:** the `pills-users` pane (account list, if shown).
 
 7. **Save the configuration report** — the **primary deliverable**. Write
-   `reports\ubiquitySpy.<ip>.md` as a **faithful capture of the router's CURRENT configuration**:
+   `<out>\<ip>\ubiquitySpy.<ip>.md` as a **faithful capture of the router's CURRENT configuration**:
    - a header (IP, device title/product, hostname, LAN/WAN MAC, capture timestamp);
    - **one section per dashboard pane**, listing each setting as `field → value` exactly as read
      (identity, interfaces/WAN/LAN, DHCP server, gateway priority, internet sharing, NAT rules,
@@ -84,8 +85,7 @@ authenticated-dashboard fetch (the dashboard is server-rendered, so all config i
    the captured HTML is **device config** (may include sensitive settings) — it lives under
    `external resources\`; the **login password is nowhere on disk**.
 
-Notes: this command is global; outputs follow the active project. **Read-only** — login + GET only,
-never a config-changing POST. The password is ephemeral (P9): env → STDIN, cleared after, never
-persisted or echoed. Editing `.claude\commands\*.md` is agent-config self-modification
-(`[[cannot-self-edit-permissions]]`, P6). If a step triggers a permission prompt (`powershell`,
-`curl`, file writes), the user approves case-by-case — no allow-rule is added unilaterally (P6).
+Notes: outputs go under `--out` (default `./ubiquity-out/`). **Read-only** — login + GET only,
+never a config-changing POST. The password is ephemeral: env → STDIN, cleared after, never
+persisted or echoed. If a step triggers a permission prompt (`powershell`, `curl`, file writes),
+the user approves case-by-case — no allow-rule is added unilaterally.

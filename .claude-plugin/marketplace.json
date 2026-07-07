@@ -22,24 +22,24 @@
     {
       "name": "technical-writer",
       "source": "./plugins/technical-writer",
-      "description": "Genera manuali operatore HMI in italiano dalle control narrative, con resa Markdown e HTML",
+      "description": "Genera e manutiene manuali operatore HMI in italiano: technical-writer redige un manuale nuovo (Markdown → HTML) dalle control narrative; maintain-manual manutiene un manuale Word (.docx) esistente (revisioni, copy-edit, audit vs codice, struttura, commenti) via python-docx",
       "version": "0.1.0",
       "author": {
         "name": "Sistec"
       },
       "category": "documentation",
-      "keywords": ["documentation", "manuale", "hmi", "technical-writing", "markdown", "html"]
+      "keywords": ["documentation", "manuale", "hmi", "technical-writing", "markdown", "html", "docx", "word", "python-docx", "manutenzione"]
     },
     {
       "name": "hmi-developer",
       "source": "./plugins/hmi-developer",
-      "description": "Assistente di sviluppo per la solution Sistec.HMI (.NET 8 / WinForms): Clean Architecture, ciclo TDD, regole C# e hook di progetto",
+      "description": "Assistente di sviluppo per la solution Sistec.HMI (.NET 8 / WinForms): Clean Architecture, ciclo TDD, regole C#, hook di progetto, fix bug DPI/anchor WinForms, generazione SQL i18n (MissingTranslations.csv → language_spv) e riconciliazione di feature tra solution",
       "version": "0.1.0",
       "author": {
         "name": "Sistec"
       },
       "category": "development",
-      "keywords": ["development", "csharp", "dotnet", "winforms", "clean-architecture", "tdd", "hmi"]
+      "keywords": ["development", "csharp", "dotnet", "winforms", "clean-architecture", "tdd", "hmi", "dpi", "translations", "i18n", "mysql", "merge", "cherry-pick", "refactor", "port"]
     },
     {
       "name": "git-release",
@@ -66,13 +66,13 @@
     {
       "name": "device-spy",
       "source": "./plugins/device-spy",
-      "description": "Ispettori read-only secret-driven: /device-spy:codesys-spy (CODESYS cifrato → PLCopen XML + sorgente POU + analisi) e /device-spy:ubiquity-spy (snapshot config di un router Ubiquiti). Password via env/STDIN, mai su disco",
+      "description": "Ispettori read-only: /device-spy:codesys-spy (CODESYS cifrato → PLCopen XML + sorgente POU + analisi), /device-spy:ubiquity-spy (snapshot config di un router Ubiquiti) e /device-spy:network-probe (config + salute di rete dell'host locale → diagnosi link-flap / conflitti IP / driver). Dove serve, password via env/STDIN, mai su disco",
       "version": "0.1.0",
       "author": {
         "name": "Sistec"
       },
       "category": "tools",
-      "keywords": ["tools", "codesys", "ubiquiti", "plc", "router", "inspection", "read-only", "snapshot"]
+      "keywords": ["tools", "codesys", "ubiquiti", "plc", "router", "inspection", "read-only", "snapshot", "network", "diagnostics"]
     }
   ]
 }

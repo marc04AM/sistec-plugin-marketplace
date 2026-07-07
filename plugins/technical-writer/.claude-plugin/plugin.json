@@ -1,6 +1,6 @@
 {
   "name": "technical-writer",
-  "description": "Genera manuali operatore HMI in italiano a partire dalle control narrative, seguendo struttura, tono e stile di un manuale di esempio",
+  "description": "Genera e manutiene manuali operatore HMI in italiano: la skill technical-writer redige un manuale nuovo (Markdown → HTML) dalle control narrative; la skill maintain-manual manutiene un manuale Word (.docx) esistente (porta revisioni, copy-edit, audit vs codice, fix struttura, commenti) via python-docx",
   "version": "0.1.0",
   "author": {
     "name": "Sistec"

@@ -272,6 +272,5 @@ in-progress operations first and `/gitize` stops rather than split a not-aligned
 only ever touches **unpushed** commits — a change whose only target is pushed is forced to a new
 commit, never a history rewrite. `git` / `Set-Clipboard` (and `git reset`/`apply`/`commit`/`commit --amend`/`rebase
 --autosquash` in split/amend modes) may prompt for permission the first time — handle case-by-case,
-don't pre-add allow-rules. Writing `.claude\commands\*.md` is agent-config
-self-modification (P6). The repo-set memory keeps the solution's layout discoverable for later runs
+don't pre-add allow-rules. The repo-set memory keeps the solution's layout discoverable for later runs
 (and for sibling commands).

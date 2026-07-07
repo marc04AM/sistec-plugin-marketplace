@@ -1,3 +1,5 @@
+a cosa serve? metà-produttore della coppia skillify/skilliDo: distilla trace.md in .claude\commands\<name>.md. authoring già coperto da skill-creator di Anthropic. tutto legato al framework privato (commands\, command.md §3 doc-sync, commands.log.md, commands-anchor, command.catalog.md, P1/P2/P6/P11/P13/P15/S-series, work-dir stale Sistec 23) → meta-infra interna, fuori dal marketplace.
+
 ---
 description: Distill an armed /skillify recording into a finished, reusable slash-command. Reads commands\<name>\trace.md, generalizes the session's concrete values into the declared flags, keeps the ordered steps + decision rules (auto vs. ask) + approval gates + reused sub-commands, and writes the runnable .claude\commands\<name>.md + filled commands\<name>\<name>.prompt.md, then syncs the commands docs. Gated before writing. Inline in the recording session (holds the live context). Partner of /skillify (skill-ify records, skilli-Do produces). Usage: /skilliDo [<skill-name>]
 ---

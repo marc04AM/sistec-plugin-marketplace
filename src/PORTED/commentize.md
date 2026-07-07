@@ -1,3 +1,5 @@
+ported in add-doc
+
 ---
 description: Apply /simplify (quality pass) to the changed code first, then add/update XML documentation comments on every type and public/protected member per DEVELOPMENT.md S9 (Comment Discipline) — purpose-first descriptions, every existing param filled, examples where helpful. Multi-repo aware; reuses the /gitize repo-set cache. Operates on the working-tree changes vs HEAD; leaves its edits unstaged (P15). Usage: /commentize [--scope|-s "<.sln, project file, or folder>"]
 ---

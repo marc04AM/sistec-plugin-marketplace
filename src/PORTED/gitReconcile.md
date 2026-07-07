@@ -1,3 +1,6 @@
+
+ported in reconcile-solutions in hmi-developer
+
 ---
 description: Compare two Sistec solutions and port the innovations of a SOURCE into a DEST, scoped to one feature/purpose. Prefers a git merge when the feature lives in a repo SHARED by both solutions on different branches; otherwise manually ports the change across the (distinct) repos. Trivial/dependent decisions proceed automatically; every non-trivial decision is confirmed interactively. Multi-repo aware (reuses the /gitize repo-set cache); plans everything and gates before editing; leaves edits unstaged (P15). Usage: /gitReconcile -s|--source "<source .sln/.slnx/folder>" -d|--dest "<dest .sln/.slnx/folder>" -p|--purpose "<feature / purpose to port>"
 ---

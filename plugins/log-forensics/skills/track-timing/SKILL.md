@@ -17,7 +17,7 @@ paths are never written). v3.25 builds use the [[sistec-hmi-v325-renames]] symbo
 0. **Update mode — refresh local copies first (`--upd` / `-u ["<src>" …]`).** Only when
    this flag is present. **Sources:** the given **source** path(s) (each a folder or a single
    file; never written to). **If `--upd` is passed with NO path** → reuse the source list from the
-   **last `--upd` run**, read from the state file `commands\trackTiming\resources\upd-sources.txt`
+   **last `--upd` run**, read from the state file `./.trackTiming/upd-sources.txt`
    (one path per line); if that file is missing/empty, say so and stop. At the end of every
    `--upd` run that received explicit paths, **(over)write** that state file with the paths used.
    Pull fresh log data into the project's **local log folders** — the `external resources\…`

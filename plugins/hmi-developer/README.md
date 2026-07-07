@@ -11,10 +11,14 @@ TDD e i comandi/hook di progetto.
 | :--------- | :--- | :------ |
 | Skill | `skills/hmi-developer/SKILL.md` | Project brain: persona, workflow agentico, tech stack, mappa file→regola |
 | Skill | `skills/tdd/SKILL.md` | `/hmi-developer:tdd` — orchestra il ciclo Red→Green→Refactor in C# |
-| Skill | `skills/add-doc/SKILL.md` | `/hmi-developer:add-doc` — documentazione XML di un progetto |
+| Skill | `skills/add-doc/SKILL.md` | `/hmi-developer:add-doc` — disciplina commenti C#: doc XML su tipi + membri public/protected e igiene dei commenti inline; su un progetto/solution/cartella, sul changed-set (diff vs HEAD), su punti specifici, o in automatico sul codice che modifichi |
 | Skill | `skills/archive/SKILL.md` | `/hmi-developer:archive` — summary di change in `.claude/claude-archive/` |
+| Skill | `skills/dpi-anchor-fix/SKILL.md` | Diagnosi + fix del bug .NET 8 WinForms "controllo anchored Top\|Bottom collassa a Height 0" (DPI-aware + AnchorLayoutV2 off): scanner deterministico → verdetto → config sicura sotto gate |
+| Skill | `skills/translate/SKILL.md` | `/hmi-developer:translate` — da `MissingTranslations.csv` genera l'`INSERT` idempotente per `language_spv`: StringName esatta (incl. `#`), testi IT/EN dedotti dal call-site, placeholder preservati. Solo generazione del `.sql` (nessuna connessione DB). Invocazione esplicita (`disable-model-invocation: true`) |
+| Skill | `skills/reconcile-solutions/SKILL.md` | `/hmi-developer:reconcile-solutions` — porta una feature da una solution SOURCE a una DEST (stessa famiglia su branch-milestone diversi): git merge/cherry-pick dove il repo è condiviso, port manuale semantico dove è divergente (ri-applica l'*intento*, non il diff). Pianifica, gate, `dotnet build`, edit unstaged. Invocazione esplicita (`disable-model-invocation: true`) |
 | Hook | `hooks/hooks.json` + `*.py` | `build-reminder`, `graphify-nudge`, `archive-recall` |
 | Asset | `assets/rules/*.md` | 13 file di regole C#/HMI (architettura, async, business logic, UI, comunicazione, test, …) |
+| Asset | `assets/dpiRepair/resources/Repair-WinFormsDpiAnchor.ps1` | Scanner/fixer deterministico usato da `dpi-anchor-fix` (detect DPI/AnchorLayoutV2, applica la config, backup `.bak`) |
 
 ## Come funziona
 

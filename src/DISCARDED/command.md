@@ -1,3 +1,5 @@
+a cosa serve? meta-tooling per gestire i propri slash-command. il modo nativo CC è creare .claude\commands\<name>.md a mano; per distillare skill c'è già skill-creator. qui invece spawner bespoke (seed-claude.cmd), ledger commands.log.md, commands-anchor, command.catalog.md, work-dir hardcoded/stale (Sistec 23), P4/P6 → non portabile, infra interna, fuori dal marketplace.
+
 ---
 description: Manage workspace commands — /command new|edit <name> opens a new Claude window to build/edit it; /command delete <name> removes it from the console. Syncs the commands docs after each.
 ---

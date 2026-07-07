@@ -1,3 +1,5 @@
+a cosa serve? è un wrapper sottile su docker compose: up/down/restart/status/logs = i comandi compose 1:1, + poca glue CODESYS-specifica (ensure_network, clear_stale per container orfani dell'autostart, HOST_IP eth0, reset demo 2h). value-add marginale; il vero artefatto sono i *.compose.yaml. modo nativo = docker compose diretto. serve WSL Debian/Docker/licenza CODESYS/i tuoi compose → resta locale, fuori dal marketplace.
+
 ---
 description: Manage the CODESYS Virtual Control PLC containers (Docker inside the Debian WSL distro) via the live codesys.sh lifecycle — up/down/restart/recreate/status/logs/list over one/many/all instances. Wraps `codesys\codesys.sh`; gates the destructive actions (down/recreate). 
 Usage: /codesys [<action>] [<name1,name2,…|all>]

@@ -1,3 +1,5 @@
+a cosa serve? il modo nativo di Claude Code è lanciare `claude` dentro ciascuna repository/cartella (da doc CC) — la cwd È il progetto, non serve un gestore di "progetto attivo". qui poi è tutto cablato sul framework privato (_config\templates, .prompt.md/.log.md, P3/P8, MEMORY.md, anchor [[…]], archiving S1 su D:\) con work-dir hardcoded e pure stale (Sistec 23). infra di sessione, non capacità → fuori dal marketplace.
+
 ---
 description: Switch active project — /proj <name> switches, /proj -n creates+switches, /proj -d deletes (plan+approval), /proj alone opens the P3 picker
 ---

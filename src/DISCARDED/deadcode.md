@@ -1,3 +1,5 @@
+a cosa serve? scan LLM dell'intera codebase = spreco enorme che satura il contesto; il dead code lo trovano linter/analyzer (Roslyn IDE0051/CS0169, ReSharper) in modo deterministico e corretto. la sua stessa caveat ("name-based, cieco a reflection/DI, candidato non conferma") lo ammette
+
 ---
 description: Heuristically find unreferenced (dead) C# types across a solution's repos — name-based scan flagging every type whose name is referenced nowhere outside its own declaration, optionally cross-checked against a sister solution to split candidates into used-there / dead-in-both / this-only, with risk tags. READ-ONLY: reports candidates, never deletes (deletion stays the user's call). Usage: /deadcode [--scope|-s "<.sln or folder>"] [--cross "<sister .sln/.slnx>"] [--out <report>]
 ---
