@@ -18,61 +18,6 @@
       },
       "category": "examples",
       "keywords": ["example", "starter", "template"]
-    },
-    {
-      "name": "technical-writer",
-      "source": "./plugins/technical-writer",
-      "description": "Genera manuali operatore HMI in italiano dalle control narrative, con resa Markdown e HTML",
-      "version": "0.1.0",
-      "author": {
-        "name": "Sistec"
-      },
-      "category": "documentation",
-      "keywords": ["documentation", "manuale", "hmi", "technical-writing", "markdown", "html"]
-    },
-    {
-      "name": "hmi-developer",
-      "source": "./plugins/hmi-developer",
-      "description": "Assistente di sviluppo per la solution Sistec.HMI (.NET 8 / WinForms): Clean Architecture, ciclo TDD, regole C# e hook di progetto",
-      "version": "0.1.0",
-      "author": {
-        "name": "Sistec"
-      },
-      "category": "development",
-      "keywords": ["development", "csharp", "dotnet", "winforms", "clean-architecture", "tdd", "hmi"]
-    },
-    {
-      "name": "git-release",
-      "source": "./plugins/git-release",
-      "description": "Strumenti di rilascio multi-repo: /gitize (diff → Conventional-Commits o split dello staged) e /versionize (release note dai DLL buildati + git, con packaging zip)",
-      "version": "0.1.0",
-      "author": {
-        "name": "Sistec"
-      },
-      "category": "development",
-      "keywords": ["development", "git", "commit", "conventional-commits", "release", "versioning", "multi-repo"]
-    },
-    {
-      "name": "log-forensics",
-      "source": "./plugins/log-forensics",
-      "description": "Analisi forense read-only di log e capture PLC/HMI: /analyzeCrash (timeline correlata + root-cause) e /trackTiming (consistenza timing ed event-chain di un log Fael/HMI)",
-      "version": "0.1.0",
-      "author": {
-        "name": "Sistec"
-      },
-      "category": "diagnostics",
-      "keywords": ["diagnostics", "logs", "crash", "forensics", "timing", "root-cause", "plc", "hmi"]
-    },
-    {
-      "name": "device-spy",
-      "source": "./plugins/device-spy",
-      "description": "Ispettori read-only secret-driven: /codesySpy (CODESYS cifrato → PLCopen XML + sorgente POU + analisi) e /ubiquitySpy (snapshot config di un router Ubiquiti). Password via env/STDIN, mai su disco",
-      "version": "0.1.0",
-      "author": {
-        "name": "Sistec"
-      },
-      "category": "tools",
-      "keywords": ["tools", "codesys", "ubiquiti", "plc", "router", "inspection", "read-only", "snapshot"]
     }
   ]
 }
