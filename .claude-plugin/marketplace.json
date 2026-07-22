@@ -33,13 +33,13 @@
     {
       "name": "hmi-developer",
       "source": "./plugins/hmi-developer",
-      "description": "Assistente di sviluppo per la solution Sistec.HMI (.NET 8 / WinForms): Clean Architecture, ciclo TDD, regole C#, hook di progetto, fix bug DPI/anchor WinForms, generazione SQL i18n (MissingTranslations.csv → language_spv) e riconciliazione di feature tra solution",
-      "version": "0.1.0",
+      "description": "Assistente di sviluppo per la solution Sistec.HMI (.NET 8 / WinForms): Clean Architecture, ciclo TDD, regole C#, hook di progetto, fix bug DPI/anchor WinForms, generazione SQL i18n (MissingTranslations.csv → language_spv), riconciliazione di feature tra solution e csharp-doc-comments per commenti XML doc C# (Microsoft/StyleCop)",
+      "version": "0.2.0",
       "author": {
         "name": "Sistec"
       },
       "category": "development",
-      "keywords": ["development", "csharp", "dotnet", "winforms", "clean-architecture", "tdd", "hmi", "dpi", "translations", "i18n", "mysql", "merge", "cherry-pick", "refactor", "port"]
+      "keywords": ["development", "csharp", "dotnet", "winforms", "clean-architecture", "tdd", "hmi", "dpi", "translations", "i18n", "mysql", "merge", "cherry-pick", "refactor", "port", "documentation", "xml-docs", "comments", "stylecop"]
     },
     {
       "name": "git-release",

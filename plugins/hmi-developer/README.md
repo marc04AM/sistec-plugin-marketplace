@@ -11,7 +11,7 @@ TDD e i comandi/hook di progetto.
 | :--------- | :--- | :------ |
 | Skill | `skills/hmi-developer/SKILL.md` | Project brain: persona, workflow agentico, tech stack, mappa file→regola |
 | Skill | `skills/tdd/SKILL.md` | `/hmi-developer:tdd` — orchestra il ciclo Red→Green→Refactor in C# |
-| Skill | `skills/add-doc/SKILL.md` | `/hmi-developer:add-doc` — disciplina commenti C#: doc XML su tipi + membri public/protected e igiene dei commenti inline; su un progetto/solution/cartella, sul changed-set (diff vs HEAD), su punti specifici, o in automatico sul codice che modifichi |
+| Skill | `skills/csharp-doc-comments/SKILL.md` | Scrive, corregge e verifica commenti XML doc (`///`) e commenti inline C# secondo le convenzioni Microsoft/StyleCop (SA16xx, CS1591); su un progetto/solution/cartella, sul changed-set (diff vs HEAD), su punti specifici, o in automatico sul codice che modifichi |
 | Skill | `skills/archive/SKILL.md` | `/hmi-developer:archive` — summary di change in `.claude/claude-archive/` |
 | Skill | `skills/dpi-anchor-fix/SKILL.md` | Diagnosi + fix del bug .NET 8 WinForms "controllo anchored Top\|Bottom collassa a Height 0" (DPI-aware + AnchorLayoutV2 off): scanner deterministico → verdetto → config sicura sotto gate |
 | Skill | `skills/translate/SKILL.md` | `/hmi-developer:translate` — da `MissingTranslations.csv` genera l'`INSERT` idempotente per `language_spv`: StringName esatta (incl. `#`), testi IT/EN dedotti dal call-site, placeholder preservati. Solo generazione del `.sql` (nessuna connessione DB). Invocazione esplicita (`disable-model-invocation: true`) |
@@ -53,5 +53,5 @@ Poi in sessione:
 
 ```shell
 /hmi-developer:tdd
-/hmi-developer:add-doc
+document this
 ```

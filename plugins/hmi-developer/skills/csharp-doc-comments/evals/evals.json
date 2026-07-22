@@ -1,0 +1,40 @@
+{
+  "skill_name": "csharp-doc-comments",
+  "evals": [
+    {
+      "id": 0,
+      "name": "xml-doc-generation",
+      "prompt": "Add XML documentation comments to TelemetryChannel.cs. Document everything that should be documented, following .NET conventions. Do not change the executable code.",
+      "expected_output": "Every public type/member documented: record with param tags on the declaration; constructor with the standard 'Initializes a new instance' text and the verified ArgumentNullException; bool property with 'Gets a value indicating whether' (restricted setter: no 'or sets'); async method with task-wording returns, all params, verified exceptions only; event with 'Occurs when'; out param with the canonical 'When this method returns' text; ToString override via inheritdoc; Dispose with the canonical wording. No invented exceptions. Executable code byte-identical.",
+      "files": ["fixtures/TelemetryChannel.cs"],
+      "assertions": [
+        "Every public type and member has an XML doc comment (or explicit inheritdoc)",
+        "Constructor summary is exactly the standard 'Initializes a new instance of the ... class.' wording",
+        "IsOpen summary starts with 'Gets a value indicating whether' (no 'or sets' - the setter is private)",
+        "ReadAsync documents all parameters, a task-phrased returns, and only exceptions actually thrown (ArgumentNullException; optionally OperationCanceledException)",
+        "No fabricated exception is documented on members that throw nothing (Open, Flush-like members, TryGetLast, Dispose)",
+        "TryGetLast documented truthfully: canonical 'When this method returns, contains ...' phrasing, or an accurate description of the always-returns-false stub",
+        "ReadingReceived event summary starts with 'Occurs when'",
+        "SensorReading record is documented with param tags on the type declaration",
+        "ToString override carries inheritdoc (not a retyped summary)",
+        "Executable (non-comment) code is unchanged"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "comment-cleanup",
+      "prompt": "Review and fix the comments in ReadingBuffer.cs: remove comments that should not be there, add any that are missing, and add XML documentation to the undocumented public members. Do not change the executable code.",
+      "expected_output": "Journal/changelog comments removed; redundant what-comments removed; commented-out code removed; the drop-oldest eviction behavior surfaced (why-comment or doc text); locking rationale preserved or expressed as a why-comment; Add/Flush/Count/WaitForDrain documented; existing correct class summary preserved; executable code unchanged.",
+      "files": ["fixtures/ReadingBuffer.cs"],
+      "assertions": [
+        "Dated journal comments (2024-11-02 / 2025-01-15) are removed",
+        "Redundant what-comments removed (adds an item, check if full, remove the oldest, enqueue the value, return the count)",
+        "Commented-out code (avg / Console.WriteLine lines) is deleted",
+        "The drop-oldest-at-capacity behavior is expressed somewhere (Add summary/remarks or a why-comment)",
+        "All public members (Add, Flush, Count, WaitForDrain) have XML summaries",
+        "The pre-existing correct class summary is preserved, not rewritten",
+        "Executable (non-comment) code is unchanged"
+      ]
+    }
+  ]
+}
