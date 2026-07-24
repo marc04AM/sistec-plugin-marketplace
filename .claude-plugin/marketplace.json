@@ -23,7 +23,7 @@
       "name": "technical-writer",
       "source": "./plugins/technical-writer",
       "description": "Documentazione tecnica in italiano: technical-writer redige un manuale operatore HMI nuovo (Markdown → HTML) dalle control narrative; maintain-manual manutiene un manuale Word (.docx) esistente (revisioni, copy-edit, audit vs codice, struttura, commenti) via python-docx; spec-document redige documenti di specifica/design come singolo HTML self-contained in stile engineering-sheet Sistec",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "author": {
         "name": "Sistec"
       },
