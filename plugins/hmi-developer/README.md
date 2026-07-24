@@ -9,7 +9,6 @@ TDD e i comandi/hook di progetto.
 
 | Componente | File | Cosa fa |
 | :--------- | :--- | :------ |
-| Skill | `skills/hmi-developer/SKILL.md` | Project brain: persona, workflow agentico, tech stack, mappa file→regola |
 | Skill | `skills/tdd/SKILL.md` | `/hmi-developer:tdd` — orchestra il ciclo Red→Green→Refactor in C# |
 | Skill | `skills/csharp-doc-comments/SKILL.md` | Scrive, corregge e verifica commenti XML doc (`///`) e commenti inline C# secondo le convenzioni Microsoft/StyleCop (SA16xx, CS1591); su un progetto/solution/cartella, sul changed-set (diff vs HEAD), su punti specifici, o in automatico sul codice che modifichi |
 | Skill | `skills/archive/SKILL.md` | `/hmi-developer:archive` — summary di change in `.claude/claude-archive/` |
@@ -17,16 +16,18 @@ TDD e i comandi/hook di progetto.
 | Skill | `skills/translate/SKILL.md` | `/hmi-developer:translate` — da `MissingTranslations.csv` genera l'`INSERT` idempotente per `language_spv`: StringName esatta (incl. `#`), testi IT/EN dedotti dal call-site, placeholder preservati. Solo generazione del `.sql` (nessuna connessione DB). Invocazione esplicita (`disable-model-invocation: true`) |
 | Skill | `skills/reconcile-solutions/SKILL.md` | `/hmi-developer:reconcile-solutions` — porta una feature da una solution SOURCE a una DEST (stessa famiglia su branch-milestone diversi): git merge/cherry-pick dove il repo è condiviso, port manuale semantico dove è divergente (ri-applica l'*intento*, non il diff). Pianifica, gate, `dotnet build`, edit unstaged. Invocazione esplicita (`disable-model-invocation: true`) |
 | Hook | `hooks/hooks.json` + `*.py` | `build-reminder`, `graphify-nudge`, `archive-recall` |
-| Asset | `assets/rules/*.md` | 13 file di regole C#/HMI (architettura, async, business logic, UI, comunicazione, test, …) |
 | Asset | `assets/dpiRepair/resources/Repair-WinFormsDpiAnchor.ps1` | Scanner/fixer deterministico usato da `dpi-anchor-fix` (detect DPI/AnchorLayoutV2, applica la config, backup `.bak`) |
 
 ## Come funziona
 
-La skill `hmi-developer` attiva persona e workflow, e indica **quale file di
-regola leggere** in base al tipo di file che si sta toccando (architettura,
-async-threading, business-logic, csharp-idioms, data-communication, ui-controls,
-tests, ecc.). Le regole sono incluse in `assets/rules/` e referenziate via
-`${CLAUDE_PLUGIN_ROOT}`.
+Il plugin porta solo skill, hook e asset **riusabili tra progetti**. La persona
+da *Senior .NET Architect*, il workflow agentico e le **regole C#/HMI** non
+vivono più nel plugin: sono specifiche del progetto e vanno nel progetto stesso —
+il vecchio *project brain* diventa il `CLAUDE.md` della solution e i file di
+regola vanno copiati/adattati in `.claude/rules/` (architettura, async-threading,
+business-logic, csharp-idioms, data-communication, ui-controls, tests, ecc.).
+Le skill che dipendono dalle regole (`tdd`, `csharp-doc-comments`) le leggono da
+`.claude/rules/*` del progetto attivo, non da `${CLAUDE_PLUGIN_ROOT}`.
 
 I tre hook replicano il comportamento del workspace originale:
 - **archive-recall** (SessionStart) — richiama la change history recente da `.claude/claude-archive/`.

@@ -10,7 +10,7 @@ Authoritative source: `.claude/rules/naming-style.md` §Commenting Style (verifi
 - `<returns>`: mandatory on every non-void method; describe the return value **and edge cases** ("…or zero if the line is invalid").
 - `<exception>`: **list every exception the method can throw, with its condition.** Stricter than the general default — during a doc pass on Sistec code, trace throw sites before declaring the docs complete.
 - `<remarks>`: only for non-obvious behavior, algorithms, or business rules.
-- Internal/private members: `<summary>` only, and only when intent is not self-evident from the name. (The older `add-doc` skill says "never document private/internal" — the rules file wins.)
+- Internal/private members: `<summary>` only, and only when intent is not self-evident from the name. (This overrides the common "never document private/internal" default — the rules file wins.)
 - `<inheritdoc/>` to inherit documentation.
 - **Direction annotation** on OPC/PLC-adjacent members: `/// <remarks>HMI -> PLC</remarks>` marks communication direction. Domain metadata, not prose — preserve it verbatim; never strip or "improve" it; add it when documenting new tag members whose direction is known from the tag configuration.
 

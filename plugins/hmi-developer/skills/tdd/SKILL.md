@@ -5,7 +5,7 @@ description: Drive a C# change in the Sistec.HMI solution through the Red→Gree
 
 # TDD Cycle Orchestrator
 
-Executes the full Red→Green→Refactor cycle for the current task. Enforces `tdd-verification.md` workflow rules (§2 Test-First Gate, §4 Sandbox Spike, §5 Run & Verify).
+Executes the full Red→Green→Refactor cycle for the current task. Enforces the project's `.claude/rules/tdd-verification.md` workflow rules (§2 Test-First Gate, §4 Sandbox Spike, §5 Run & Verify).
 
 **Input**: Task description (inferred from conversation if omitted). Optionally: `--spike` to enter sandbox spike mode before writing the real test.
 
@@ -58,7 +58,7 @@ Skip this step if the mechanic is well-understood.
 In `<Project>.Tests`, write the test(s) that encode the prompt's exact inputs and expected outputs:
 
 - One test per distinct behaviour; one additional case per guard clause.
-- Follow `tests.md` naming: `<Method>_<Scenario>_<ExpectedOutcome>`.
+- Follow `.claude/rules/tests.md` naming: `<Method>_<Scenario>_<ExpectedOutcome>`.
 - Use AAA structure. Assert on specific values from the prompt — not just `IsSuccess`.
 - Do **not** write any production code yet.
 
@@ -120,8 +120,8 @@ A change is **done** only when all of the following hold:
 - [ ] Every locked test passes
 - [ ] Each test's actual output matches the **starting parameters and expected output** from the prompt — not just exit code
 - [ ] No previously-passing test regressed
-- [ ] No `architecture.md` boundary violation introduced
-- [ ] No mock used that `tests.md` does not permit
+- [ ] No `.claude/rules/architecture.md` boundary violation introduced
+- [ ] No mock used that `.claude/rules/tests.md` does not permit
 
 Report the final test run output verbatim (counts, duration, pass/fail per test name).
 

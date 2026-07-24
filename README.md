@@ -44,17 +44,9 @@ sistec-plugin-marketplace/
 │   ├── hmi-developer/            # Sviluppo solution Sistec.HMI (.NET/WinForms): regole, TDD, hook
 │   │   ├── .claude-plugin/
 │   │   │   └── plugin.json
-│   │   ├── skills/
-│   │   │   ├── hmi-developer/    # Project brain: persona, workflow, mappa file→regola
-│   │   │   │   └── SKILL.md
-│   │   │   ├── tdd/
-│   │   │   │   └── SKILL.md
-│   │   │   ├── add-doc/
-│   │   │   │   └── SKILL.md
-│   │   │   └── archive/
-│   │   │       └── SKILL.md
+│   │   ├── skills/                # tdd, csharp-doc-comments, archive, dpi-anchor-fix, translate, reconcile-solutions
 │   │   ├── hooks/                # hooks.json + script Python (build/graphify/archive)
-│   │   ├── assets/rules/         # Regole C#/HMI (architettura, async, business logic, UI, ...)
+│   │   ├── assets/dpiRepair/     # Scanner/fixer PowerShell per dpi-anchor-fix
 │   │   └── README.md
 │   ├── git-release/              # Rilascio multi-repo (cache repo-set condivisa)
 │   │   ├── .claude-plugin/
