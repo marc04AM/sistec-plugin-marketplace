@@ -28,15 +28,19 @@ System events with counts.
 The report is **raw data with hint-notes, not a verdict.** Your job is the part the script can't:
 **run it, then read the report and diagnose the root cause** — that diagnosis is the deliverable.
 
-## Step 1 — Resolve options
+## Step 1 — Resolve options — natural language first
 
-- `--out "<path>"` → report path. Default `./network-probe-out/network.config.md` (create the dir).
-- `--days <N>` → how far back to pull NIC/Tcpip events. Default 7.
-- `--targets "ip1,ip2,…"` → extra hosts to ping. The scanner **already auto-detects and pings the
-  gateway(s)**; add the production servers / PLCs / any suspected-conflicting addresses here.
+Take the report location, how far back to look, and any extra hosts to ping from what the user says
+in conversation (or default them). `--out`/`--days`/`--targets` also work as an explicit **shorthand**
+— they map straight onto the scanner's Step-2 parameters (`--out`→`-OutFile`, `--days`→`-DaysBack`,
+`--targets`→`-PingTargets`):
 
-These map to the scanner's Step-2 parameters: `--out`→`-OutFile`, `--days`→`-DaysBack`,
-`--targets`→`-PingTargets`.
+- **Report path** — default `./network-probe-out/network.config.md` (create the dir); `--out "<path>"`
+  is the shorthand.
+- **Lookback window** for NIC/Tcpip events — default 7 days; `--days <N>` is the shorthand.
+- **Extra hosts to ping** — the scanner **already auto-detects and pings the gateway(s)**; if the user
+  names production servers / PLCs / suspected-conflicting addresses, add them here (`--targets
+  "ip1,ip2,…"` is the shorthand).
 
 ## Step 2 — Run the probe (read-only)
 

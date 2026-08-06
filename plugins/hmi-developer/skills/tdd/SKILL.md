@@ -7,7 +7,7 @@ description: Drive a C# change in the Sistec.HMI solution through the Red→Gree
 
 Executes the full Red→Green→Refactor cycle for the current task. Enforces the project's `.claude/rules/tdd-verification.md` workflow rules (§2 Test-First Gate, §4 Sandbox Spike, §5 Run & Verify).
 
-**Input**: Task description (inferred from conversation if omitted). Optionally: `--spike` to enter sandbox spike mode before writing the real test.
+**Input**: task description, inferred from conversation. Ask to spike/prototype first when the mechanic is unfamiliar — `--spike` is the literal shorthand for that ask.
 
 ---
 
@@ -41,7 +41,7 @@ On build failure: stop, report errors, do not proceed until clean.
 
 ## Step 3 — Sandbox Spike (conditional)
 
-Trigger: `--spike` flag passed, OR the task involves an unfamiliar API (OPC UA, Dapper, Modbus, KUKA), risky LINQ/async mechanic, or non-obvious math.
+Trigger: the task involves an unfamiliar API (OPC UA, Dapper, Modbus, KUKA), a risky LINQ/async mechanic, or non-obvious math — or the user explicitly asks to spike/prototype first (`--spike` is the literal shorthand for that ask).
 
 1. Create a throwaway `*.Spikes` console project or xUnit project — never inside a production project.
 2. Write the minimum code to answer **one specific question** about the API/mechanic.

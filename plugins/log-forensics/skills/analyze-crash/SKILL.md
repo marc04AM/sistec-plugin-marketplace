@@ -1,21 +1,28 @@
 ---
 name: analyze-crash
-description: Analyze a crash/diagnostic capture folder (HMI/app logs, PLC/controller logs, Windows events, PerfMon/ETL, network) — catalog the artifacts, build a time-correlated issue timeline over the main log's lifetime, root-cause, and report. Generalized across PLC and HMI software. Use when the user has a crash/incident capture folder from a machine or controller and wants its mixed logs catalogued, correlated on one timeline, and root-caused into a single report. Usage: /analyzeCrash [-fn "<capture folder>"]
+description: >-
+  Analyze a crash/diagnostic capture folder (HMI/app logs, PLC/controller logs, Windows events,
+  PerfMon/ETL, network) — catalog the artifacts, build a time-correlated issue timeline over the
+  main log's lifetime, root-cause, and report. Generalized across PLC and HMI software. Use when
+  the user has a crash/incident capture folder from a machine or controller and wants its mixed
+  logs catalogued, correlated on one timeline, and root-caused into a single report. Usage:
+  describe the capture folder in conversation, or pass -fn "<capture folder>" as shorthand
 disable-model-invocation: true
 ---
 
 The user invoked `/analyzeCrash` to analyze a machine/controller crash-or-incident **capture
 folder** and produce a correlated root-cause report. This generalizes the procedure proven on the
 `5309_FAEL-Diagnostics` captures (**example only** — e.g. `Crash 20260608_1827`, see
-`reports\Crash.20260608_1827.analysis.md` and memory [[time-analysis-job-pattern]],
-[[time-analysis-device-tracking]]; treat these as illustrative, not required inputs). **Read-only**
-except the report + ledger + memory (no approval gate needed). Do **not** hardcode a specific PLC/HMI — detect artifact types by pattern/content and
+`reports\Crash.20260608_1827.analysis.md`; treat as illustrative, not a required input). **Read-only**
+except the report (no approval gate needed). Do **not** hardcode a specific PLC/HMI — detect artifact types by pattern/content and
 apply the matching parser; state assumptions when something is unfamiliar.
 
-1. **Resolve the capture folder.** `-fn "<path>"` if given (strip quotes); else the **newest**
-   `Crash *` / capture folder under the **active project**'s `external resources\`. Read
-   `_manifest.txt` if present (capture time, computer, channels, source dirs). If nothing resolves,
-   say so and stop.
+1. **Resolve the capture folder — infer it from the conversation first.** A path the user pasted,
+   pointed at, or described ("this crash folder", "the one from this morning") resolves it; `-fn
+   "<path>"` also works as an explicit shorthand (strip quotes). If neither resolves it, fall back to
+   the **newest** `Crash *` / capture folder under the **active project**'s `external resources\`.
+   Read `_manifest.txt` if present (capture time, computer, channels, source dirs). If nothing
+   resolves, say so and stop.
 
 2. **Catalog every artifact** (deliverable §1) — one table: path · type · size · **time-coverage** ·
    parser · relevance. Detect and group by kind (a capture may have any subset). If an artifact's
@@ -56,8 +63,11 @@ apply the matching parser; state assumptions when something is unfamiliar.
    - perfmon: CPU/mem/disk/handles in-window (flag if **post-crash**);
    - network: changes / device reachability.
 
-6. **Device tracking** (per [[time-analysis-device-tracking]]) — enumerate every device/peer
-   disconnection or exception across the window, with times.
+6. **Device tracking** — for every device/peer link found in the logs, enumerate disconnections
+   and exceptions across the window: count, first/last timestamp, hourly distribution, affected
+   tags (heartbeat vs real data), and correlate against production/operation gaps. Build a
+   per-device health table — a comms/availability incident is often the day's real root cause,
+   not a logic bug; don't let cycle-timing analysis hide it.
 
 7. **Root cause** — correlate across **≥2 independent sources**; pin the incident to a faulting
    module + exception code + code path when identifiable; separate app vs controller vs OS vs
@@ -74,9 +84,6 @@ apply the matching parser; state assumptions when something is unfamiliar.
    cross-refs. Report concrete numbers (counts, counter values), not adjectives. Minimal shapes:
    - timeline row: `time · source · event · severity`
    - device row: `device · disconnects · first/last · affected tags · correlates-with`
-
-10. **Ledger + memory** — append a `*.log.md` P2 entry for the request; update the project anchor +
-    relevant theme memories with any new, non-obvious finding.
 
 Notes: global command; outputs follow the **active project**. Read-only on the capture; parsed
 CSV/XML go to `$env:TEMP`, never the reports dir. If a parser/permission prompt appears, the user

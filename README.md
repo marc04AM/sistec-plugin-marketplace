@@ -11,7 +11,7 @@ Repository: <https://github.com/marc04AM/sistec-plugin-marketplace>
 | `hello-sistec` | Plugin di esempio: skill, agent e hook per partire velocemente |
 | `technical-writer` | Genera manuali operatore HMI in italiano dalle control narrative (Markdown + HTML) |
 | `hmi-developer` | Assistente di sviluppo per la solution Sistec.HMI (.NET 8 / WinForms): Clean Architecture, ciclo TDD, regole C# e hook di progetto |
-| `git-release` | Rilascio multi-repo: `/git-release:gitize` (diff → Conventional-Commits o split staged) e `/git-release:versionize` (release note dai DLL buildati + git, packaging zip) |
+| `git-release` | Rilascio multi-repo: `/git-release:gitize` (diff → Conventional-Commits), `/git-release:git-split-commits` / `/git-release:git-amend-commits` (staged → commit), `/git-release:versionize` (release note dai DLL buildati + git) e `/git-release:package-release` (packaging zip + repeat) |
 | `log-forensics` | Forensics read-only di log/capture PLC/HMI: `/log-forensics:analyze-crash` (timeline + root-cause) e `/log-forensics:track-timing` (consistenza timing ed event-chain Fael/HMI) |
 | `device-spy` | Ispettori read-only secret-driven: `/device-spy:codesys-spy` (CODESYS cifrato → sorgente + analisi) e `/device-spy:ubiquity-spy` (snapshot config router Ubiquiti) |
 
@@ -51,7 +51,7 @@ sistec-plugin-marketplace/
 │   ├── git-release/              # Rilascio multi-repo (cache repo-set condivisa)
 │   │   ├── .claude-plugin/
 │   │   │   └── plugin.json
-│   │   ├── skills/                # gitize, versionize
+│   │   ├── skills/                # gitize, git-split-commits, git-amend-commits, versionize, package-release
 │   │   └── README.md
 │   ├── log-forensics/            # Forensics read-only di log/capture PLC/HMI
 │   │   ├── .claude-plugin/

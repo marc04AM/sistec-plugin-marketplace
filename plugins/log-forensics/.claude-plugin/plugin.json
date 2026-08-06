@@ -1,7 +1,7 @@
 {
   "name": "log-forensics",
   "description": "Analisi forense read-only di log e capture PLC/HMI: /log-forensics:analyze-crash (timeline correlata e root-cause da una cartella di capture) e /log-forensics:track-timing (consistenza timing ed event-chain di un log Fael/HMI)",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": {
     "name": "Sistec"
   },

@@ -1,6 +1,12 @@
 ---
 name: ubiquity-spy
-description: Inspect a Ubiquiti "System Manager" router READ-ONLY — log in and save a faithful field→value report of its complete current configuration (interfaces / DHCP / networking / VPN / users); it captures config, it does not analyze it. Use when the user wants to snapshot, document, or back up the current settings of a Ubiquiti System Manager router (given its IP + credentials) without changing anything. Usage: /ubiquitySpy -ip <ip> -user <user> -pw <password> [--out "<dir>"]
+description: >-
+  Inspect a Ubiquiti "System Manager" router READ-ONLY — log in and save a faithful field→value
+  report of its complete current configuration (interfaces / DHCP / networking / VPN / users); it
+  captures config, it does not analyze it. Use when the user wants to snapshot, document, or back
+  up the current settings of a Ubiquiti System Manager router (given its IP + credentials) without
+  changing anything. Usage: tell it the router's IP, username, and password in conversation, or
+  use flags as shorthand: /ubiquitySpy -ip <ip> -user <user> -pw <password> [--out "<dir>"]
 ---
 
 The user invoked `/ubiquitySpy` to log into a Ubiquiti **"System Manager"** router and **save a
@@ -18,13 +24,13 @@ Resource (do not modify): `${CLAUDE_PLUGIN_ROOT}/assets/ubiquitySpy/resources/ub
 env-driven login + authenticated-dashboard fetch (the dashboard is server-rendered, so all config is
 inline in its HTML).
 
-1. **Parse the arguments** from the text after `/ubiquitySpy` (flags order-independent):
-   - `-ip` → the router IP/host.
-   - `-user` → the admin username.
-   - `-pw` → the password = everything after `-pw` up to the next ` -<flag>` (may contain `$`,
-     spaces if quoted, etc.).
-   - `--out` → optional output directory (strip quotes). Default `./ubiquity-out/`.
-   - Any required flag (`-ip`/`-user`/`-pw`) missing → report the exact problem and stop.
+1. **Resolve the target + credentials — natural language first.** Take the router's IP/host, admin
+   username, and password from what the user says in conversation (e.g. "log into 192.168.10.6 with
+   admin / <password>"); `-ip`/`-user`/`-pw` also work as an explicit, order-independent **shorthand**
+   (the value after `-pw` runs to the next ` -<flag>` and may contain `$`/spaces if quoted). `--out`
+   optionally names an output directory (strip quotes; default `./ubiquity-out/`). If the IP,
+   username, or password can't be resolved from the message either way, ask for the exact missing
+   piece and stop rather than guessing.
 
 2. **Resolve output locations** under the output dir (`--out`, default `./ubiquity-out/`):
    - `<out>\<ip>\dashboard.html` — the captured config.

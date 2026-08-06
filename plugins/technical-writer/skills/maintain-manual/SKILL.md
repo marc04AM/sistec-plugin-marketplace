@@ -1,6 +1,15 @@
 ---
 name: maintain-manual
-description: Manutiene un manuale operatore GIÀ ESISTENTE in formato Word (.docx) con python-docx. Modi: porta dentro le modifiche di una copia di revisione (inclusi i canali nascosti — commenti Word e revisioni/tracked-changes); copy-editing (refusi/grammatica/stile); audit di copertura rispetto al software con inserimento in-stile delle funzioni mancanti; fix strutturali (run di paragrafi vuoti → salto pagina, numerazione/rientri); o aggiunta di commenti di revisione. Usala quando l'utente ha un manuale `.docx` esistente da aggiornare, correggere, revisionare o auditare — NON per generare un manuale nuovo (quello è la skill `technical-writer`, che produce Markdown/HTML). Lavora sempre su una COPIA con versione incrementata (il master resta intatto), con backup nello scratchpad, e preserva conteggio immagini, etichette in grassetto e TOC.
+description: >-
+  Manutiene un manuale operatore GIÀ ESISTENTE in formato Word (.docx) con python-docx. Modi:
+  porta dentro le modifiche di una copia di revisione (inclusi i canali nascosti — commenti Word e
+  revisioni/tracked-changes); copy-editing (refusi/grammatica/stile); audit di copertura rispetto
+  al software con inserimento in-stile delle funzioni mancanti; fix strutturali (run di paragrafi
+  vuoti → salto pagina, numerazione/rientri); o aggiunta di commenti di revisione. Usala quando
+  l'utente ha un manuale `.docx` esistente da aggiornare, correggere, revisionare o auditare — NON
+  per generare un manuale nuovo (quello è la skill `technical-writer`, che produce Markdown/HTML).
+  Lavora sempre su una COPIA con versione incrementata (il master resta intatto), con backup nello
+  scratchpad, e preserva conteggio immagini, etichette in grassetto e TOC.
 ---
 
 # Maintain Manual — manutenzione di un manuale Word (.docx)
@@ -54,9 +63,10 @@ sull'output del precedente, con un gate a testa — non fonderli in un colpo sol
 - **copyedit** — refusi, grammatica, leggibilità; togli ridondanze. Uniforma lo **stile** (mappa gli
   stili orfani su quelli standard, sistema titoli duplicati). Attenzione al gotcha di codifica
   **cp1252/utf-8**. Rinfresca il TOC.
-- **audit [--code "<solution/cartella>"]** — il manuale descrive ogni funzione/procedura implementata?
-  - costruisci l'**inventario funzioni HMI** dal codice (`--code`, altrimenti la solution del progetto
-    attivo; per inventari grandi delega a un agente **Explore** read-only).
+- **audit** — il manuale descrive ogni funzione/procedura implementata?
+  - costruisci l'**inventario funzioni HMI** dal codice indicato in conversazione (`--code
+    "<solution/cartella>"` è la scorciatoia esplicita), altrimenti la solution del progetto attivo;
+    per inventari grandi delega a un agente **Explore** read-only.
   - classifica la copertura → **gap** (implementate, non documentate) / **stale** (documentate, non nel
     codice) / **procedure implicite**.
   - inserisci i **gap ad alto valore** nello stile esistente del manuale, con segnaposto `Immagine:`

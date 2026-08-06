@@ -1,6 +1,12 @@
 ---
 name: codesys-spy
-description: Open a password-protected CODESYS .project, export + extract its PLC program to readable source, then analyze it. Use when the user points at a CODESYS .project (often encrypted/password-protected) and wants its POUs/program extracted, made readable, reviewed, or analyzed without opening CODESYS by hand. Usage: /codesySpy -pw <password> -fn "<path to .project>" [--out "<dir>"]
+description: >-
+  Open a password-protected CODESYS .project, export + extract its PLC program to readable source,
+  then analyze it. Use when the user points at a CODESYS .project (often
+  encrypted/password-protected) and wants its POUs/program extracted, made readable, reviewed, or
+  analyzed without opening CODESYS by hand. Usage: point at the .project file and give its
+  password in conversation, or use flags as shorthand: /codesySpy -pw <password> -fn "<path to
+  .project>" [--out "<dir>"]
 ---
 
 The user invoked `/codesySpy` to turn an encrypted CODESYS `.project` into readable, analyzed
@@ -12,13 +18,13 @@ Resources (do not modify), under `${CLAUDE_PLUGIN_ROOT}/assets/codesySpy/resourc
 `export_project.py` (CODESYS IronPython export), `run_export.bat` (headless launcher),
 `extract_pous.py` (Python 3 xml.etree extractor).
 
-1. **Parse the arguments** from the text after `/codesySpy` (flags are order-independent):
-   - `-pw` → the password = the value after `-pw`, up to the next ` -<flag>` (it may contain `$`,
-     spaces if quoted, etc.).
-   - `-fn` → the `.project` path (typically quoted; strip the quotes).
-   - `--out` → optional output directory (strip quotes). Default `./codesySpy-out/`.
-   - If `-pw` or `-fn` is missing, or the `.project` file does not exist, report the exact problem
-     and stop — do not proceed.
+1. **Resolve the project file + password — natural language first.** Take the `.project` path and
+   its password from what the user says or points at in conversation; `-pw`/`-fn` also work as an
+   explicit **shorthand** (`-pw`'s value runs to the next ` -<flag>` and may contain `$`/spaces if
+   quoted; `-fn`'s path is typically quoted — strip the quotes). `--out` optionally names an output
+   directory (strip quotes; default `./codesySpy-out/`). If the password or the `.project` path can't
+   be resolved from the message either way, or the file doesn't exist, report the exact problem and
+   stop — do not proceed.
 
 2. **Resolve output locations.** Under the output dir (`--out`, default `./codesySpy-out/`):
    - `<out>\<project-stem>\` — for the PLCopen XML, the per-POU `.txt` files, and the consolidated
