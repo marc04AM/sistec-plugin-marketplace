@@ -45,7 +45,7 @@
       "name": "git-release",
       "source": "./plugins/git-release",
       "description": "Strumenti di rilascio multi-repo: /git-release:gitize (diff → Conventional-Commits), /git-release:git-split-commits (staged → più commit), /git-release:git-amend-commits (staged → fold nei commit esistenti), /git-release:versionize (release note dai DLL buildati + git) e /git-release:package-release (packaging zip + repeat). Nessun deploy in produzione: il perimetro si ferma allo zip",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "author": {
         "name": "Sistec"
       },
@@ -56,7 +56,7 @@
       "name": "log-forensics",
       "source": "./plugins/log-forensics",
       "description": "Analisi forense read-only di log e capture PLC/HMI: /log-forensics:analyze-crash (timeline correlata + root-cause) e /log-forensics:track-timing (consistenza timing ed event-chain di un log Fael/HMI)",
-      "version": "0.1.1",
+      "version": "0.2.0",
       "author": {
         "name": "Sistec"
       },

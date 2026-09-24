@@ -85,7 +85,7 @@ to them.
      by newest `*.dll` `LastWriteTime`. **Scan every app's `bin\Release` in ONE shell pass**, reading
      only `LastWriteTime` — the version number itself (major.minor) comes from a single follow-up
      `[System.Reflection.AssemblyName]::GetAssemblyName($dll).Version` read on the chosen folder.
-   - **No build found anywhere** (same fallback as `versionize` Step 4): fall back to the `.csproj`'s
+   - **No build found anywhere** (same fallback as `versionize`): fall back to the `.csproj`'s
      literal `FileVersion`, and **sanitize it for filesystem use** before Step 7 touches a path with
      it — an unexpanded literal like `3.25.*` still has a `major.minor` prefix, so strip everything
      from the first non-numeric/non-dot character onward (`3.25.*` → `3.25`). Flag prominently in the

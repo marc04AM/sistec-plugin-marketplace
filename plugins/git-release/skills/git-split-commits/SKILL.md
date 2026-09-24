@@ -81,7 +81,7 @@ untouched throughout.
 
    Order the resulting commits so prerequisites land first (self-dependent/foundational changes
    before their dependents; within a repo, prerequisite before consumer). Give each group its own
-   Conventional-Commits message (subject + body + `Repos:` footer, same shape as `gitize` Step 6).
+   Conventional-Commits message (subject + body + `Repos:` footer, same shape as `gitize` §2).
 
 7. **Present the plan and confirm (interaction 1).** Show the **ordered list** of proposed
    commits — each with its order index, message, and the repo(s)/files it covers — and **ask the
