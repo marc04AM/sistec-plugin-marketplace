@@ -1,5 +1,5 @@
 """
-FotografaPLY -- centre the model on screen keeping the user's inclination, then save a
+SnapshotPLY -- centre the model on screen keeping the user's inclination, then save a
 clean image (white background, no grid / overlays / gizmos) of the 3D viewport.
 
 Run inside Blender through the MCP bridge via the exec wrapper in SKILL.md.

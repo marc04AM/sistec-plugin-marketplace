@@ -1,47 +1,47 @@
 # git-release
 
-Strumenti di rilascio per le solution **multi-repo** Sistec (la radice della solution non è un repo
-git; ogni sottocartella lo è). Le skill condividono la scoperta del set di repo (scansione fresca ad
-ogni run, nessuna cache).
+Release tools for Sistec **multi-repo** solutions (the solution root is not a git repo; each
+subfolder is). The skills share repo-set discovery (a fresh scan on every run, no cache).
 
-## Skill
+## Skills
 
-| Skill | Cosa fa | Scrive |
-| :---- | :------ | :----- |
-| `/git-release:gitize [--scope\|-s "<target>"]` | aggrega i diff di tutti i sub-repo cambiati (staged + unstaged) in **un** messaggio Conventional-Commits sulla clipboard | clipboard |
-| `/git-release:git-split-commits [--scope\|-s "<target>"]` | spezza lo **staged** in più commit raggruppati per impatto, committati interattivamente segmento per segmento | commit |
-| `/git-release:git-amend-commits [--scope\|-s "<target>"]` | piega lo **staged** nei commit unpushed esistenti (amend/fixup+autosquash); pianifica un nuovo commit per il resto | commit (amend) |
-| `/git-release:versionize -new\|-upd "<target>" [--out <path>]` | release note `ReleaseNote.md` (4 sezioni: Versions, Cell AB, Cell C, Libraries) da DLL già buildate + git; `-upd` antepone un changelog | file `.md` |
-| `/git-release:package-release --zip "<target>" [--rel <note>] [--skip …] [--include\|-i …] \| -r\|--repeat` | impacchetta sorgente git-clean + build + release note in uno zip versionato; `-r` ripete l'ultimo flow di packaging | file `.zip` |
+| Skill | What it does | Writes |
+| :---- | :----------- | :----- |
+| `/git-release:gitize [--scope\|-s "<target>"]` | aggregates the diffs of every changed sub-repo (staged + unstaged) into **one** Conventional-Commits message on the clipboard | clipboard |
+| `/git-release:git-split-commits [--scope\|-s "<target>"]` | splits the **staged** changes into several commits grouped by impact, committed interactively segment by segment | commits |
+| `/git-release:git-amend-commits [--scope\|-s "<target>"]` | folds the **staged** changes into the existing unpushed commits (amend/fixup+autosquash); plans a new commit for the rest | commits (amend) |
+| `/git-release:versionize -new\|-upd "<target>" [--out <path>]` | `ReleaseNote.md` release note (4 sections: Versions, Cell AB, Cell C, Libraries) from already-built DLLs + git; `-upd` prepends a changelog | `.md` file |
+| `/git-release:package-release --zip "<target>" [--rel <note>] [--skip …] [--include\|-i …] \| -r\|--repeat` | packages git-clean source + build + release note into a versioned zip; `-r` repeats the last packaging flow | `.zip` file |
 
-Prima erano solo due comandi (`gitize` con `--split`/`--amend` annidati, `versionize` con
-`--zip`/`--deploy`/`-r` annidati); sono stati separati perché ciascuna modalità è una chirurgia git o
-un'orchestrazione di release a sé, non una variante del compito base. **Nessuna skill deploya o
-pubblica nulla in produzione** — il perimetro di questo plugin si ferma allo zip; `--deploy` è stato
-rimosso intenzionalmente (la skill `/deploy` a cui si appoggiava non esiste in questo marketplace).
+Previously there were only two commands (`gitize` with nested `--split`/`--amend`, `versionize` with
+nested `--zip`/`--deploy`/`-r`); they were split out because each mode is git surgery or release
+orchestration in its own right, not a variant of the base task. **No skill deploys or publishes
+anything to production** — this plugin's scope stops at the zip; `--deploy` was removed on purpose
+(the `/deploy` skill it relied on does not exist in this marketplace).
 
-## Note
+## Notes
 
-- **`gitize` è sempre read-only** (git status/diff + scrittura clipboard, nessun commit).
-- **`git-split-commits` e `git-amend-commits` committano** (il secondo riscrive anche commit
-  unpushed via amend/autosquash) — entrambi gated da conferme e si rifiutano di partire se un repo
-  è a metà merge/rebase/cherry-pick (nessun auto-fix: l'utente risolve a mano, poi ri-lancia).
-- **`versionize` non builda mai**: legge le versioni dalle DLL già buildate (la più giovane) e i
-  fatti git dai repo. Unica scrittura: il file di output.
-- **`package-release` non builda mai** e non scrive il contenuto della release note (richiama
-  `versionize -upd` quando serve rinfrescarla prima di impacchettare). Non deploya e non pubblica
-  nulla — produce solo lo zip.
-- **Consumo token ridotto**: `gitize` e `versionize` raccolgono i dati con uno script PowerShell
-  bundled (`scripts/collect-changes.ps1`, `scripts/collect-release-facts.ps1`) che restituisce un
-  output compatto in una sola chiamata, invece di decine di comandi git/DLL letti dal modello.
-  `gitize` ha un budget sui diff (300 righe per file, 600 per repo, 1500 in totale; oltre, solo
-  riepilogo a livello file, sempre dichiarato) e gira in un contesto separato (`context: fork`) con
-  `model: haiku`: non vede la conversazione, quindi lo scope va passato come argomento (default: cwd).
-  `versionize` usa `model: sonnet` e resta inline perché il gate di pre-flight deve poter chiedere
-  all'utente; per `-new` legge `FeatureCatalog.md` + solo il delta git, mai il sorgente intero.
-- I segreti non sono coinvolti. `git` / `Set-Clipboard` possono chiedere un permesso la prima volta.
+- **`gitize` is always read-only** (git status/diff + a clipboard write, no commits).
+- **`git-split-commits` and `git-amend-commits` commit** (the latter also rewrites unpushed commits
+  via amend/autosquash) — both are gated by confirmations and refuse to start if a repo is
+  mid-merge/rebase/cherry-pick (no auto-fix: the user resolves it by hand, then re-runs).
+- **`versionize` never builds**: it reads versions from the already-built DLLs (the youngest) and
+  git facts from the repos. Its only write is the output file.
+- **`package-release` never builds** and does not write the release note's content (it calls
+  `versionize -upd` when the note needs refreshing before packaging). It does not deploy or publish
+  anything — it only produces the zip.
+- **Reduced token usage**: `gitize` and `versionize` collect their data with a bundled PowerShell
+  script (`scripts/collect-changes.ps1`, `scripts/collect-release-facts.ps1`) that returns compact
+  output in a single call, instead of dozens of git/DLL commands read by the model.
+  `gitize` has a diff budget (300 lines per file, 600 per repo, 1500 in total; beyond that, a
+  file-level summary only, always declared) and runs in a separate context (`context: fork`) with
+  `model: haiku`: it does not see the conversation, so the scope must be passed as an argument
+  (default: cwd). `versionize` uses `model: sonnet` and stays inline because the pre-flight gate
+  must be able to ask the user; for `-new` it reads `FeatureCatalog.md` + only the git delta, never
+  the whole source.
+- No secrets are involved. `git` / `Set-Clipboard` may ask for permission the first time.
 
-## Installazione
+## Installation
 
 ```shell
 /plugin install git-release@sistec-plugins

@@ -1,5 +1,5 @@
 """
-CentraBlender -- put the visible 3D model in the middle of the screen in Blender.
+CenterBlender -- put the visible 3D model in the middle of the screen in Blender.
 
 Run inside Blender through the MCP bridge via the exec wrapper in SKILL.md.
 Assigns a JSON-serialisable dict to `result`.

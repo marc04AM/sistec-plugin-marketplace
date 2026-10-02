@@ -1,52 +1,55 @@
 # technical-writer
 
-Plugin del marketplace Sistec per la **documentazione tecnica** in italiano, su tre
-fronti: **generare** un manuale operatore HMI nuovo (Markdown → HTML) dalle control narrative,
-**manutenere** un manuale Word (`.docx`) già esistente (revisioni, copy-edit, audit vs codice,
-struttura, commenti) e **redigere** documenti di specifica/design in stile engineering-sheet
-Sistec (HTML self-contained).
+Sistec marketplace plugin for **technical documentation**, on three
+fronts: **generating** a new HMI operator manual (Markdown → HTML) from the control narratives,
+**maintaining** an existing Word (`.docx`) manual (revisions, copy-edit, audit vs code,
+structure, comments) and **drafting** specification/design documents in the Sistec
+engineering-sheet style (self-contained HTML).
 
-## Componenti
+The skill instructions are in English; the manuals they produce are written in Italian, while
+spec-document writes in the language of the request.
 
-| Componente | File | Cosa fa |
-| :--------- | :--- | :------ |
-| Skill | `skills/technical-writer/SKILL.md` | **Genera** il manuale (MD/HTML) dalle control narrative; invocabile come `/technical-writer:technical-writer` o automaticamente quando si chiede di creare un manuale HMI |
-| Skill | `skills/maintain-manual/SKILL.md` | **Manutiene** un manuale Word (`.docx`) esistente via python-docx: porta revisioni (inclusi commenti/tracked-changes nascosti), copy-edit, audit di copertura vs codice, fix struttura, commenti di revisione. Lavora su una copia versionata (master intatto) |
-| Skill | `skills/spec-document/SKILL.md` | **Redige** un documento di specifica/design come singolo HTML self-contained in stile engineering-sheet Sistec (tema light/dark, sezioni §, callout, figure SVG, tabella Revisioni); invocabile come `/technical-writer:spec-document` o automaticamente quando si chiede un documento di specifica |
-| Asset | `skills/spec-document/template.html` | Scaffold del documento: CSS del design system + skeleton del body + script del tema |
-| Asset | `skills/spec-document/sheet.css` | Stesso CSS di `template.html`, standalone per diff col sito; da tenere in sync |
-| Asset | `skills/spec-document/components.md` | Markup copia-incolla di ogni blocco (callout, figure, tabelle, steps, tag) |
-| Asset | `assets/exampleManual.md` | Manuale di esempio: riferimento di **forma**, non di contenuto |
-| Asset | `assets/style.css` | Stile per la resa HTML finale |
-| Asset | `assets/struttura-manuale.template.md` | Template dell'indice delle sezioni |
-| Asset | `assets/img-README.md` | Convenzioni di denominazione delle immagini |
+## Components
 
-## Come funziona
+| Component | File | What it does |
+| :-------- | :--- | :----------- |
+| Skill | `skills/technical-writer/SKILL.md` | **Generates** the manual (MD/HTML) from the control narratives; invocable as `/technical-writer:technical-writer` or automatically when you ask to create an HMI manual |
+| Skill | `skills/maintain-manual/SKILL.md` | **Maintains** an existing Word (`.docx`) manual via python-docx: ports revisions (including hidden comments/tracked-changes), copy-edit, coverage audit vs code, structure fixes, review comments. Works on a versioned copy (master untouched) |
+| Skill | `skills/spec-document/SKILL.md` | **Drafts** a specification/design document as a single self-contained HTML file in the Sistec engineering-sheet style (light/dark theme, § sections, callouts, SVG figures, Revisions table); invocable as `/technical-writer:spec-document` or automatically when you ask for a specification document |
+| Asset | `skills/spec-document/template.html` | Document scaffold: design-system CSS + body skeleton + theme script |
+| Asset | `skills/spec-document/sheet.css` | Same CSS as `template.html`, standalone for diffing against the site; keep in sync |
+| Asset | `skills/spec-document/components.md` | Copy-paste markup for every block (callout, figure, tables, steps, tag) |
+| Asset | `assets/exampleManual.md` | Example manual (Italian): a reference for **form**, not content |
+| Asset | `assets/style.css` | Stylesheet for the final HTML rendering |
+| Asset | `assets/manual-structure.template.md` | Template for the section index |
+| Asset | `assets/img-README.md` | Image naming conventions |
 
-1. Predisponi il progetto: immagini in `src/img/`, indice in `docs/struttura-manuale.md`,
-   control narrative in `ControlNarrative/`. La skill può creare lo scaffolding
-   copiando i template inclusi.
-2. Chiedi di generare il manuale.
-3. La skill produce, a livello root del progetto:
-   - `ManualeHMI.md` — manuale in Markdown,
-   - `ManualeHMI.html` — manuale in HTML (linka `style.css`),
-   - `immagini-richieste.md` — segnaposto immagine ancora da fornire.
+## How it works
 
-## Principi
+1. Prepare the project: images in `src/img/`, index in `docs/manual-structure.md`
+   (a legacy `docs/struttura-manuale.md` is still read), control narratives in
+   `ControlNarrative/`. The skill can create the scaffolding by copying the bundled templates.
+2. Ask it to generate the manual.
+3. The skill produces, at the project root:
+   - `ManualeHMI.md` — the manual in Markdown,
+   - `ManualeHMI.html` — the manual in HTML (links `style.css`),
+   - `immagini-richieste.md` — image placeholders still to be supplied.
 
-- **Lingua**: italiano, forma impersonale.
-- **Fonte di verità**: le control narrative. Non inventare funzionalità; le lacune
-  si marcano con `<!-- TODO: ... -->`.
-- **Esempio = forma, non contenuto**: `exampleManual.md` è un modello di struttura
-  e stile; mai copiarne i dati tecnici.
+## Principles
 
-## Test rapido
+- **Language**: the manual is written in Italian, impersonal form.
+- **Source of truth**: the control narratives. Do not invent features; gaps
+  are marked with `<!-- TODO: ... -->`.
+- **Example = form, not content**: `exampleManual.md` is a model of structure
+  and style; never copy its technical data.
+
+## Quick test
 
 ```bash
 claude --plugin-dir ./plugins/technical-writer
 ```
 
-Poi in sessione:
+Then in the session:
 
 ```shell
 /technical-writer:technical-writer

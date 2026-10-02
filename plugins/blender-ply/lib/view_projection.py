@@ -1,6 +1,6 @@
 """
-Shared viewport maths for the blender-ply skill scripts (centrablender, fotografaply,
-visualizzaply). Runs inside Blender; each script loads it by path, starting from the
+Shared viewport maths for the blender-ply skill scripts (center-blender, snapshot-ply,
+view-ply). Runs inside Blender; each script loads it by path, starting from the
 __file__ that the SKILL.md exec wrapper passes in.
 
 The centring method: project every vertex through the live view and move only

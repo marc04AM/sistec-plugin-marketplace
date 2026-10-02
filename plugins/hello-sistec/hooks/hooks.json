@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.file_path' | xargs -I{} echo \"[hello-sistec] file modificato: {}\""
+            "command": "jq -r '.tool_input.file_path' | xargs -I{} echo \"[hello-sistec] file modified: {}\""
           }
         ]
       }

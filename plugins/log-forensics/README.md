@@ -1,33 +1,33 @@
 # log-forensics
 
-Analisi forense **read-only** di log e capture PLC/HMI. I comandi catalogano gli artefatti, ne
-ricostruiscono una timeline/event-chain correlata nel tempo e producono un report; non modificano
-mai la capture (l'unica scrittura è il report sotto `--out`, più — opzionale — la memoria di
-progetto). Per molti/grandi log parallelizzano fino a **5 subagent Explore**.
+**Read-only** forensic analysis of PLC/HMI logs and captures. The commands catalog the artifacts,
+reconstruct a time-correlated timeline/event chain from them and produce a report; they never
+modify the capture (the only write is the report under `--out`, plus — optionally — the project
+memory). For many/large logs they parallelize across up to **5 Explore subagents**.
 
-## Skill
+## Skills
 
-| Skill | Cosa fa | Scrive |
-| :---- | :------ | :----- |
-| `/log-forensics:analyze-crash -fn "<cartella capture>" [--out "<dir>"]` | forensics su una cartella di capture (log HMI/app, log PLC, eventi Windows, PerfMon `.blg`/`.etl`, rete) → timeline correlata + root-cause su ≥2 sorgenti indipendenti. Generalizzato su PLC/HMI diversi (rileva il formato e applica il parser giusto) | `--out` (default `./crash-out/`) |
-| `/log-forensics:track-timing [-fn "<log-o-cartella>" …] [-prod] [--upd\|-u ["<src>" …]] [--full]` | consistenza **timing ed event-chain** di un log Fael/HMI (+ JSON `plc_reports`): ricostruisce le catene per-job, segnala link rotti/mancanti/fuori ordine, tabelle timing + salute dispositivi, ledger cumulativo dei pezzi | `reports\` del progetto attivo + stato in `./.trackTiming/` |
+| Skill | What it does | Writes |
+| :---- | :----------- | :----- |
+| `/log-forensics:analyze-crash -fn "<capture folder>" [--out "<dir>"]` | forensics on a capture folder (HMI/app logs, PLC logs, Windows events, PerfMon `.blg`/`.etl`, network) → correlated timeline + root cause across ≥2 independent sources. Generalized across different PLCs/HMIs (detects the format and applies the right parser) | `--out` (default `./crash-out/`) |
+| `/log-forensics:track-timing [-fn "<log-or-folder>" …] [-prod] [--upd\|-u ["<src>" …]] [--full]` | **timing and event-chain** consistency of a Fael/HMI log (+ `plc_reports` JSON): reconstructs the per-job chains, flags broken/missing/out-of-order links, timing + device-health tables, cumulative parts ledger | the active project's `reports\` + state in `./.trackTiming/` |
 
-## Note
+## Notes
 
-- Entrambi sono **read-only** sulla sorgente; i CSV/XML derivati dai binari (`.blg`→`relog`,
-  `.etl`→`tracerpt`) vanno in `$env:TEMP`, mai nella cartella di output.
-- `/log-forensics:analyze-crash` è crash-capture-oriented; `/log-forensics:track-timing` è
-  production-timing / chain-consistency oriented e porta il vocabolario di event-chain del dominio Fael.
-- `track-timing` delega il parsing a `scripts/scan_timing.py` (Python stdlib): analizza tutto il
-  log (~9 s per 1,4 M righe), scrive direttamente le tabelle del report e stampa solo un digest con
-  le anomalie **nuove** dall'ultimo run (high-water mark per file in `.trackTiming/hwm.json`;
-  `--full` per rivederle tutte). `--upd` usa `scripts/sync_logs.py` (append del solo tail, rotazioni,
-  backlog saltato). Il catalogo artefatti e la checklist del baseline sono persistiti in
-  `.trackTiming/`. Gira con `context: fork` + `model: sonnet`: non può fare domande, quindi le
-  eventuali domande (artefatti sconosciuti, cartella di destinazione) finiscono nel report finale.
-- I parser usano built-in Windows; un eventuale permesso viene approvato caso per caso.
+- Both are **read-only** on the source; CSV/XML derived from binaries (`.blg`→`relog`,
+  `.etl`→`tracerpt`) go to `$env:TEMP`, never the output folder.
+- `/log-forensics:analyze-crash` is crash-capture oriented; `/log-forensics:track-timing` is
+  production-timing / chain-consistency oriented and carries the Fael domain's event-chain vocabulary.
+- `track-timing` delegates parsing to `scripts/scan_timing.py` (Python stdlib): it analyzes the whole
+  log (~9 s for 1.4 M lines), writes the report tables directly and prints only a digest with the
+  anomalies that are **new** since the last run (per-file high-water mark in `.trackTiming/hwm.json`;
+  `--full` to review them all). `--upd` uses `scripts/sync_logs.py` (appends only the tail, handles
+  rotations, skips the backlog). The artifact catalog and the baseline checklist are persisted in
+  `.trackTiming/`. It runs with `context: fork` + `model: sonnet`: it can't ask questions, so any
+  questions (unknown artifacts, destination folder) end up in the final report.
+- The parsers use Windows built-ins; any permission prompt is approved case by case.
 
-## Installazione
+## Installation
 
 ```shell
 /plugin install log-forensics@sistec-plugins

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "sistec-plugins",
-  "description": "Marketplace di plugin Claude Code del team Sistec",
+  "description": "Claude Code plugin marketplace of the Sistec team",
   "version": "0.1.0",
   "owner": {
     "name": "Sistec",
@@ -11,8 +11,8 @@
     {
       "name": "hello-sistec",
       "source": "./plugins/hello-sistec",
-      "description": "Plugin di esempio: skill, agent e hook per partire velocemente",
-      "version": "0.1.0",
+      "description": "Example plugin: skill, agent and hook to get started quickly",
+      "version": "0.1.1",
       "author": {
         "name": "Sistec"
       },
@@ -22,19 +22,19 @@
     {
       "name": "technical-writer",
       "source": "./plugins/technical-writer",
-      "description": "Documentazione tecnica in italiano: technical-writer redige un manuale operatore HMI nuovo (Markdown → HTML) dalle control narrative; maintain-manual manutiene un manuale Word (.docx) esistente (revisioni, copy-edit, audit vs codice, struttura, commenti) via python-docx; spec-document redige documenti di specifica/design come singolo HTML self-contained in stile engineering-sheet Sistec",
-      "version": "0.2.2",
+      "description": "Technical documentation: technical-writer drafts a new Italian HMI operator manual (Markdown → HTML) from the control narratives; maintain-manual maintains an existing Word manual (.docx) (revisions, copy-edit, audit vs code, structure, comments) via python-docx; spec-document drafts specification/design documents as a single self-contained HTML in the Sistec engineering-sheet style",
+      "version": "0.3.0",
       "author": {
         "name": "Sistec"
       },
       "category": "documentation",
-      "keywords": ["documentation", "manuale", "hmi", "technical-writing", "markdown", "html", "docx", "word", "python-docx", "manutenzione", "specifica", "design-doc", "engineering-sheet"]
+      "keywords": ["documentation", "manual", "hmi", "technical-writing", "markdown", "html", "docx", "word", "python-docx", "maintenance", "specification", "design-doc", "engineering-sheet"]
     },
     {
       "name": "hmi-developer",
       "source": "./plugins/hmi-developer",
-      "description": "Assistente di sviluppo per la solution Sistec.HMI (.NET 8 / WinForms): ciclo TDD, hook di progetto, fix bug DPI/anchor WinForms, generazione SQL i18n (MissingTranslations.csv → language_spv), riconciliazione di feature tra solution e csharp-doc-comments per commenti XML doc C# (Microsoft/StyleCop). Persona e regole C#/HMI vivono nel progetto (CLAUDE.md + .claude/rules/), non nel plugin",
-      "version": "0.3.0",
+      "description": "Development assistant for the Sistec.HMI solution (.NET 8 / WinForms): TDD cycle, project hooks, WinForms DPI/anchor bug fixes, i18n SQL generation (MissingTranslations.csv → language_spv), feature reconciliation between solutions and csharp-doc-comments for C# XML doc comments (Microsoft/StyleCop). Persona and C#/HMI rules live in the project (CLAUDE.md + .claude/rules/), not in the plugin",
+      "version": "0.3.1",
       "author": {
         "name": "Sistec"
       },
@@ -44,8 +44,8 @@
     {
       "name": "git-release",
       "source": "./plugins/git-release",
-      "description": "Strumenti di rilascio multi-repo: /git-release:gitize (diff → Conventional-Commits), /git-release:git-split-commits (staged → più commit), /git-release:git-amend-commits (staged → fold nei commit esistenti), /git-release:versionize (release note dai DLL buildati + git) e /git-release:package-release (packaging zip + repeat). Nessun deploy in produzione: il perimetro si ferma allo zip",
-      "version": "0.3.0",
+      "description": "Multi-repo release tools: /git-release:gitize (diff → Conventional-Commits), /git-release:git-split-commits (staged → multiple commits), /git-release:git-amend-commits (staged → folded into existing commits), /git-release:versionize (release notes from built DLLs + git) and /git-release:package-release (zip packaging + repeat). No production deploy: the scope stops at the zip",
+      "version": "0.3.1",
       "author": {
         "name": "Sistec"
       },
@@ -55,8 +55,8 @@
     {
       "name": "log-forensics",
       "source": "./plugins/log-forensics",
-      "description": "Analisi forense read-only di log e capture PLC/HMI: /log-forensics:analyze-crash (timeline correlata + root-cause) e /log-forensics:track-timing (consistenza timing ed event-chain di un log Fael/HMI)",
-      "version": "0.2.0",
+      "description": "Read-only forensic analysis of PLC/HMI logs and captures: /log-forensics:analyze-crash (correlated timeline + root cause) and /log-forensics:track-timing (timing and event-chain consistency of a Fael/HMI log)",
+      "version": "0.2.1",
       "author": {
         "name": "Sistec"
       },
@@ -66,8 +66,8 @@
     {
       "name": "device-spy",
       "source": "./plugins/device-spy",
-      "description": "Ispettori read-only: /device-spy:codesys-spy (CODESYS cifrato → PLCopen XML + sorgente POU + analisi), /device-spy:ubiquity-spy (snapshot config di un router Ubiquiti) e /device-spy:network-probe (config + salute di rete dell'host locale → diagnosi link-flap / conflitti IP / driver). Dove serve, password via env/STDIN, mai su disco",
-      "version": "0.1.1",
+      "description": "Read-only inspectors: /device-spy:codesys-spy (encrypted CODESYS → PLCopen XML + POU source + analysis), /device-spy:ubiquity-spy (config snapshot of a Ubiquiti router) and /device-spy:network-probe (local host network config + health → link-flap / IP conflict / driver diagnosis). Where needed, passwords via env/STDIN, never on disk",
+      "version": "0.1.2",
       "author": {
         "name": "Sistec"
       },
@@ -77,8 +77,8 @@
     {
       "name": "blender-ply",
       "source": "./plugins/blender-ply",
-      "description": "Modelli PLY da CAD in Blender via bridge MCP: /blender-ply:visualizzaply (colori + clip + vista + zoom dopo l'import), /blender-ply:centrablender (centra la vista senza ruotarla), /blender-ply:centraply (origine sul vertice selezionato, valida nel PLY esportato), /blender-ply:fotografaply (PNG su sfondo bianco) e /blender-ply:ply-colors (ripristino colori per vertice)",
-      "version": "0.1.0",
+      "description": "CAD PLY models in Blender via the MCP bridge: /blender-ply:view-ply (colours + clip + view + zoom after the import), /blender-ply:center-blender (centres the view without rotating it), /blender-ply:center-ply (origin on the selected vertex, valid in the exported PLY), /blender-ply:snapshot-ply (PNG on a white background) and /blender-ply:ply-colors (per-vertex colour restore)",
+      "version": "0.2.0",
       "author": {
         "name": "Sistec"
       },
