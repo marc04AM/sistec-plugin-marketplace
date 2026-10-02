@@ -13,7 +13,7 @@ Repository: <https://github.com/marc04AM/sistec-plugin-marketplace>
 | `hmi-developer` | Development assistant for the Sistec.HMI solution (.NET 8 / WinForms): Clean Architecture, TDD cycle, C# rules and project hooks |
 | `git-release` | Multi-repo release: `/git-release:gitize` (diff → Conventional-Commits), `/git-release:git-split-commits` / `/git-release:git-amend-commits` (staged → commits), `/git-release:versionize` (release notes from built DLLs + git) and `/git-release:package-release` (zip packaging + repeat) |
 | `log-forensics` | Read-only forensics of PLC/HMI logs/captures: `/log-forensics:analyze-crash` (timeline + root cause) and `/log-forensics:track-timing` (Fael/HMI timing and event-chain consistency) |
-| `device-spy` | Secret-driven read-only inspectors: `/device-spy:codesys-spy` (encrypted CODESYS → source + analysis) and `/device-spy:ubiquity-spy` (Ubiquiti router config snapshot) |
+| `device-spy` | Secret-driven read-only inspectors: `/device-spy:codesys-spy` (encrypted CODESYS → source + analysis) `/device-spy:ubiquity-spy` (Ubiquiti router config snapshot), `/device-spy:network-probe` (local network diagnosis) and `/device-spy:alarm-troubleshooting` (PLC alarms → Troubleshooting workbook) |
 | `blender-ply` | CAD PLY models in Blender via the MCP bridge: `/blender-ply:view-ply`, `/blender-ply:center-blender`, `/blender-ply:center-ply`, `/blender-ply:snapshot-ply`, `/blender-ply:ply-colors` |
 
 ## Repository layout
@@ -62,7 +62,7 @@ sistec-plugin-marketplace/
 │   ├── device-spy/               # Secret-driven read-only inspectors (bundled helpers)
 │   │   ├── .claude-plugin/
 │   │   │   └── plugin.json
-│   │   ├── skills/                # codesys-spy, ubiquity-spy
+│   │   ├── skills/                # codesys-spy, ubiquity-spy, network-probe, alarm-troubleshooting (+ scripts/)
 │   │   ├── assets/               # codesySpy/resources/*, ubiquitySpy/resources/* (env-driven)
 │   │   └── README.md
 │   └── blender-ply/              # CAD PLY models in Blender via the MCP bridge

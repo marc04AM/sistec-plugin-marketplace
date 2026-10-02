@@ -66,13 +66,13 @@
     {
       "name": "device-spy",
       "source": "./plugins/device-spy",
-      "description": "Read-only inspectors: /device-spy:codesys-spy (encrypted CODESYS → PLCopen XML + POU source + analysis), /device-spy:ubiquity-spy (config snapshot of a Ubiquiti router) and /device-spy:network-probe (local host network config + health → link-flap / IP conflict / driver diagnosis). Where needed, passwords via env/STDIN, never on disk",
-      "version": "0.1.2",
+      "description": "Read-only inspectors: /device-spy:codesys-spy (encrypted CODESYS → PLCopen XML + POU source + analysis), /device-spy:ubiquity-spy (config snapshot of a Ubiquiti router) /device-spy:network-probe (local host network config + health → link-flap / IP conflict / driver diagnosis) and /device-spy:alarm-troubleshooting (PLC alarms → filled Troubleshooting workbook). Where needed, passwords via env/STDIN, never on disk",
+      "version": "0.2.0",
       "author": {
         "name": "Sistec"
       },
       "category": "tools",
-      "keywords": ["tools", "codesys", "ubiquiti", "plc", "router", "inspection", "read-only", "snapshot", "network", "diagnostics"]
+      "keywords": ["tools", "codesys", "ubiquiti", "plc", "router", "inspection", "read-only", "snapshot", "network", "diagnostics", "alarms", "troubleshooting", "excel"]
     },
     {
       "name": "blender-ply",
