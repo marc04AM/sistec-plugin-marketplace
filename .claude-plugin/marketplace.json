@@ -22,7 +22,7 @@
     {
       "name": "technical-writer",
       "source": "./plugins/technical-writer",
-      "description": "Technical documentation (output in Italian): technical-writer drafts a new HMI operator manual (Markdown → HTML) from the control narratives; maintain-manual maintains an existing Word manual (.docx) (revisions, copy-edit, audit vs code, structure, comments) via python-docx; spec-document drafts specification/design documents as a single self-contained HTML in the Sistec engineering-sheet style",
+      "description": "Technical documentation: technical-writer drafts a new Italian HMI operator manual (Markdown → HTML) from the control narratives; maintain-manual maintains an existing Word manual (.docx) (revisions, copy-edit, audit vs code, structure, comments) via python-docx; spec-document drafts specification/design documents as a single self-contained HTML in the Sistec engineering-sheet style",
       "version": "0.3.0",
       "author": {
         "name": "Sistec"

@@ -1,6 +1,6 @@
 {
   "name": "technical-writer",
-  "description": "Technical documentation in Italian: the technical-writer skill drafts a new HMI operator manual (Markdown → HTML) from the control narratives; the maintain-manual skill maintains an existing Word (.docx) manual (ports revisions, copy-edit, audit vs code, structure fixes, comments) via python-docx; the spec-document skill drafts specification/design documents as a single self-contained HTML file in the Sistec engineering-sheet style",
+  "description": "Technical documentation: the technical-writer skill drafts a new Italian HMI operator manual (Markdown → HTML) from the control narratives; the maintain-manual skill maintains an existing Word (.docx) manual (ports revisions, copy-edit, audit vs code, structure fixes, comments) via python-docx; the spec-document skill drafts specification/design documents as a single self-contained HTML file in the Sistec engineering-sheet style",
   "version": "0.3.0",
   "author": {
     "name": "Sistec"

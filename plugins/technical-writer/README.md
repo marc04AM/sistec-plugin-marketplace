@@ -1,12 +1,13 @@
 # technical-writer
 
-Sistec marketplace plugin for **technical documentation** in Italian, on three
+Sistec marketplace plugin for **technical documentation**, on three
 fronts: **generating** a new HMI operator manual (Markdown → HTML) from the control narratives,
 **maintaining** an existing Word (`.docx`) manual (revisions, copy-edit, audit vs code,
 structure, comments) and **drafting** specification/design documents in the Sistec
 engineering-sheet style (self-contained HTML).
 
-The skill instructions are in English; the documents they produce are written in Italian.
+The skill instructions are in English; the manuals they produce are written in Italian, while
+spec-document writes in the language of the request.
 
 ## Components
 

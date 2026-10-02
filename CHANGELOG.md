@@ -16,11 +16,10 @@ hello-sistec 0.1.0 → 0.1.1** · branch `chore/translate-to-english`
 - The quoted Italian trigger phrases stay in the skill descriptions, so Italian requests still
   trigger the skills; technical-writer and maintain-manual gained a few.
 - Italian that is output or data stays Italian: the manuals produced by technical-writer and
-  maintain-manual (and the Italian sample `assets/exampleManual.md`), the labels of the
-  spec-document template, the archive note headings of hmi-developer, the SQL sample values of
+  maintain-manual (and the Italian sample `assets/exampleManual.md`), the archive note headings of hmi-developer, the SQL sample values of
   `translate`, PLC/HMI symbol names and network paths.
-- **technical-writer**: the skills now state explicitly that the documents are written in Italian;
-  spec-document defaults to Italian instead of following the language of the request.
+- **technical-writer**: technical-writer and maintain-manual now state explicitly that the manual is
+  written in Italian; spec-document still writes in the language of the request.
 
 ### Renamed (breaking)
 
