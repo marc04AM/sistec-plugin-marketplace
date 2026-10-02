@@ -3,6 +3,48 @@
 Modifiche rilevanti ai plugin del marketplace. Formato ispirato a
 [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); le versioni sono quelle dei singoli plugin.
 
+## 2026-10-02 — Nuovo plugin blender-ply
+
+**blender-ply 0.1.0** · branch `feat/blender-ply`
+
+### Aggiunto
+
+Plugin per lavorare in Blender, tramite il bridge MCP, su modelli PLY esportati da CAD (in mm,
+colori per vertice, nessun materiale). Le skill vengono da sessioni d'uso reali.
+
+- `/blender-ply:visualizzaply`: dopo l'import rende visibili i colori per vertice, calcola il clip
+  dalla diagonale del modello, imposta una vista 3/4 centrata e attiva *Zoom to Mouse Position* +
+  *Auto Depth*.
+- `/blender-ply:centrablender`: centra il modello sulla sagoma a schermo senza cambiare
+  l'inclinazione; lo zoom si allontana solo se il modello non ci sta.
+- `/blender-ply:centraply`: porta il vertice selezionato (o il punto medio) su (0,0,0), facendo
+  coincidere origine oggetto, cursore 3D e origine mondo. Sposta la mesh, quindi vale anche nel
+  PLY esportato.
+- `/blender-ply:fotografaply`: salva un PNG su sfondo bianco senza overlay tramite viewport render
+  (view transform `Standard`, perché con AgX il bianco esce grigio), poi ripristina la vista.
+- `/blender-ply:ply-colors`: ripristina i colori per vertice (Solid → `VERTEX` e materiale per
+  Material Preview); `detect_ply_colors.py` è la versione in sola lettura.
+- Hook `PostToolUse` `ply-colors-nudge.py`: dopo un import PLY o alla prima chiamata Blender della
+  sessione interroga Blender in sola lettura e avvisa solo se un modello è davvero mostrato grigio.
+- Regola opzionale `rules/blender-ply-colors.md`, da copiare a mano in `~/.claude/rules/`.
+
+### Rispetto alle skill originali
+
+- Percorsi portabili: gli script si caricano da `${CLAUDE_SKILL_DIR}` con un wrapper `exec`, invece
+  che da un percorso utente scritto nel codice. Anche `ply-colors` usa ora il wrapper e non invia
+  più lo script intero nella conversazione.
+- La matematica del viewport (proiezione, centratura, vertici nel mondo) è in
+  `lib/view_projection.py`, invece che duplicata in tre script. L'equivalenza con il vecchio ciclo
+  di centratura è stata verificata su 300 casi casuali.
+- `blender-ply-colors` rinominata in `ply-colors`, per evitare `/blender-ply:blender-ply-colors`.
+- SKILL.md e messaggi degli script in inglese; le frasi d'innesco italiane restano nelle description.
+
+### Corretto
+
+- Hook: il messaggio riportava il `color_type` della prima vista invece di quella sbagliata.
+- `centraply`: rileva anche rotazioni in quaternioni o asse-angolo (`matrix_basis` invece di
+  `rotation_euler`).
+
 ## 2026-09-24 — Riduzione del consumo token di gitize, versionize, track-timing
 
 **git-release 0.2.0 → 0.3.0 · log-forensics 0.1.1 → 0.2.0** · branch `perf/skill-token-reduction`
