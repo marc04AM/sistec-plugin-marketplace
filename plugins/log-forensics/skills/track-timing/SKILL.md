@@ -7,10 +7,13 @@ description: >-
   broken/missing/out-of-order link, builds timing + device-health tables, and reports. `-fn`
   accepts MULTIPLE paths (logs and/or folders) merged into ONE unified timeline with cross-source
   correlation. `--upd`/`-u <src…>` first refreshes the local log copies (append-only delta where
-  possible) before analyzing. Every run also maintains a cumulative parts-issued table. Use when
-  the user wants to verify runtime timing / event-chain consistency of a Fael/HMI log, spot broken
-  or out-of-order job chains or device-health issues, or refresh and re-analyze those logs. Usage:
-  /track-timing [-fn "<log-or-folder>" …] [-prod] [--upd|-u ["<src>" …]] [--full]
+  possible) and the cells' DB day-table exports (PLC reports + alarm journal) before analyzing;
+  `-b`/`--base` only fetches them. Every run also maintains a cumulative parts-issued table. Use
+  when the user wants to verify runtime timing / event-chain consistency of a Fael/HMI log, spot
+  broken or out-of-order job chains or device-health issues, refresh and re-analyze those logs, or
+  just fetch the latest logs and DB records. Usage:
+  /track-timing [-fn "<log-or-folder>" …] [-prod] [--upd|-u ["<src>" …]] [-b|--base ["<src>" …]
+  [--dates YYYYMMDD,…]] [--full]
 disable-model-invocation: true
 context: fork
 model: sonnet
@@ -19,7 +22,8 @@ model: sonnet
 Verify the **runtime timing and event-chain consistency** of the Fael HMI/PLC coordination from its
 own logs, and write a report. This skill focuses on production timing and chain consistency.
 Crash captures are `analyze-crash`'s job. Read-only on the sources. It writes only the report, the
-parts ledger, the state in `./.trackTiming/`, and (with `--upd`) the local log copies.
+parts ledger, the state in `./.trackTiming/`, and (with `--upd`/`-b`) the local log copies and DB
+exports. The DB is only read.
 
 Arguments: `$ARGUMENTS`
 
@@ -43,7 +47,7 @@ Read it the first time you need to interpret an anomaly, not up front.
 
 `reports\` is the active project's reports folder. The state dir is `./.trackTiming/`.
 
-## 2. `--upd` / `-u` — refresh local copies first (only when asked)
+## 2. `--upd` / `-u` / `-b` — refresh local copies first (only when asked)
 
 ```bash
 python "${CLAUDE_SKILL_DIR}/scripts/sync_logs.py" --dest "<project>/external resources" --state .trackTiming ["<src>" …]
@@ -55,6 +59,40 @@ the source is a strict append. It fully replaces a file that rotated or restarte
 ones. Its `CHANGED:` lines are the analysis targets (plus any `-fn` paths). `RESULT: NOTHING-NEW`
 with no `-fn` → report that and stop. A `NEEDS-FOLDER:` line means a file's naming family matches
 no local folder, or several. Don't guess. Leave it out and ask in the report where it belongs.
+`UNREADABLE:` means a source could not be read this time; its local copy is untouched, so report it.
+
+Then export the DB day tables of the analyzed dates (the distinct `YYYYMMDD` in the `CHANGED:`
+names; none → skip):
+
+```bash
+python "${CLAUDE_SKILL_DIR}/scripts/export_db_tables.py" --config .trackTiming/db-source.txt --dates <YYYYMMDD,…>
+```
+
+Per cell and date it writes `<out_dir>/<date>.json` (table `reports_<date>`) and
+`alarms_<date>.json` (that day's `alarm_journal`): append past the file's max ID, rebuild a reset
+table, skip an absent one. Report its per-file lines. `ERROR` lines and `RESULT: NO-MYSQL` don't
+stop the analysis: note them. Credentials stay in each cell's `DB.ini`: never read, print or copy
+them yourself. `.trackTiming/db-source.txt` has one block per cell, plus an optional
+`[common] mysql=<path>` when the client isn't on PATH. Relative paths resolve against the project
+root:
+
+```ini
+[AB]
+host=192.168.10.10
+db_ini=<that cell's HMI Config\DB.ini>
+db_section=DB_0
+out_dir=<project>/external resources/db-tables-ab
+```
+
+`RESULT: NO-CONFIG` → skip the export and ask in the report for each cell's host, `DB.ini` path +
+section and output folder, giving that block as the example (5309 FAEL also has `[C]`: host
+`192.168.10.11`, `db-tables-c`). Write the file once the user answers.
+
+**`-b` / `--base`: fetch only.** It implies `--upd` (bare `-b` reuses `upd-sources.txt`). Run the
+log sync, then the export for `--dates` if given, else the changed logs' dates, else today: the PLC
+writes `reports_<date>`/`alarm_journal` even when the HMI log is silent, so `NOTHING-NEW` doesn't
+stop it. Return both scripts' summary lines and stop: no scan, report, baseline or parts ledger.
+`-fn`/`-prod` are ignored.
 
 ## 3. Scan — one call
 
@@ -63,8 +101,11 @@ python "${CLAUDE_SKILL_DIR}/scripts/scan_timing.py" --reports "<project>/reports
 ```
 
 The script:
-- **catalogs** the inputs: known `SPV_*.log` / `plc_reports_*.json`, plus any roles recorded in
-  `.trackTiming/catalog.json`;
+- **catalogs** the inputs: known `SPV_*.log` / `plc_reports_*.json` / DB exports `<date>.json` +
+  `alarms_<date>.json`, plus any roles recorded in `.trackTiming/catalog.json`. It adds the DB
+  exports of the logs' dates from the `out_dir`s in `db-source.txt` by itself. A DB export
+  supersedes a `plc_reports_<date>.json` of the same date and cell (the catalog says so). Alarm
+  raises and clears join the PLC rows as correlates;
 - parses every source in full, **reconstructs per-job chains**, flags broken, missing and
   out-of-order links, computes cycle Δ / race-rate, send durations and first-send latency, and
   **device health**;

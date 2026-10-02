@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Deterministic parser for track-timing: Fael/HMI SPV_*.log (+ plc_reports_*.json).
+"""Deterministic parser for track-timing: Fael/HMI SPV_*.log (+ PLC report / alarm-journal JSONs:
+plc_reports_<date>.json, and the DB exports <date>.json + alarms_<date>.json; the DB exports for
+the logs' dates are also picked up from the out_dir of each cell in <state>/db-source.txt).
 
 Parses every source in full (CPU is cheap; tokens are not), then:
   * writes the data-heavy report sections straight into reports/<base>.md
@@ -437,20 +439,111 @@ def parse_plc(path: Path, label: str):
         ty = str(r.get('Type', ''))
         # Real files: DataTime = "06:56:00" (time only), created_at = "2026-06-09 06:56:28".
         # Take the date from created_at (else the file name) and the event time from DataTime.
+        # Some rows carry a placeholder DataTime ("00:00" on cell C): fall back to created_at.
         ts, ca = str(r.get('DataTime') or ''), str(r.get('created_at') or '')
-        try:
-            if re.fullmatch(r'\d{2}:\d{2}:\d{2}(\.\d+)?', ts):
-                d = dt.date.fromisoformat(ca[:10]) if re.match(r'\d{4}-\d{2}-\d{2}', ca) else day
-                t = dt.datetime.combine(d, dt.time.fromisoformat(ts[:12]))
-            else:
-                t = dt.datetime.fromisoformat((ts or ca).replace('Z', '').replace('T', ' ')[:23])
-        except ValueError:
+        t = None
+        for cand in (ts, ca):
+            try:
+                if re.fullmatch(r'\d{2}:\d{2}:\d{2}(\.\d+)?', cand):
+                    d = dt.date.fromisoformat(ca[:10]) if re.match(r'\d{4}-\d{2}-\d{2}', ca) else day
+                    t = dt.datetime.combine(d, dt.time.fromisoformat(cand[:12]))
+                elif cand:
+                    t = dt.datetime.fromisoformat(cand.replace('Z', '').replace('T', ' ')[:23])
+            except ValueError:
+                continue
+            if t:
+                break
+        if t is None:
             continue
         out.append({'t': t, 'type': ty, 'zone': r.get('ZoneSymbol', ''),
                     'text': ' / '.join(str(r[k]).strip() for k in ('Text1', 'Text2', 'Text3') if str(r.get(k) or '').strip()),
                     'id': r.get('ID')})
     out.sort(key=lambda x: x['t'])
     return out, f'{len(out)} rows ({Counter(x["type"] for x in out)})'
+
+
+def parse_alarms(path: Path, label: str):
+    """alarms_<date>.json (DB export of alarm_journal): one row per raise (Active "1") or clear
+    (Active "0") of an occurrence (UID). TimeStamp = when that row was written (~2 s after the
+    event). EventTime = the PLC-side raise time (equal to the report row's DataTime), repeated on
+    the clear row, sometimes empty or stale. So: raise at EventTime when it is 0-600 s before
+    TimeStamp, else TimeStamp; clear at TimeStamp."""
+    try:
+        rows = json.loads(path.read_text(encoding='utf-8', errors='replace'))
+        if not isinstance(rows, list):
+            raise ValueError('not a JSON array')
+    except Exception as e:
+        return None, f'unusable ({type(e).__name__})'
+    out, raised = [], {}
+    for r in rows:
+        if not isinstance(r, dict):
+            continue
+        try:
+            t = dt.datetime.fromisoformat(str(r.get('TimeStamp') or '')[:19])
+        except ValueError:
+            continue
+        pr, name, active = str(r.get('Priority', '')), str(r.get('Name') or '?'), str(r.get('Active', ''))
+        ty = {'1': 'ALM', '2': 'WRN'}.get(pr, f'P{pr}')
+        if active == '1':
+            try:
+                et = dt.datetime.fromisoformat(str(r.get('EventTime') or '')[:19])
+                t = et if 0 <= (t - et).total_seconds() <= 600 else t
+            except ValueError:
+                pass
+            raised[r.get('UID')] = t
+            what = 'raised'
+        else:
+            t0 = raised.pop(r.get('UID'), None)
+            what = f'cleared after {(t - t0).total_seconds():.0f}s' if t0 else 'cleared'
+        out.append({'t': t, 'type': ty, 'zone': r.get('Zone') or '', 'text': f'{name} / {what}',
+                    'id': r.get('ID'), 'active': active == '1'})
+    out.sort(key=lambda x: x['t'])
+    n_up = sum(x['active'] for x in out)
+    orphan = sum(1 for x in out if not x['active'] and x['text'].endswith('/ cleared'))
+    return out, (f'{len(out)} rows: {n_up} raised / {len(out) - n_up} cleared '
+                 f'({Counter(x["type"] for x in out)}); {len(raised)} still active at the end, '
+                 f'{orphan} cleared without a raise in the file')
+
+
+def companion_cell(f: Path, log_cells: dict) -> str | None:
+    """Cell of a PLC/alarm companion: from its folder name (logs-ab, db-tables-c → the log cell
+    ending in AB / C), else from the SPV_* logs in the same folder. log_cells: folder → {cells}."""
+    tok = re.split(r'[-_ .]', f.parent.name.lower())[-1]
+    every = {c for cs in log_cells.values() for c in cs}
+    hit = [c for c in every if tok and not tok.isdigit() and c.lower().endswith(tok)]
+    if len(hit) == 1:
+        return hit[0]
+    sib = log_cells.get(str(f.parent.resolve()), set())
+    return next(iter(sib)) if len(sib) == 1 else None
+
+
+def db_exports_for(state: Path, dates, log_cells: dict, have: set):
+    """DB exports (<date>.json, alarms_<date>.json) of the logs' dates from every cell's out_dir
+    in <state>/db-source.txt. Returns [(path, cell)] not already among the inputs."""
+    cfg = state / 'db-source.txt'
+    if not cfg.is_file():
+        return []
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        sys.dont_write_bytecode = True       # no __pycache__ inside the installed plugin
+        from export_db_tables import read_db_source
+        cells, _ = read_db_source(cfg)
+    except Exception:
+        return []
+    every = {c for cs in log_cells.values() for c in cs}
+    out = []
+    for sec, blk in cells.items():
+        od = Path(blk.get('out_dir') or '')
+        if not blk.get('out_dir') or not od.is_dir():
+            continue
+        match = [c for c in every if c.lower().endswith(sec.lower())]
+        cell = match[0] if len(match) == 1 else sec
+        for d in sorted(dates):
+            for name in (f'{d:%Y%m%d}.json', f'alarms_{d:%Y%m%d}.json'):
+                p = od / name
+                if p.is_file() and str(p.resolve()) not in have:
+                    out.append((p, cell))
+    return out
 
 
 # ----------------------------------------------------------------------------- state / catalog
@@ -464,11 +557,14 @@ def load_json(p: Path, default):
 KNOWN = [
     (re.compile(r'^SPV_.*\.log$', re.I), 'HMI/app log (primary timeline)'),
     (re.compile(r'^plc_reports_\d{8}\.json$', re.I), 'PLC reports (ALM/WRN/CMD/STA)'),
+    # DB exports written by export_db_tables.py: same schema as plc_reports_*.
+    (re.compile(r'^\d{8}\.json$'), 'PLC reports (DB export of reports_<date>)'),
+    (re.compile(r'^alarms_\d{8}\.json$', re.I), 'Alarm journal (DB export, raise/clear)'),
 ]
 
 
 def catalog_sources(inputs, catalog):
-    logs, plcs, entries, unknown = [], [], [], []
+    logs, plcs, alarms, entries, unknown = [], [], [], [], []
     for inp in inputs:
         p = Path(inp)
         files = sorted(p.iterdir()) if p.is_dir() else [p]
@@ -489,7 +585,9 @@ def catalog_sources(inputs, catalog):
                 logs.append(f)
             elif role.startswith('PLC reports'):
                 plcs.append(f)
-    return logs, plcs, entries, unknown
+            elif role.startswith('Alarm journal'):
+                alarms.append(f)
+    return logs, plcs, alarms, entries, unknown
 
 
 # ----------------------------------------------------------------------------- report
@@ -630,7 +728,7 @@ def main():
     catalog = load_json(state / 'catalog.json', {})
     hwm = load_json(state / 'hwm.json', {})
 
-    logs, plcs, entries, unknown = catalog_sources(a.inputs, catalog)
+    logs, plcs, alarms, entries, unknown = catalog_sources(a.inputs, catalog)
     if not logs:
         print('RESULT: NO-SOURCE — no SPV_*.log among the inputs')
         for u in unknown:
@@ -663,24 +761,70 @@ def main():
             if e['path'] == str(f):
                 e['coverage'] = f"{fmt(shape['first'])}→{fmt(shape['last'])}"
         hwm[key] = {'head': h, 'size': f.stat().st_size, 'lines': shape['lines'], 'last': fmt(shape['last'])}
+    # Companions: PLC reports (plc_reports_<date>.json or the DB export <date>.json) and the DB
+    # alarm journal (alarms_<date>.json). The DB exports of the logs' dates come in automatically
+    # from db-source.txt. Each companion gets a cell (folder name, sibling logs, or config block).
+    log_cells = defaultdict(set)
+    for f in logs:
+        log_cells[str(f.parent.resolve())].add(cell_of(f))
+    have = {str(Path(e['path']).resolve()) for e in entries}
+    comp_cell = {}
+    for p, cell in db_exports_for(state, {file_date(f) for f in logs}, log_cells, have):
+        role = next(r for rx, r in KNOWN if rx.match(p.name))
+        entries.append({'path': str(p), 'size': p.stat().st_size, 'role': role + ' [via db-source.txt]'})
+        (plcs if role.startswith('PLC reports') else alarms).append(p)
+        comp_cell[str(p)] = cell
+    for f in plcs + alarms:
+        comp_cell.setdefault(str(f), companion_cell(f, log_cells))
+    # A DB export supersedes a plc_reports_<date>.json of the same date and cell.
+    db_rep = [f for f in plcs if re.match(r'^\d{8}\.json$', f.name)]
+    superseded = {}
     for f in plcs:
-        rows, info = parse_plc(f, f.name)
-        plc_info[f.name] = info
+        if not f.name.lower().startswith('plc_reports_'):
+            continue
+        c = comp_cell[str(f)]
+        cands = [g for g in db_rep if file_date(g) == file_date(f)
+                 and (c is None or comp_cell[str(g)] is None or comp_cell[str(g)] == c)]
+        if len(cands) == 1:
+            superseded[str(f)] = cands[0]
+    names = Counter(f.name for f in plcs + alarms)
+    multi_cell = len({c for c in comp_cell.values() if c}) > 1
+    for f in plcs + alarms:
+        disp = f.name if names[f.name] == 1 else f'{f.parent.name}/{f.name}'
+        ent = next((e for e in entries if e['path'] == str(f)), None)
+        if ent and multi_cell and comp_cell[str(f)]:
+            ent['role'] += f" · {comp_cell[str(f)]}"
+        if str(f) in superseded:
+            g = superseded[str(f)]
+            plc_info[disp] = f'superseded by DB export {g.parent.name}/{g.name} (same date and cell): not used'
+            if ent:
+                ent['role'] += f' — superseded by DB export {g.name}'
+            continue
+        journal = f in alarms
+        rows, info = (parse_alarms if journal else parse_plc)(f, f.name)
+        plc_info[disp] = info
         if rows:
             # Codes that fire all shift long (maintenance reminders, standing warnings) are
             # background, not a correlate: drop any ALM/WRN code seen more than 30 times.
-            plc_events += [dict(r, src=f.name) for r in rows if r['type'] in ('ALM', 'WRN')]
-            for e in entries:
-                if e['path'] == str(f):
-                    e['coverage'] = f"{rows[0]['t']:%H:%M:%S}→{rows[-1]['t']:%H:%M:%S}" if rows else ''
+            # Every alarm-journal row (raise and clear) is a correlate.
+            cell = comp_cell[str(f)] if multi_cell else None
+            plc_events += [dict(r, src=disp, cell=cell, journal=journal) for r in rows
+                           if journal or r['type'] in ('ALM', 'WRN')]
+            if ent:
+                ent['coverage'] = f"{rows[0]['t']:%H:%M:%S}→{rows[-1]['t']:%H:%M:%S}"
 
     if not results:
         return 2
     if plc_events:
-        # Counted over all PLC files together (a prior-day file shows what is "always on").
-        freq = Counter(e['text'].split(' / ')[0] for e in plc_events)
-        cap = max(30, len(plc_events) // 100)
-        noisy = {c for c, n in freq.items() if n > cap}
+        # Counted over all PLC files together (a prior-day file shows what is "always on"), and
+        # separately for the alarm journal (raises only), so a code present in both streams is
+        # not counted twice.
+        noisy = set()
+        for journal in (False, True):
+            ev = [e for e in plc_events if e['journal'] == journal and (not journal or e['active'])]
+            cap = max(30, len(ev) // 100)
+            noisy |= {c for c, n in Counter(e['text'].split(' / ')[0] for e in ev).items() if n > cap}
+        cap = max(30, sum(not e['journal'] for e in plc_events) // 100)
         plc_events = [e for e in plc_events if e['text'].split(' / ')[0] not in noisy]
         if noisy:
             plc_info['background'] = (f"{len(noisy)} ALM/WRN codes firing >{cap}× ignored for correlation: "
@@ -716,7 +860,7 @@ def main():
                     break
         lo, hi = window(plc_t, x.t)
         for e in plc_events[lo:min(hi, lo + 4)]:
-            hits.append(f"{e['type']} {e['zone']} {e['text'][:50]}")
+            hits.append(f"{e['cell'] + ' ' if e['cell'] else ''}{e['type']} {e['zone']} {e['text'][:50]}")
         lo, hi = window(dev_t, x.t)
         for t, lbl, name in dev_events[lo:hi]:
             hits.append(f'{lbl} {name}')

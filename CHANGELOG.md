@@ -3,6 +3,71 @@
 Notable changes to the marketplace plugins. Format inspired by
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions are those of the individual plugins.
 
+## 2026-10-02 — Andrea B's post-import updates to versionize and trackTiming
+
+**git-release 0.3.1 → 0.4.0 · log-forensics 0.2.1 → 0.3.0** · branch `feat/recover-andb-updates`
+
+Andrea kept updating his commands after the 2026-07-07 import. Compared with the skills, `gitize`
+and `commentize` had nothing to recover; `versionize` and `trackTiming` did.
+
+### Changed — package-release / versionize
+
+- Every zip refreshes the release note first (`versionize -upd`), even in a package-only flow with a
+  clean pre-flight: on 2026-08-03 a bare `--zip` almost shipped a note describing its own binaries
+  as unbuilt. Skipped only if the note was refreshed in the same flow with no commit or rebuild
+  since, or if nothing advanced.
+- `versionize -upd`: "nothing advanced" (no new commits, same DLL versions, nothing to promote)
+  leaves the note unchanged instead of adding an empty entry; `## Unreleased` commits included in
+  the build move into the new dated entry, so an Unreleased heading never ships in a zip; an
+  existing root `CHANGELOG.md`/`ChangeLog.md`/`changelog.html` gets the same entry (none is
+  created).
+- The package-release report names the dated entry the packaged note carries.
+- Fixed a stale reference to versionize's old step numbers.
+
+### Added — track-timing
+
+- `scripts/export_db_tables.py`: during `--upd`, exports each cell's `reports_<date>` → `<date>.json`
+  and that day's `alarm_journal` → `alarms_<date>.json` (append-only by ID, rebuilt on reset,
+  absent table skipped). Cells in `.trackTiming/db-source.txt`; credentials from the cell's `DB.ini`,
+  passed only via `MYSQL_PWD`, never on the command line or on disk.
+- `scan_timing.py` reads the exports: `<date>.json` as PLC reports (superseding `plc_reports` for the
+  same date and cell, noted in the catalogue) and the alarm journal as raise/clear events in the
+  cross-source correlation.
+- `-b`/`--base`: fetch only (log sync + DB export), then stop; `--dates`, default = the dates of the
+  changed logs, else today (the PLC writes even when the HMI log is silent).
+- `references/event-chains.md`: DB companions of the 5309 FAEL cells (hosts, `sistec` database,
+  independent ID sequences per cell → correlate on timestamp, dead `DB_1`, alarm-journal schema).
+
+### Fixed — compared with Andrea's exporter and the previous sync
+
+- Exporter: the rotation guard could never fire (the delta query already filtered `ID > max_id`),
+  so a reset table was reported up to date; the configured DB.ini section was ignored (`DB_0`
+  hard-coded); `--dates` reached the SQL unvalidated; hard-coded `mysql.exe` path.
+- `sync_logs.py`: SMB stale sizes and files held open by the HMI (from the history-player log) — a
+  grown source could be skipped as backlog and a 0 B stat triggered a full replace. It now reads the
+  bytes instead of trusting the stat, re-reads the tail until stable, opens without locking, and
+  replaces via `.part`.
+- `scan_timing.py`: report rows with `DataTime` `00:00` (about 3% on cell C) were dropped; they now
+  fall back to `created_at`.
+
+### Verification
+
+- Exporter, 27 checks against an sqlite-backed fake mysql seeded from the real AB export of
+  2026-09-09: fresh export and append byte-identical to Andrea's files, up-to-date, three kinds of
+  reset, invalid dates, absent table, password never in command lines/output/disk. Not yet run
+  against a real MySQL: watch its first run.
+- Sync, 13 checks, including the two failures of the old script.
+- Scan on the real 2026-09-09 AB+C logs + DB files: counts equal to the JSON contents (AB 4150
+  report rows, 1327 journal rows; C 1885 / 714); without DB files, digest, report, `parts-issued.md`
+  and `hwm.json` identical to the previous script on three real cases.
+
+### Not recovered
+
+- `--deploy`, the mandatory `changelog.html` (Andrea's personal convention), the 7-Zip fallback for
+  the zip (AMSI blocked `ZipFile` on Andrea's machine; to verify on other machines first).
+- The NAS copy of `trackTiming.md` predates Andrea's 2026-09-02 amendment; `-b` and the per-cell
+  export were rebuilt from his spec, log and scripts.
+
 ## 2026-10-02 — Marketplace translated to English
 
 **blender-ply 0.1.0 → 0.2.0 · technical-writer 0.2.2 → 0.3.0 · hmi-developer 0.3.0 → 0.3.1 ·

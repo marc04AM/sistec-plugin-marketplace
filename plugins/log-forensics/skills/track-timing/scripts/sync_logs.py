@@ -12,14 +12,26 @@ captured), then does the cheapest correct update:
   replaced  source shrank or its head differs (rotation/restart): full overwrite
   identical same size and content: nothing to do
 
+SMB/lock handling (all three were hit on the line's log shares):
+  * the HMI keeps today's log open for writing: sources are read with plain open(), whose Windows
+    share mode lets the writer keep the file (the FileShare.ReadWrite equivalent);
+  * a directory listing, and even a direct stat, over SMB can report a stale size (0 B, or
+    hundreds of KB short): sizes are never trusted, every decision reads the bytes, and a copy
+    always runs to EOF;
+  * the file keeps growing while it is read: after an append the tail is re-read until a pass
+    adds nothing.
+Each local copy is stamped with its source's mtime, so the youngest-file floor reflects the source
+and not the time of our own copy; the floor also admits any file whose date-in-name is not older
+than the folder's newest one.
+
 Prints one line per candidate plus CHANGED: <local path> lines for the scan. Stdlib only.
 Usage:  python sync_logs.py --dest <external resources dir> [--state .trackTiming] [src ...]
 """
 from __future__ import annotations
 
 import argparse
+import os
 import re
-import shutil
 import sys
 from collections import Counter
 from pathlib import Path
@@ -52,6 +64,43 @@ def is_prefix(local: Path, src: Path) -> bool:
     return same_bytes(local, src, size - tail, tail)
 
 
+def has_bytes_past(src: Path, offset: int) -> bool:
+    """True when src really holds data beyond offset (read, not stat: SMB sizes can be stale)."""
+    with open(src, 'rb') as f:
+        f.seek(offset)
+        return bool(f.read(1))
+
+
+def copy_from(src: Path, dst, offset: int):
+    """Copy src[offset:EOF] into the open dst; returns (bytes copied, fstat of the open source)."""
+    n = 0
+    with open(src, 'rb') as f:
+        f.seek(offset)
+        for chunk in iter(lambda: f.read(1 << 20), b''):
+            dst.write(chunk)
+            n += len(chunk)
+        st = os.fstat(f.fileno())
+    return n, st
+
+
+def stamp(local: Path, st) -> None:
+    os.utime(local, ns=(st.st_atime_ns, st.st_mtime_ns))
+
+
+def full_copy(src: Path, local: Path) -> int:
+    tmp = local.with_name(local.name + '.part')
+    with open(tmp, 'wb') as fl:
+        n, st = copy_from(src, fl, 0)
+    os.replace(tmp, local)
+    stamp(local, st)
+    return n
+
+
+def name_date(p: Path):
+    m = DATE.search(p.name)
+    return m[0].replace('-', '') if m else None
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument('sources', nargs='*')
@@ -76,9 +125,11 @@ def main() -> int:
     by_family: dict[str, set[Path]] = {}
     for p in local_files:
         by_family.setdefault(family(p.name), set()).add(p.parent)
-    floor = {}
+    floor, floor_day = {}, {}
     for p in local_files:
         floor[p.parent] = max(floor.get(p.parent, 0), p.stat().st_mtime)
+        if name_date(p):
+            floor_day[p.parent] = max(floor_day.get(p.parent, ''), name_date(p))
 
     cand = []
     for s in sources:
@@ -104,35 +155,48 @@ def main() -> int:
             counts['needs-folder'] += 1
             continue
         folder = next(iter(folders))   # not pop(): the set is shared via by_family
-        if f.stat().st_mtime < floor.get(folder, 0) - 1:
+        nd = name_date(f)
+        recent = nd is not None and nd >= floor_day.get(folder, '')
+        if not recent and f.stat().st_mtime < floor.get(folder, 0) - 1:
             counts['backlog'] += 1
             continue
         local = folder / f.name
-        ss = f.stat().st_size
-        if not local.exists():
-            shutil.copy2(f, local)
-            print(f'created   {local} ({ss:,} bytes)')
-            counts['created'] += 1
+        try:
+            if not local.exists():
+                n = full_copy(f, local)
+                print(f'created   {local} ({n:,} bytes)')
+                counts['created'] += 1
+                changed.append(local)
+                continue
+            ls = local.stat().st_size
+            prefix = is_prefix(local, f)
+            if prefix and not has_bytes_past(f, ls):
+                counts['identical'] += 1
+                continue
+            if prefix:
+                with open(local, 'rb') as fl:
+                    old_lines = sum(chunk.count(b'\n') for chunk in iter(lambda: fl.read(1 << 20), b''))
+                added = passes = 0
+                with open(local, 'ab') as fl:
+                    while passes < 5:            # the source grows while we read it
+                        n, st = copy_from(f, fl, ls + added)
+                        passes += 1
+                        added += n
+                        if n == 0:
+                            break
+                stamp(local, st)
+                print(f'appended  {local} (+{added:,} bytes from line {old_lines + 1}'
+                      f'{f", {passes - 1} passes" if passes > 2 else ""})')
+                counts['appended'] += 1
+                changed.append(local)
+                continue
+            n = full_copy(f, local)
+            print(f'replaced  {local} (source {"shrank" if n < ls else "head differs"}: rotation/restart — full analysis)')
+            counts['replaced'] += 1
             changed.append(local)
-            continue
-        ls = local.stat().st_size
-        if ss == ls and is_prefix(local, f):
-            counts['identical'] += 1
-            continue
-        if ss > ls and is_prefix(local, f):
-            with open(local, 'rb') as fl:
-                old_lines = sum(chunk.count(b'\n') for chunk in iter(lambda: fl.read(1 << 20), b''))
-            with open(f, 'rb') as fs, open(local, 'ab') as fl:
-                fs.seek(ls)
-                shutil.copyfileobj(fs, fl)
-            print(f'appended  {local} (+{ss - ls:,} bytes from line {old_lines + 1})')
-            counts['appended'] += 1
-            changed.append(local)
-            continue
-        shutil.copy2(f, local)
-        print(f'replaced  {local} (source {"shrank" if ss < ls else "head differs"}: rotation/restart — full analysis)')
-        counts['replaced'] += 1
-        changed.append(local)
+        except OSError as e:     # e.g. a sharing violation: the local copy stays as it was
+            print(f'UNREADABLE: {f} — {type(e).__name__}: {e}; local copy left unchanged')
+            counts['unreadable'] += 1
 
     if a.sources:
         remembered.write_text('\n'.join(a.sources) + '\n', encoding='utf-8')

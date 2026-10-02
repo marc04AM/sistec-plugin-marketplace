@@ -8,7 +8,7 @@ description: >-
   built DLLs (no rebuild); read-only on git except the note itself. Use when the user wants to cut
   or update a release, or generate/refresh a ReleaseNote. For packaging a versioned source+build
   zip (and for repeating a past packaging flow), use the sibling skill `package-release` — when the
-  flow calls for a fresher note, it calls this skill's `-upd` step first so the packaged note isn't
+  flow packages a zip, it calls this skill's `-upd` step first so the packaged note isn't
   stale. Usage: say what you want
   (cut a new release note, update the changelog) and point at the solution/project/folder — or use
   flags as shorthand: /versionize -new|-upd "<.sln, project file, or folder>" [--out <path>]
@@ -18,7 +18,8 @@ model: sonnet
 
 Create or update `ReleaseNote.md`, a snapshot of a Sistec solution with **four fixed sections, in
 order: `Versions`, `Cell AB`, `Cell C`, `Libraries`**. Read-only on git, reads already-built DLLs,
-never builds / stages / commits. Only the note (and, for `-new`, `FeatureCatalog.md`) is written.
+never builds / stages / commits. Only the note (and, for `-new`, `FeatureCatalog.md`; for `-upd`, an
+existing root changelog — §4b) is written.
 Packaging a zip is `package-release`'s job.
 
 Arguments: `$ARGUMENTS`
@@ -101,11 +102,28 @@ it like any other change.
 
 ## 4b. `-upd` — prepend a changelog
 
+**Nothing advanced → no entry.** If every repo's `log` is empty (and every repo in `repos[]` has
+a recorded commit, so it got a `log`), every app DLL `version` in `builds[]` equals the one in
+the note's `Versions` table, and there's no `## Unreleased` section to promote, the note already
+describes this build. Leave it unchanged and report "nothing advanced, note unchanged".
+
 From each repo's `log`, classify by Conventional-Commits type: **Features** (`feat`), **Fixes**
 (`fix`), and a brief **Other** line for the rest. Group them by repo. Insert
 `## <YYYY-MM-DD> — <version>` **at the top** of the note, then refresh the `Versions` table's
 commit pointers and DLL versions from the JSON, so the next `-upd` diffs from here. Leave Cell
 AB / Cell C / Libraries untouched unless the user asks. Don't read app source for `-upd`.
+
+**Promote `## Unreleased`.** If the note has a `## Unreleased` / "committed but not yet built"
+section, move each of its commits that this build includes into the new dated entry, and drop
+the heading once it's empty. A commit is included when it's an ancestor of the built-from `sha`
+of its repo's DLL (`git -C <repo> merge-base --is-ancestor <commit> <sha>`). With no stale build,
+everything up to HEAD qualifies. An Unreleased heading must never ship in a zip that contains
+those commits' binaries.
+
+**Existing root changelog.** If the solution root already keeps a `CHANGELOG.md`, `ChangeLog.md`
+or `changelog.html`, mirror the same entry into it, newest-first and in that file's own format,
+so the two never disagree. Don't create one when there is none: the note's dated sections are
+the changelog.
 
 Keep every accumulating list newest-first. The new dated section goes above the older ones, and
 the new `> 🔄 …` header note goes at the top of the header `🔄` block, directly under the `-new`
@@ -114,4 +132,5 @@ origin line. If an earlier run left that block oldest-first, reorder it now.
 ## 5. Report
 
 Give the output path, the repo set with each repo's HEAD, the version table you wrote, and any
-drift or missing-DLL notes. For `-upd`, also summarize the changelog you added.
+drift or missing-DLL notes. For `-upd`, also summarize the changelog you added (or say "nothing
+advanced, note unchanged"), and name any root changelog you mirrored it into.

@@ -92,5 +92,25 @@ correcting to false`], `PezzoInUscita` Path-B dedup (`OnNewPart Aborted: duplica
 - `plc_reports_<YYYYMMDD>.json`: an array of `{ID, DataTime, Type∈{ALM,WRN,CMD,STA}, ZoneSymbol,
   Text1..3, created_at}`. A same-date file covers this shift, and a prior-date file gives the
   baseline. ALM/WRN rows are used for correlation.
+- DB exports (`scripts/export_db_tables.py`): `<date>.json` is table `reports_<date>`, same schema as
+  `plc_reports_*`. `alarms_<date>.json` is that day's `alarm_journal`: `{ID, TimeStamp, UID,
+  EventTime, Priority, Zone, Name, Extra, Active}`, all strings. One occurrence = one `UID` with a
+  raise row (`Active` 1) and a clear row (`Active` 0). `TimeStamp` is when that row was written
+  (~2 s late). `EventTime` is the PLC raise time, equal to the report row's `DataTime` and repeated
+  on the clear row, so it is not the clear time. It is empty on some rows (4-13%) and stale on old data
+  (June). `Priority` 1 = alarm, 2 = warning. Some `reports_<date>` rows on C have `DataTime`
+  `00:00`; the scan falls back to `created_at` for them.
 - Baseline claims: `5309_FAEL-Coordination\reports\SystemCoordination.md`. Standing procedure:
   `5309_FAEL-Diagnostics\reports\Time.analysis.md`.
+
+## DB companions (5309 FAEL)
+- Each cell's `DB.ini` `DB_0.IP` is `127.0.0.1`, the loopback of that cell's own HMI. From the dev
+  machine the DB is on the cell's log-share host: AB `192.168.10.10`, C `192.168.10.11`. The tables
+  are in database `sistec`.
+- The two cells have independent ID sequences (alarm IDs ~426k on AB, ~122k on C in Sep 2026).
+  Correlate across cells on timestamp, never on ID.
+- AB's `DB_1` (`db_5309c`, "Secondary database, Cell C") points to a database that doesn't exist on
+  the AB host (`ERROR 1049 Unknown database`). C's `DB_1` points back to AB's `sistec`. Use `DB_0`
+  on both.
+- The PLC writes `reports_<date>` and `alarm_journal` even when the HMI log is silent, so a day
+  without log changes can still have new DB rows.
