@@ -3,6 +3,38 @@
 Notable changes to the marketplace plugins. Format inspired by
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions are those of the individual plugins.
 
+## 2026-10-02 — New alarm-troubleshooting skill in device-spy
+
+**device-spy 0.1.2 → 0.2.0** · branch `feat/alarmize`
+
+### Added
+
+- `/device-spy:alarm-troubleshooting`, ported from Andrea B's `/alarmize` command: from a CODESYS
+  project and the DB translation JSON it writes Description, Solution and Note for every row of
+  the Troubleshooting workbook. Scripts do the join, slicing and Excel writing; subagents do the
+  authoring, per row, following `references/authoring-guideline.md`. `--spy` lists every
+  meaningful alarm/warning the PLC defines to `.xlsx`/`.csv`/`.json`/`.md`. The PLC extraction
+  reuses `codesys-spy`.
+
+### Compared with the original command
+
+- Fixed: the spy slices never carried the device-FB family (`fb` was read from the join, which did
+  not have it), so the Valve/Inverter/Encoder/AnalogScaling patterns of the guideline never applied
+  in spy mode — on the 5315 data that is 321 of 336 rows to author. `extract_alarms.py` now records
+  `fb`.
+- Implemented the documented rule "blank key column → resolve the row by its Name through the
+  translation", which no script applied.
+- `fill_excel.py` now does the validation (duplicates, missing rows, empty description/solution,
+  U+FFFD/control characters) and refuses to save on failure; it also refuses to overwrite its own
+  source.
+- All JSON readers accept a UTF-8 BOM.
+- The guideline is generic: the 5315 machine description became a `## Machine` paragraph that the
+  skill fills from the PLC.
+- Removed the coupling to the private workspace: P-directives, project ledger, `last-source.txt`,
+  machine paths.
+- Checked on the real 5315 data (2237 PLC keys, 392 workbook rows): identical join and slices, and
+  the filled workbook matches the delivered one cell by cell; spy gives 285 alarms + 443 warnings.
+
 ## 2026-10-02 — Marketplace translated to English
 
 **blender-ply 0.1.0 → 0.2.0 · technical-writer 0.2.2 → 0.3.0 · hmi-developer 0.3.0 → 0.3.1 ·
