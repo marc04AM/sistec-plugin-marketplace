@@ -73,6 +73,17 @@
       },
       "category": "tools",
       "keywords": ["tools", "codesys", "ubiquiti", "plc", "router", "inspection", "read-only", "snapshot", "network", "diagnostics"]
+    },
+    {
+      "name": "blender-ply",
+      "source": "./plugins/blender-ply",
+      "description": "Modelli PLY da CAD in Blender via bridge MCP: /blender-ply:visualizzaply (colori + clip + vista + zoom dopo l'import), /blender-ply:centrablender (centra la vista senza ruotarla), /blender-ply:centraply (origine sul vertice selezionato, valida nel PLY esportato), /blender-ply:fotografaply (PNG su sfondo bianco) e /blender-ply:ply-colors (ripristino colori per vertice)",
+      "version": "0.1.0",
+      "author": {
+        "name": "Sistec"
+      },
+      "category": "tools",
+      "keywords": ["tools", "blender", "ply", "cad", "3d", "mcp", "vertex-colors", "viewport", "origin", "render", "screenshot"]
     }
   ]
 }
