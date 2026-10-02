@@ -31,6 +31,14 @@ rimosso intenzionalmente (la skill `/deploy` a cui si appoggiava non esiste in q
 - **`package-release` non builda mai** e non scrive il contenuto della release note (richiama
   `versionize -upd` quando serve rinfrescarla prima di impacchettare). Non deploya e non pubblica
   nulla — produce solo lo zip.
+- **Consumo token ridotto**: `gitize` e `versionize` raccolgono i dati con uno script PowerShell
+  bundled (`scripts/collect-changes.ps1`, `scripts/collect-release-facts.ps1`) che restituisce un
+  output compatto in una sola chiamata, invece di decine di comandi git/DLL letti dal modello.
+  `gitize` ha un budget sui diff (300 righe per file, 600 per repo, 1500 in totale; oltre, solo
+  riepilogo a livello file, sempre dichiarato) e gira in un contesto separato (`context: fork`) con
+  `model: haiku`: non vede la conversazione, quindi lo scope va passato come argomento (default: cwd).
+  `versionize` usa `model: sonnet` e resta inline perché il gate di pre-flight deve poter chiedere
+  all'utente; per `-new` legge `FeatureCatalog.md` + solo il delta git, mai il sorgente intero.
 - I segreti non sono coinvolti. `git` / `Set-Clipboard` possono chiedere un permesso la prima volta.
 
 ## Installazione
