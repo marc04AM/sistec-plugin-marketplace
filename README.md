@@ -14,6 +14,7 @@ Repository: <https://github.com/marc04AM/sistec-plugin-marketplace>
 | `git-release` | Rilascio multi-repo: `/git-release:gitize` (diff → Conventional-Commits), `/git-release:git-split-commits` / `/git-release:git-amend-commits` (staged → commit), `/git-release:versionize` (release note dai DLL buildati + git) e `/git-release:package-release` (packaging zip + repeat) |
 | `log-forensics` | Forensics read-only di log/capture PLC/HMI: `/log-forensics:analyze-crash` (timeline + root-cause) e `/log-forensics:track-timing` (consistenza timing ed event-chain Fael/HMI) |
 | `device-spy` | Ispettori read-only secret-driven: `/device-spy:codesys-spy` (CODESYS cifrato → sorgente + analisi) e `/device-spy:ubiquity-spy` (snapshot config router Ubiquiti) |
+| `blender-ply` | Modelli PLY da CAD in Blender via bridge MCP: `/blender-ply:visualizzaply`, `/blender-ply:centrablender`, `/blender-ply:centraply`, `/blender-ply:fotografaply`, `/blender-ply:ply-colors` |
 
 ## Struttura del repository
 
@@ -58,11 +59,19 @@ sistec-plugin-marketplace/
 │   │   │   └── plugin.json
 │   │   ├── skills/                # analyze-crash, track-timing
 │   │   └── README.md
-│   └── device-spy/               # Ispettori read-only secret-driven (helper bundlati)
+│   ├── device-spy/               # Ispettori read-only secret-driven (helper bundlati)
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
+│   │   ├── skills/                # codesys-spy, ubiquity-spy
+│   │   ├── assets/               # codesySpy/resources/*, ubiquitySpy/resources/* (env-driven)
+│   │   └── README.md
+│   └── blender-ply/              # PLY da CAD in Blender via bridge MCP
 │       ├── .claude-plugin/
 │       │   └── plugin.json
-│       ├── skills/                # codesys-spy, ubiquity-spy
-│       ├── assets/               # codesySpy/resources/*, ubiquitySpy/resources/* (env-driven)
+│       ├── skills/                # visualizzaply, centrablender, centraply, fotografaply, ply-colors (+ scripts/*.py)
+│       ├── lib/                  # view_projection.py: matematica del viewport condivisa dagli script
+│       ├── hooks/                # hooks.json + ply-colors-nudge.py (rileva modelli PLY grigi)
+│       ├── rules/                # blender-ply-colors.md (opzionale, da copiare in ~/.claude/rules)
 │       └── README.md
 ├── LICENSE
 └── README.md
@@ -85,6 +94,7 @@ sistec-plugin-marketplace/
 /plugin install git-release@sistec-plugins
 /plugin install log-forensics@sistec-plugins
 /plugin install device-spy@sistec-plugins
+/plugin install blender-ply@sistec-plugins
 
 # Prova una skill (namespaced con il nome del plugin)
 /hello-sistec:hello Marco

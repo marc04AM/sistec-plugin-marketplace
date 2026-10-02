@@ -1,0 +1,10 @@
+{
+  "name": "blender-ply",
+  "description": "Modelli PLY da CAD in Blender tramite il bridge MCP: /blender-ply:visualizzaply (colori per vertice + clip + vista 3/4 + zoom verso il mouse dopo l'import), /blender-ply:centrablender (centra la vista sul modello senza ruotarla), /blender-ply:centraply (origine oggetto = cursore = origine mondo sul vertice selezionato, valida anche nel PLY esportato), /blender-ply:fotografaply (PNG pulito su sfondo bianco via viewport render) e /blender-ply:ply-colors (ripristino colori per vertice). Script Python bundlati, eseguiti dentro Blender; hook PostToolUse che avvisa solo quando un modello PLY è davvero mostrato grigio",
+  "version": "0.1.0",
+  "author": {
+    "name": "Sistec"
+  },
+  "homepage": "https://github.com/marc04AM/sistec-plugin-marketplace",
+  "license": "MIT"
+}
