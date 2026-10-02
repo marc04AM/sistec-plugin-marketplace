@@ -10,7 +10,7 @@ memory). For many/large logs they parallelize across up to **5 Explore subagents
 | Skill | What it does | Writes |
 | :---- | :----------- | :----- |
 | `/log-forensics:analyze-crash -fn "<capture folder>" [--out "<dir>"]` | forensics on a capture folder (HMI/app logs, PLC logs, Windows events, PerfMon `.blg`/`.etl`, network) → correlated timeline + root cause across ≥2 independent sources. Generalized across different PLCs/HMIs (detects the format and applies the right parser) | `--out` (default `./crash-out/`) |
-| `/log-forensics:track-timing [-fn "<log-or-folder>" …] [-prod] [--upd\|-u ["<src>" …]] [--full]` | **timing and event-chain** consistency of a Fael/HMI log (+ `plc_reports` JSON): reconstructs the per-job chains, flags broken/missing/out-of-order links, timing + device-health tables, cumulative parts ledger | the active project's `reports\` + state in `./.trackTiming/` |
+| `/log-forensics:track-timing [-fn "<log-or-folder>" …] [-prod] [--upd\|-u ["<src>" …]] [-b\|--base [--dates …]] [--full]` | **timing and event-chain** consistency of a Fael/HMI log (+ `plc_reports` JSON and the cells' DB day tables): reconstructs the per-job chains, flags broken/missing/out-of-order links, timing + device-health tables, cumulative parts ledger | the active project's `reports\` + state in `./.trackTiming/` |
 
 ## Notes
 
@@ -22,7 +22,11 @@ memory). For many/large logs they parallelize across up to **5 Explore subagents
   log (~9 s for 1.4 M lines), writes the report tables directly and prints only a digest with the
   anomalies that are **new** since the last run (per-file high-water mark in `.trackTiming/hwm.json`;
   `--full` to review them all). `--upd` uses `scripts/sync_logs.py` (appends only the tail, handles
-  rotations, skips the backlog). The artifact catalog and the baseline checklist are persisted in
+  rotations, skips the backlog, robust to SMB stale sizes and files held open by the HMI), then
+  `scripts/export_db_tables.py`, which exports each cell's `reports_<date>` and `alarm_journal` per
+  day (append-only; credentials from the cell's `DB.ini`, passed only via `MYSQL_PWD`; cells in
+  `.trackTiming/db-source.txt`). The DB exports supersede `plc_reports` for the same date and cell.
+  `-b`/`--base` only fetches (log sync + DB export) and stops. The artifact catalog and the baseline checklist are persisted in
   `.trackTiming/`. It runs with `context: fork` + `model: sonnet`: it can't ask questions, so any
   questions (unknown artifacts, destination folder) end up in the final report.
 - The parsers use Windows built-ins; any permission prompt is approved case by case.

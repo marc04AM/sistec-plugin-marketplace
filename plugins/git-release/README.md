@@ -28,7 +28,8 @@ anything to production** — this plugin's scope stops at the zip; `--deploy` wa
 - **`versionize` never builds**: it reads versions from the already-built DLLs (the youngest) and
   git facts from the repos. Its only write is the output file.
 - **`package-release` never builds** and does not write the release note's content (it calls
-  `versionize -upd` when the note needs refreshing before packaging). It does not deploy or publish
+  `versionize -upd` before every zip, so a stale note is never packaged; skipped only if the note
+  was just refreshed in the same flow or nothing advanced). It does not deploy or publish
   anything — it only produces the zip.
 - **Reduced token usage**: `gitize` and `versionize` collect their data with a bundled PowerShell
   script (`scripts/collect-changes.ps1`, `scripts/collect-release-facts.ps1`) that returns compact

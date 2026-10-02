@@ -17,15 +17,15 @@ description: >-
 
 The user invoked `/package-release` to **package a Sistec solution's release artifact** (git-clean
 source + build output + release note) into a versioned zip. It reuses `gitize`/`versionize`'s
-repo-set discovery, and calls `versionize`'s own `-upd` step when the note needs refreshing first —
-this skill never writes the release note's own content itself. It is **read-only on git**; its only
-writes are the zip file and its own replay-state file. **It never deploys or pushes anything
-anywhere** — packaging a zip is the entire scope; what the user does with that zip afterward is up
-to them.
+repo-set discovery, and calls `versionize`'s own `-upd` step before every package so the zip never
+carries a stale note — this skill never writes the release note's own content itself. It is
+**read-only on git**; its only writes are the zip file and its own replay-state file. **It never
+deploys or pushes anything anywhere** — packaging a zip is the entire scope; what the user does
+with that zip afterward is up to them.
 
 1. **Resolve the flow — natural language first.** Check for a **repeat** request first (it's
-   standalone — see Step 2). Otherwise infer, from what the user is asking, whether to **refresh
-   the release note first** (e.g. "update the changelog and package it") before packaging. The
+   standalone — see Step 2). Otherwise resolve the target and options from the request; the note
+   refresh isn't an option to infer, since Step 3 runs it on every package. The
    flags below are accepted, order-independent **shorthand** for the same intent — useful for
    precise lists (`--skip`/`--include`) or repeatable scripting — but none of this wording is
    required:
@@ -51,16 +51,26 @@ to them.
    `refresh-note <target>` or `package <target> [flags…]`. If the file is **missing or empty**,
    print usage and **stop**. **Echo each leg before running it**; a `refresh-note` leg re-dispatches
    `versionize`'s own `-upd` step (Step 3 below) on the recorded target, a `package` leg
-   re-dispatches Step 7. If a leg's target no longer resolves (moved/renamed path), echo the leg,
-   report the failure, and **stop** rather than replaying a broken flow. Replayed legs **do not
+   re-dispatches Steps 3–8 (its refresh is skipped when a `refresh-note` leg just ran). If a leg's
+   target no longer resolves (moved/renamed path), echo the leg, report the failure, and **stop**
+   rather than replaying a broken flow. Replayed legs **do not
    re-record** (a flow's own legs are part of the replay, not new user calls) and `-r` itself is
    **never recorded** — so the saved flow is unchanged and a second `-r` repeats it identically.
-   Skip Steps 3–8 below entirely once a replay is dispatched.
+   Beyond what the legs dispatch, don't run Steps 3–8 again.
 
-3. **Refresh the release note first, when the flow calls for it.** Run `versionize`'s own `-upd`
-   step (its Steps 1–10, mode `-upd`) on the resolved target, exactly as if the user had asked
-   `versionize` directly — this skill does not duplicate that logic. Skip this step when the flow is
-   package-only (the existing `--rel` note is trusted as-is).
+3. **Refresh the release note — on every package, once Step 6's gate is through.** Never zip a
+   stale note: a bare package once nearly shipped a note that described its own binaries as unbuilt.
+   So even a package-only request with a clean pre-flight runs `versionize`'s `-upd` (its §1–§4b) on
+   the resolved target, with `--out` = the `--rel` note, exactly as if the user had asked
+   `versionize` directly — this skill does not duplicate that logic. Run it after Step 6, just
+   before Step 7, because the entry needs the fresh build and a release-worthy tree. Step 6 already ran the gate, so don't ask
+   versionize's §3 question again: carry its outcome (a *Proceed anyway* gets labelled in the note).
+   Skip it only when:
+   - an explicit `versionize -new`/`-upd` already ran on this target earlier in the same flow (or a
+     replayed `refresh-note` leg just did), with no commit or rebuild since; or
+   - nothing advanced. versionize's §4b decides this from its script output: every repo's `log`
+     since the note's recorded commits is empty, and the app DLL versions match the note's
+     `Versions` table. It then leaves the note unchanged.
 
 4. **Resolve the target → root, stem, and repo set** (same shapes as `gitize`/`versionize`):
    - **`.sln` file** (or a **folder** with exactly one `.sln`) → **solution target**: root = its
@@ -71,8 +81,9 @@ to them.
      `git -C "<dir>" rev-parse --show-toplevel`; repo set = just that repo.
 
 5. **Locate the build outputs — follow each app project's output redirection, then trust the
-   youngest build** (same discipline as `versionize` Step 4 — reused here so the zip's version and
-   `Release/` contents come from the actual freshest build, never a stale published copy):
+   youngest build** (same discipline as `versionize`'s `collect-release-facts.ps1` — reused here so
+   the zip's version and `Release/` contents come from the actual freshest build, never a stale
+   published copy):
    - **Read the `.csproj` for an output redirection** — `<OutputPath>` (or `<OutDir>` /
      `<BaseOutputPath>`). Sistec apps set `OutputPath = bin\$(Configuration)\$(_ProductFolderName)\`
      where `_ProductFolderName = "HMI v$(_AsmVerMajorMinor)"` (e.g. `bin\Release\HMI v3.25\`). Resolve
@@ -124,10 +135,10 @@ to them.
    For a **stale build (c)**, this skill **never builds** — the sanitize path is *Cancel → rebuild →
    re-run* or *Proceed anyway (drift noted)*. **Regenerate after a sanitize rebuild:** whenever
    sanitizing committed changes and/or a stale build was rebuilt, resume by **(i)** re-running Step 5
-   to pick up the fresh youngest build, **(ii)** re-running Step 3 (note refresh) so the packaged
-   note reflects the just-committed changes — even a package-only flow gets an implicit refresh here,
-   so the zip never bundles a stale note — **(iii)** rebuilding the zip from the fresh build. (If
-   sanitizing was **not** necessary, proceed straight through.)
+   to pick up the fresh youngest build, **(ii)** running Step 3's refresh against it, so the packaged
+   note reflects the just-committed changes (an earlier refresh in this flow doesn't count, since it
+   predates them), **(iii)** rebuilding the zip from the fresh build. (If sanitizing was **not**
+   necessary, go on to Step 3's refresh, then Step 7.)
 
 7. **Package — the git-clean source + build output + release note, into a versioned zip.**
    - **Version** = the HMI **app assembly major.minor** (from Step 5) — e.g. `3.25`.
@@ -141,7 +152,9 @@ to them.
      are excluded). Add each file under `<repo-folder>/<path>` (ls-files already uses `/`). Plus the
      **target `.sln`** at the zip root (the solution root isn't a git repo) and the **release note**
      (`--rel`, default `<root>\ReleaseNote.md`; if missing, tell the user to run `versionize -new`
-     first or pass `--rel`, and **stop**) at the zip root (its basename).
+     first or pass `--rel`, and **stop**) at the zip root (its basename). If the solution root keeps
+     a `CHANGELOG.md`/`ChangeLog.md`/`changelog.html` (refreshed with the note in Step 3), add it at
+     the zip root too, unless a repo's bundled source already carries it.
    - **Plus the build output of every executable project, under a top-level `Release/` folder.** The
      git-clean source excludes `bin\`, so the deployable output is added **explicitly** — except
      when Step 5 found **no build at all**, in which case there's nothing to add: skip `Release/`
@@ -181,14 +194,16 @@ to them.
      rather than `Remove-Item`.
 
 8. **Report** in chat: the zip path + size, the repo set + file count, confirmation that
-   git-ignored files and the note are handled, and any skip/include summaries.
+   git-ignored files and the note are handled, which dated entry (`## <date> — <version>`) the
+   packaged note carries — or "nothing advanced, note unchanged" — and any skip/include summaries.
 
 9. **Record the resolved flow, for later `-r`/`--repeat` (every non-replay run).** Once the flow is
    resolved (Step 1) and has finished, write it as **one leg per line** to
-   `./.package-release/last-flow.txt` (current working directory) — `refresh-note <target>` (if
-   Step 3 ran) and `package <target> [--rel …] [--skip …] [--include …]`. A lone run **overwrites**
-   the file with its own legs (flow = this run). This is bookkeeping only — it does not affect the
-   read-only / no-build guarantees, and `-r` runs never re-record (Step 2).
+   `./.package-release/last-flow.txt` (current working directory) — `package <target> [--rel …]
+   [--skip …] [--include …]`, preceded by `refresh-note <target>` only when the user explicitly asked
+   for the note update. A lone run **overwrites** the file with its own legs (flow = this run). This
+   is bookkeeping only — it does not affect the read-only / no-build guarantees, and `-r` runs never
+   re-record (Step 2).
 
 Notes: global command — operates on the `<target>`, independent of the active project. **No approval
 gate** in the clean case (read-only git + one zip write, overwriting a prior same-name zip). **One
