@@ -1,12 +1,12 @@
 ---
 name: hello
-description: Saluta l'utente con un messaggio personalizzato. Usala quando l'utente vuole un saluto o vuole testare il plugin.
+description: Greets the user with a personalized message. Use it when the user wants a greeting or wants to test the plugin.
 disable-model-invocation: true
 ---
 
 # Hello Sistec
 
-Saluta l'utente chiamato "$ARGUMENTS" in modo caloroso e chiedi come puoi
-aiutarlo oggi. Se non viene fornito alcun nome, usa un saluto generico.
+Greet the user named "$ARGUMENTS" warmly and ask how you can help them
+today. If no name is given, use a generic greeting.
 
-Mantieni la risposta breve e amichevole.
+Keep the reply short and friendly.

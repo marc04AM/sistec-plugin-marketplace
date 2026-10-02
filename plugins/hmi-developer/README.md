@@ -1,56 +1,56 @@
 # hmi-developer
 
-Plugin del marketplace Sistec per lo sviluppo e la manutenzione della solution
-**Sistec.HMI** (.NET 8 / C# 12 / WinForms). Porta la persona da *Senior .NET
-Architect*, le regole di Clean Architecture / Clean Code del progetto, il ciclo
-TDD e i comandi/hook di progetto.
+Sistec marketplace plugin for developing and maintaining the
+**Sistec.HMI** solution (.NET 8 / C# 12 / WinForms). It brings the *Senior .NET
+Architect* persona, the project's Clean Architecture / Clean Code rules, the
+TDD cycle, and the project commands/hooks.
 
-## Componenti
+## Components
 
-| Componente | File | Cosa fa |
-| :--------- | :--- | :------ |
-| Skill | `skills/tdd/SKILL.md` | `/hmi-developer:tdd` — orchestra il ciclo Red→Green→Refactor in C# |
-| Skill | `skills/csharp-doc-comments/SKILL.md` | Scrive, corregge e verifica commenti XML doc (`///`) e commenti inline C# secondo le convenzioni Microsoft/StyleCop (SA16xx, CS1591); su un progetto/solution/cartella, sul changed-set (diff vs HEAD), su punti specifici, o in automatico sul codice che modifichi |
-| Skill | `skills/archive/SKILL.md` | `/hmi-developer:archive` — summary di change in `.claude/claude-archive/` |
-| Skill | `skills/dpi-anchor-fix/SKILL.md` | Diagnosi + fix del bug .NET 8 WinForms "controllo anchored Top\|Bottom collassa a Height 0" (DPI-aware + AnchorLayoutV2 off): scanner deterministico → verdetto → config sicura sotto gate |
-| Skill | `skills/translate/SKILL.md` | `/hmi-developer:translate` — da `MissingTranslations.csv` genera l'`INSERT` idempotente per `language_spv`: StringName esatta (incl. `#`), testi IT/EN dedotti dal call-site, placeholder preservati. Solo generazione del `.sql` (nessuna connessione DB). Invocazione esplicita (`disable-model-invocation: true`) |
-| Skill | `skills/reconcile-solutions/SKILL.md` | `/hmi-developer:reconcile-solutions` — porta una feature da una solution SOURCE a una DEST (stessa famiglia su branch-milestone diversi): git merge/cherry-pick dove il repo è condiviso, port manuale semantico dove è divergente (ri-applica l'*intento*, non il diff). Pianifica, gate, `dotnet build`, edit unstaged. Invocazione esplicita (`disable-model-invocation: true`) |
+| Component | File | What it does |
+| :-------- | :--- | :----------- |
+| Skill | `skills/tdd/SKILL.md` | `/hmi-developer:tdd` — orchestrates the Red→Green→Refactor cycle in C# |
+| Skill | `skills/csharp-doc-comments/SKILL.md` | Writes, fixes, and audits C# XML doc comments (`///`) and inline comments following Microsoft/StyleCop conventions (SA16xx, CS1591); on a project/solution/folder, on the changed set (diff vs HEAD), on specific places, or automatically on the code you edit |
+| Skill | `skills/archive/SKILL.md` | `/hmi-developer:archive` — change summary in `.claude/claude-archive/` |
+| Skill | `skills/dpi-anchor-fix/SKILL.md` | Diagnosis + fix of the .NET 8 WinForms bug "control anchored Top\|Bottom collapses to Height 0" (DPI-aware + AnchorLayoutV2 off): deterministic scanner → verdict → safe config behind a gate |
+| Skill | `skills/translate/SKILL.md` | `/hmi-developer:translate` — generates the idempotent `INSERT` for `language_spv` from `MissingTranslations.csv`: exact StringName (incl. `#`), IT/EN texts inferred from the call site, placeholders preserved. Generates the `.sql` only (no DB connection). Explicit invocation (`disable-model-invocation: true`) |
+| Skill | `skills/reconcile-solutions/SKILL.md` | `/hmi-developer:reconcile-solutions` — ports a feature from a SOURCE solution to a DEST one (same family on different milestone branches): git merge/cherry-pick where the repo is shared, semantic manual port where it has diverged (re-applies the *intent*, not the diff). Plans, gates, `dotnet build`, unstaged edits. Explicit invocation (`disable-model-invocation: true`) |
 | Hook | `hooks/hooks.json` + `*.py` | `build-reminder`, `graphify-nudge`, `archive-recall` |
-| Asset | `assets/dpiRepair/resources/Repair-WinFormsDpiAnchor.ps1` | Scanner/fixer deterministico usato da `dpi-anchor-fix` (detect DPI/AnchorLayoutV2, applica la config, backup `.bak`) |
+| Asset | `assets/dpiRepair/resources/Repair-WinFormsDpiAnchor.ps1` | Deterministic scanner/fixer used by `dpi-anchor-fix` (detects DPI/AnchorLayoutV2, applies the config, `.bak` backup) |
 
-## Come funziona
+## How it works
 
-Il plugin porta solo skill, hook e asset **riusabili tra progetti**. La persona
-da *Senior .NET Architect*, il workflow agentico e le **regole C#/HMI** non
-vivono più nel plugin: sono specifiche del progetto e vanno nel progetto stesso —
-il vecchio *project brain* diventa il `CLAUDE.md` della solution e i file di
-regola vanno copiati/adattati in `.claude/rules/` (architettura, async-threading,
-business-logic, csharp-idioms, data-communication, ui-controls, tests, ecc.).
-Le skill che dipendono dalle regole (`tdd`, `csharp-doc-comments`) le leggono da
-`.claude/rules/*` del progetto attivo, non da `${CLAUDE_PLUGIN_ROOT}`.
+The plugin ships only skills, hooks, and assets that are **reusable across projects**. The
+*Senior .NET Architect* persona, the agentic workflow, and the **C#/HMI rules** no longer
+live in the plugin: they are project-specific and belong in the project itself —
+the old *project brain* becomes the solution's `CLAUDE.md`, and the rule files
+are copied/adapted into `.claude/rules/` (architecture, async-threading,
+business-logic, csharp-idioms, data-communication, ui-controls, tests, etc.).
+The skills that depend on the rules (`tdd`, `csharp-doc-comments`) read them from
+the active project's `.claude/rules/*`, not from `${CLAUDE_PLUGIN_ROOT}`.
 
-I tre hook replicano il comportamento del workspace originale:
-- **archive-recall** (SessionStart) — richiama la change history recente da `.claude/claude-archive/`.
-- **graphify-nudge** (PreToolUse su Bash/Grep/Glob) — se esiste `graphify-out/`, suggerisce `graphify query` al posto del grep.
-- **build-reminder** (PostToolUse su Edit/Write) — ricorda `dotnet build` dopo edit di file `.cs`.
+The three hooks replicate the behaviour of the original workspace:
+- **archive-recall** (SessionStart) — recalls the recent change history from `.claude/claude-archive/`.
+- **graphify-nudge** (PreToolUse on Bash/Grep/Glob) — if `graphify-out/` exists, suggests `graphify query` instead of grep.
+- **build-reminder** (PostToolUse on Edit/Write) — reminds you to run `dotnet build` after editing `.cs` files.
 
-> Gli hook richiedono **Python 3** nel PATH come `python`. Leggono `CLAUDE_PROJECT_DIR`,
-> quindi operano sulla root del progetto in cui il plugin è attivo.
+> The hooks require **Python 3** on the PATH as `python`. They read `CLAUDE_PROJECT_DIR`,
+> so they operate on the root of the project where the plugin is active.
 
-## Cosa NON è incluso (di proposito)
+## What is NOT included (on purpose)
 
-Gli strumenti di terze parti del workspace originale (caveman, OpenSpec, graphify,
-claude-mem, karpathy-guidelines) si installano separatamente — vedi il README del
-repository `Sistec.Claude.DeveloperHMI`. Questo plugin contiene solo ciò che è
-specifico dello sviluppo Sistec.HMI.
+The third-party tools of the original workspace (caveman, OpenSpec, graphify,
+claude-mem, karpathy-guidelines) are installed separately — see the README of the
+`Sistec.Claude.DeveloperHMI` repository. This plugin contains only what is
+specific to Sistec.HMI development.
 
-## Test rapido
+## Quick test
 
 ```bash
 claude --plugin-dir ./plugins/hmi-developer
 ```
 
-Poi in sessione:
+Then, in the session:
 
 ```shell
 /hmi-developer:tdd

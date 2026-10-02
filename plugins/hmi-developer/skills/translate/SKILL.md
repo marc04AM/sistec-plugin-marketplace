@@ -1,56 +1,56 @@
 ---
 name: translate
-description: Genera l'INSERT MySQL per la tabella language_spv a partire dal MissingTranslations.csv di una HMI. Per ogni chiave ricava StringName (esatta, incluso l'eventuale '#' iniziale) e i testi Italian/English leggendo il call-site nel codice, preserva i placeholder string.Format, e scrive un .sql idempotente pronto da eseguire. Usala quando c'è un MissingTranslations.csv da riversare in language_spv.
+description: Generates the MySQL INSERT for the language_spv table from an HMI's MissingTranslations.csv. For each key it derives the StringName (exact, including any leading '#') and the Italian/English texts by reading the call site in the code, preserves string.Format placeholders, and writes an idempotent .sql ready to run. Use it when there is a MissingTranslations.csv to load into language_spv.
 disable-model-invocation: true
 ---
 
 # translate — MissingTranslations.csv → INSERT `language_spv`
 
-Converte le traduzioni mancanti loggate da una HMI (`MissingTranslations.csv`) in un `.sql` pronto:
-un `INSERT` idempotente nella tabella canonica `language_spv`. **Genera solo il file** — non si
-connette al database; l'esecuzione la fai tu.
+Converts the missing translations logged by an HMI (`MissingTranslations.csv`) into a ready-to-run `.sql`:
+an idempotent `INSERT` into the canonical `language_spv` table. **It only generates the file** — it does not
+connect to the database; you run it yourself.
 
-## 1. Risolvi il CSV
+## 1. Resolve the CSV
 
-- Path dato → quello.
-- Nessun path → il `MissingTranslations.csv` **più recente** (per data di modifica) sotto la cartella
-  di lavoro (tipicamente `**/bin/**/MissingTranslations.csv`). Nessuno trovato → segnala e fermati.
-- CSV vuoto o senza righe dati (0 chiavi) → segnala e fermati: non generare un `INSERT` vuoto.
+- Path given → use it.
+- No path → the **most recent** `MissingTranslations.csv` (by modification date) under the working
+  folder (typically `**/bin/**/MissingTranslations.csv`). None found → report it and stop.
+- Empty CSV or no data rows (0 keys) → report it and stop: do not generate an empty `INSERT`.
 
-## 2. Parsa → chiavi distinte
+## 2. Parse → distinct keys
 
-Colonne del CSV (delimitatore `;`, in quest'ordine): `Timestamp;Locale;Key;DefaultText;Module;Method`.
-Se un campo contiene `;` o virgolette, gestisci il quoting CSV standard (campo tra `"…"`, `""` come
-escape) invece di splittare alla cieca. Collassa a **una riga per `Key` distinta** (una chiave si
-logga una volta per locale). Se la stessa `Key` compare con `DefaultText` **discordanti**, tieni
-quello col `Timestamp` più recente e **segnala il conflitto**. Tieni `DefaultText`, `Module`,
-`Method`: puntano al call-site per lo Step 3.
+CSV columns (delimiter `;`, in this order): `Timestamp;Locale;Key;DefaultText;Module;Method`.
+If a field contains `;` or quotes, handle standard CSV quoting (field in `"…"`, `""` as
+escape) instead of splitting blindly. Collapse to **one row per distinct `Key`** (a key is
+logged once per locale). If the same `Key` appears with **conflicting** `DefaultText` values, keep
+the one with the most recent `Timestamp` and **report the conflict**. Keep `DefaultText`, `Module`,
+`Method`: they point to the call site for Step 3.
 
-## 3. Ricava Italian + English dal call-site (il punto)
+## 3. Derive Italian + English from the call site (the core step)
 
-Per ogni chiave, `grep` il sorgente a `Module`/`Method` (e la chiamata `GetOrDefault(key, default)`)
-per leggere il testo inteso e il suo significato, poi produci un valore **Italian** e uno **English**
-puliti:
+For each key, `grep` the source at `Module`/`Method` (and the `GetOrDefault(key, default)` call)
+to read the intended text and its meaning, then produce a clean **Italian** value and a clean **English**
+value:
 
-- il `DefaultText` senza `#` è il fallback dell'autore — di solito giusto per una lingua; fornisci tu
-  la traduzione naturale dell'altra;
-- disambigua dal contesto (titolo vs corpo, header di colonna, membro enum, unità di misura);
-- **preserva i placeholder `string.Format`** (`{0}`, `{1}`, …) verbatim in entrambe le lingue;
-- **segnala ogni valore indovinato** (nessun default leggibile nel codice) perché l'utente lo verifichi;
-- se il call-site **non si trova** (grep su `Module`/`Method` a vuoto), marca la chiave come *irrisolta*,
-  emetti comunque la riga col `DefaultText` come valore provvisorio flaggato, e mettila nell'elenco del report.
+- the `DefaultText` without `#` is the author's fallback — usually right for one language; supply
+  the natural translation for the other yourself;
+- disambiguate from context (title vs body, column header, enum member, unit of measure);
+- **preserve `string.Format` placeholders** (`{0}`, `{1}`, …) verbatim in both languages;
+- **flag every guessed value** (no readable default in the code) so the user can check it;
+- if the call site **cannot be found** (grep on `Module`/`Method` comes back empty), mark the key as *unresolved*,
+  still emit the row with `DefaultText` as a flagged provisional value, and add it to the list in the report.
 
-### Regola di correttezza n.1 — `StringName` = chiave esatta
+### Correctness rule #1 — `StringName` = exact key
 
-La HMI risolve un termine con un **hit esatto di dizionario, senza strippare il `#`**. Quindi
-`StringName` **deve** essere la chiave grezza: le chiavi scritte con `#` iniziale nel codice
-(`"#ProductionLog"`) si salvano **con** il `#`; quelle senza (`plc_PLC_0`) senza. Sbagliare qui = il
-termine non si risolve mai a runtime. Il `#` nella colonna `DefaultText` del CSV è invece solo il
-marcatore "non tradotto" — **non** fa parte della chiave.
+The HMI resolves a term with an **exact dictionary hit, without stripping the `#`**. So
+`StringName` **must** be the raw key: keys written with a leading `#` in the code
+(`"#ProductionLog"`) are stored **with** the `#`; those without (`plc_PLC_0`) without it. Getting this wrong = the
+term never resolves at runtime. The `#` in the CSV's `DefaultText` column, by contrast, is only the
+"untranslated" marker — it is **not** part of the key.
 
-## 4. Scrivi il `.sql`
+## 4. Write the `.sql`
 
-Un unico `INSERT` multi-riga, **idempotente**, in **UTF-8** (testo IT accentato):
+A single multi-row, **idempotent** `INSERT`, in **UTF-8** (accented IT text):
 
 ```sql
 INSERT INTO language_spv (StringName, Italian, English) VALUES
@@ -59,19 +59,19 @@ INSERT INTO language_spv (StringName, Italian, English) VALUES
 ON DUPLICATE KEY UPDATE Italian = VALUES(Italian), English = VALUES(English);
 ```
 
-- `StringName` = chiave esatta (incl. `#`); lascia `TimeStamp`/`Other` ai loro default.
-- La coda `ON DUPLICATE KEY UPDATE … = VALUES(…)` rende l'INSERT rieseguibile senza errori di chiave
-  duplicata e vale **sia su MySQL 5.7 sia 8.x** — nessun rilevamento di versione.
-- **Escape gli apici singoli** nei testi (`'` → `''`, escaping MySQL standard): l'italiano ne è pieno (`l'operatore` → `l''operatore`).
-- Intestazione a commento: CSV sorgente, tabella, e le regole (chiave-esatta, marcatore `#`,
-  idempotenza). Raggruppa le tuple per area con un commento per gruppo; marca con un commento le righe
-  il cui valore è **indovinato**.
-- Output di default: `<dir-del-csv>\MissingTranslations.sql` (o il path indicato). Se il file esiste già, avvisa prima di sovrascriverlo.
+- `StringName` = exact key (incl. `#`); leave `TimeStamp`/`Other` at their defaults.
+- The `ON DUPLICATE KEY UPDATE … = VALUES(…)` tail makes the INSERT re-runnable without duplicate-key
+  errors and works on **both MySQL 5.7 and 8.x** — no version detection.
+- **Escape single quotes** in the texts (`'` → `''`, standard MySQL escaping): Italian is full of them (`l'operatore` → `l''operatore`).
+- Comment header: source CSV, table, and the rules (exact key, `#` marker,
+  idempotency). Group the tuples by area with one comment per group; mark with a comment the rows
+  whose value is **guessed**.
+- Default output: `<csv-dir>\MissingTranslations.sql` (or the given path). If the file already exists, warn before overwriting it.
 
 ## 5. Report
 
-Path del `.sql`, conteggi (chiavi distinte / indovinate), l'elenco dei valori indovinati da vetare, e
-il comando per eseguirlo:
+Path of the `.sql`, counts (distinct keys / guessed), the list of guessed values to vet, and
+the command to run it:
 
 ```
 mysql -h <host> -u <user> -p <db> --default-character-set=utf8mb4 < <out>

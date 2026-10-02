@@ -58,7 +58,9 @@ When editing an already-issued sheet, do all four in the same change:
 - **Never touch the `<style>` block or the theme script** — they are the shared design system; copy
   verbatim from `template.html`. Style only via the existing classes/tokens. If the design system
   itself needs updating, edit `template.html` and `sheet.css` together (see "Files in this skill").
-- **Dates** `YYYY-MM-DD`. **Language** matches the request (the reference is Italian).
+- **Dates** `YYYY-MM-DD`. **Language**: write the document in Italian — the template's fixed labels
+  (Autore, Versione, Ultima revisione, Revisioni, …) are Italian; use another language only if the
+  user explicitly asks for it.
 - **Escape** `<`, `>`, `&` as `&lt;`/`&gt;`/`&amp;` inside `<pre>`/`<code>` content.
 - **Save location:** default to `<project root>\specifications\<name>.html` when working inside a
   project; otherwise the path the user gives.

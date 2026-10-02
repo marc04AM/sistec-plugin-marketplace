@@ -1,22 +1,22 @@
 # device-spy
 
-Ispettori **read-only**: un progetto CODESYS cifrato, un router Ubiquiti live, e la rete dell'host
-locale. Gli helper sono script bundlati nel plugin. Dove serve un segreto (CODESYS, Ubiquiti) questo
-raggiunge l'helper via `os.environ` / STDIN, **mai** come argomento di riga di comando e **mai** su
-disco, azzerato subito dopo l'uso. Gli inspector che si connettono o lanciano un target hanno un
-**approval gate**; `network-probe` è read-only sull'host locale e non ne ha bisogno.
+**Read-only** inspectors: an encrypted CODESYS project, a live Ubiquiti router, and the local host's
+network. The helpers are scripts bundled in the plugin. Where a secret is needed (CODESYS, Ubiquiti),
+it reaches the helper via `os.environ` / STDIN, **never** as a command-line argument and **never** on
+disk, and is cleared right after use. Inspectors that connect to or launch a target have an
+**approval gate**; `network-probe` is read-only on the local host and doesn't need one.
 
-## Skill
+## Skills
 
-| Skill | Cosa fa | Scrive |
-| :---- | :------ | :----- |
-| `/device-spy:codesys-spy -pw <password> -fn "<.project>" [--out "<dir>"]` | progetto CODESYS cifrato → export PLCopen XML (headless) → estrazione sorgente per-POU (ST/SFC/LD/FBD decodificati) → analisi con subagent Explore | `--out` (default `./codesySpy-out/`) |
-| `/device-spy:ubiquity-spy -ip <ip> -user <user> -pw <password> [--out "<dir>"]` | login + GET read-only su un router Ubiquiti "System Manager" → cattura il dashboard server-rendered → report fedele della config corrente (`field → value` per ogni pannello) | `--out` (default `./ubiquity-out/`) |
-| `/device-spy:network-probe [--out "<dir>"] [--days <N>] [--targets "ip1,ip2,…"]` | snapshot read-only della rete dell'host locale → report Markdown (adapter/driver, EEE/flow/power, IP, ARP + analisi dup-IP/MAC, route/DNS, connettività, eventi e1rexpress/Tcpip) → **diagnosi** link-flap / conflitti IP / driver stale | `--out` (default `./network-probe-out/`) |
+| Skill | What it does | Writes |
+| :---- | :----------- | :----- |
+| `/device-spy:codesys-spy -pw <password> -fn "<.project>" [--out "<dir>"]` | encrypted CODESYS project → PLCopen XML export (headless) → per-POU source extraction (ST/SFC/LD/FBD decoded) → analysis with Explore subagents | `--out` (default `./codesySpy-out/`) |
+| `/device-spy:ubiquity-spy -ip <ip> -user <user> -pw <password> [--out "<dir>"]` | login + read-only GET on a Ubiquiti "System Manager" router → captures the server-rendered dashboard → faithful report of the current config (`field → value` for each pane) | `--out` (default `./ubiquity-out/`) |
+| `/device-spy:network-probe [--out "<dir>"] [--days <N>] [--targets "ip1,ip2,…"]` | read-only snapshot of the local host's network → Markdown report (adapters/drivers, EEE/flow/power, IP, ARP + dup-IP/MAC analysis, routes/DNS, connectivity, e1rexpress/Tcpip events) → **diagnosis** of link-flaps / IP conflicts / stale drivers | `--out` (default `./network-probe-out/`) |
 
-## Resource bundlate
+## Bundled resources
 
-Gli script helper sono **statici** e non vanno modificati; sono risolti via `$env:CLAUDE_PLUGIN_ROOT`:
+The helper scripts are **static** and must not be modified; they are resolved via `$env:CLAUDE_PLUGIN_ROOT`:
 
 ```
 assets/
@@ -25,18 +25,18 @@ assets/
   networkProbe/resources/network-config-probe.ps1
 ```
 
-## Note
+## Notes
 
-- `/device-spy:codesys-spy` lancia CODESYS headless (pesante) → conferma all'approval gate.
-  `/device-spy:ubiquity-spy` è login + GET soltanto, **mai** un POST che cambia la config.
-  `/device-spy:network-probe` gira sull'host locale, read-only (scrive solo il report) → nessun gate;
-  meglio da shell **elevata** per dati completi.
-- **Gestione segreti** (codesys-spy, ubiquity-spy): la password è effimera (env → child process /
-  STDIN), azzerata dopo l'uso, mai persistita né riecheggiata. `network-probe` non usa segreti.
-- Permessi (`cmd /c`, `CODESYS.exe`, `python`, `powershell`, `curl`, scritture file) approvati caso
-  per caso — nessuna allow-rule aggiunta unilateralmente.
+- `/device-spy:codesys-spy` launches CODESYS headless (heavyweight) → confirm at the approval gate.
+  `/device-spy:ubiquity-spy` is login + GET only, **never** a POST that changes the config.
+  `/device-spy:network-probe` runs on the local host, read-only (it writes only the report) → no gate;
+  best run from an **elevated** shell for complete data.
+- **Secret handling** (codesys-spy, ubiquity-spy): the password is ephemeral (env → child process /
+  STDIN), cleared after use, never persisted or echoed. `network-probe` uses no secrets.
+- Permissions (`cmd /c`, `CODESYS.exe`, `python`, `powershell`, `curl`, file writes) are approved case
+  by case — no allow-rule is added unilaterally.
 
-## Installazione
+## Installation
 
 ```shell
 /plugin install device-spy@sistec-plugins

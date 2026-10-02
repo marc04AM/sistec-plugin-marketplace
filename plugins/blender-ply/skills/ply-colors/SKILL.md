@@ -11,7 +11,7 @@ description: >-
   run it as a routine check after importing a PLY even when the user says nothing about colours,
   since they usually only notice the grey later — whenever inspecting or modifying a Blender scene
   via MCP, treat colour display as part of the inspection. For the full post-import setup (view, clip,
-  zoom and colours together) use /blender-ply:visualizzaply, which already runs this script.
+  zoom and colours together) use /blender-ply:view-ply, which already runs this script.
 ---
 
 # Restoring PLY vertex colours in Blender
@@ -106,7 +106,7 @@ worse than an honest grey, because the user may believe it came from their data.
 This script never changes the viewport **shading mode** (Solid / Material Preview
 / Rendered). That is the user's own view preference, and silently switching it is
 disorienting. It only changes what Solid mode uses as its colour source.
-(/blender-ply:visualizzaply is the one exception: it moves a Wireframe viewport to
+(/blender-ply:view-ply is the one exception: it moves a Wireframe viewport to
 Solid, because no colour can be seen in Wireframe at all.)
 
 It also never overwrites an existing material, because a material the user built

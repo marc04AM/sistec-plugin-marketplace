@@ -1,7 +1,7 @@
 {
   "name": "hello-sistec",
-  "description": "Plugin di esempio con una skill, un agent e un hook",
-  "version": "0.1.0",
+  "description": "Example plugin with a skill, an agent and a hook",
+  "version": "0.1.1",
   "author": {
     "name": "Sistec"
   },

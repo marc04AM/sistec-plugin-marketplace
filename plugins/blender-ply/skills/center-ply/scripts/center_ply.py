@@ -1,5 +1,5 @@
 """
-CentraPLY -- make the selected vertex (or the midpoint of the selected vertices) the
+CenterPLY -- make the selected vertex (or the midpoint of the selected vertices) the
 common origin: object origin = 3D cursor = world origin (0,0,0).
 
 Run inside Blender through the MCP bridge via the exec wrapper in SKILL.md.
@@ -168,7 +168,7 @@ else:
         else:
             chk = sum(now, Vector()) / len(now)
         try:
-            bpy.ops.ed.undo_push(message="CentraPLY")
+            bpy.ops.ed.undo_push(message="CenterPLY")
         except Exception as e:
             report["notes"].append("undo_push: {}".format(e))
 
@@ -179,6 +179,6 @@ else:
             "point_world_after": [round(v, 6) for v in chk],
             "ok": chk.length < 1e-3,
             "cursor": [0.0, 0.0, 0.0],
-            "undo": "Ctrl+Z undoes it (step 'CentraPLY')",
+            "undo": "Ctrl+Z undoes it (step 'CenterPLY')",
         })
         result = report

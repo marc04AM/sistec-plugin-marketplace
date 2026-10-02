@@ -1,7 +1,7 @@
 {
   "name": "device-spy",
-  "description": "Ispettori read-only con script helper bundlati: /device-spy:codesys-spy (progetto CODESYS cifrato → PLCopen XML + sorgente POU + analisi), /device-spy:ubiquity-spy (snapshot della config di un router Ubiquiti) e /device-spy:network-probe (config + salute di rete dell'host locale → diagnosi link-flap / conflitti IP / driver). Dove serve, la password viaggia via env/STDIN, mai su disco o riga di comando",
-  "version": "0.1.1",
+  "description": "Read-only inspectors with bundled helper scripts: /device-spy:codesys-spy (encrypted CODESYS project → PLCopen XML + POU source + analysis), /device-spy:ubiquity-spy (config snapshot of a Ubiquiti router) and /device-spy:network-probe (local host network config + health → link-flap / IP-conflict / driver diagnosis). Where needed, the password travels via env/STDIN, never on disk or the command line",
+  "version": "0.1.2",
   "author": {
     "name": "Sistec"
   },

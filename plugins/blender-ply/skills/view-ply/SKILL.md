@@ -1,18 +1,18 @@
 ---
-name: visualizzaply
+name: view-ply
 description: >-
-  VisualizzaPLY — connects to Blender through the MCP bridge, checks that a PLY model has been
+  ViewPLY — connects to Blender through the MCP bridge, checks that a PLY model has been
   imported, and sets up viewpoint, zoom (clip start/end, zoom to mouse position) and vertex-colour
-  display in one go. Use it when the user invokes /blender-ply:visualizzaply or VisualizzaPLY, and
+  display in one go. Use it when the user invokes /blender-ply:view-ply or ViewPLY, and
   whenever they ask to fix, correct or set up the viewpoint, zoom and colours of a PLY in Blender —
   "sistema/correggi/configura il view point, lo zoom e i colori", "ho importato un ply",
   "collegati a Blender e aggiusta la vista", "non vedo il modello", "è tutto grigio", "correggi
   come sempre zoom, viewpoint e colori", "I imported a ply", "fix the view", "I can't see the
-  model" — even if the skill is not named. Not for taking a picture of the model (FotografaPLY)
-  or moving the origin (CentraPLY).
+  model" — even if the skill is not named. Not for taking a picture of the model (SnapshotPLY)
+  or moving the origin (CenterPLY).
 ---
 
-# VisualizzaPLY
+# ViewPLY
 
 After every import of a CAD PLY into Blender, the same three problems show up:
 
@@ -29,7 +29,7 @@ This skill fixes all three in one call and then shows the result. The procedure 
 2. **Run the script** with `mcp__Blender__execute_blender_code`, using this wrapper. PARAMS is optional: leave it `{}` unless the user asked for something specific.
    ```python
    PARAMS = {}
-   p = r"${CLAUDE_SKILL_DIR}/scripts/visualizza_ply.py"
+   p = r"${CLAUDE_SKILL_DIR}/scripts/view_ply.py"
    g = {"PARAMS": PARAMS, "__file__": p}
    exec(compile(open(p, encoding="utf-8").read(), p, "exec"), g)
    result = g["result"]
@@ -73,4 +73,4 @@ This skill fixes all three in one call and then shows the result. The procedure 
 - **The zoom preferences are global**, and Blender saves them on its own if preference auto-save is on. Mention them in the answer, so the user knows they changed.
 - **Manual procedure, to explain if the user asks.** Shading menu at the top right → Color → Attribute (the UI label for `VERTEX`). Sidebar N → View → Clip Start/End. Edit → Preferences → Navigation → Zoom to Mouse Position and Auto Depth.
 - **Object far from the origin**: if the model shows up as a dot, the script frames it anyway, because it centres on the world-space bounding box.
-- To move the origin use **CentraPLY**; to save an image use **FotografaPLY**.
+- To move the origin use **CenterPLY**; to save an image use **SnapshotPLY**.

@@ -1,7 +1,7 @@
 {
   "name": "hmi-developer",
-  "description": "Assistente di sviluppo per la solution Sistec.HMI (.NET 8 / WinForms): ciclo TDD, skill csharp-doc-comments per commenti XML doc C#, fix bug DPI/anchor WinForms, SQL i18n, riconciliazione feature tra solution, hook di progetto. Persona e regole C#/HMI vivono nel progetto (CLAUDE.md + .claude/rules/), non nel plugin.",
-  "version": "0.3.0",
+  "description": "Development assistant for the Sistec.HMI solution (.NET 8 / WinForms): TDD cycle, csharp-doc-comments skill for C# XML doc comments, WinForms DPI/anchor bug fix, i18n SQL, feature reconciliation between solutions, project hooks. Persona and C#/HMI rules live in the project (CLAUDE.md + .claude/rules/), not in the plugin.",
+  "version": "0.3.1",
   "author": {
     "name": "Sistec"
   },

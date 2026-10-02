@@ -1,5 +1,5 @@
 """
-VisualizzaPLY -- make an imported PLY model visible and readable in Blender's viewport.
+ViewPLY -- make an imported PLY model visible and readable in Blender's viewport.
 
 Run inside Blender through the MCP bridge (mcp__Blender__execute_blender_code),
 normally via the small exec wrapper shown in SKILL.md so that PARAMS can be passed.

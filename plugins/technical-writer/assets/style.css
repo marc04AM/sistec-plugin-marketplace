@@ -1,27 +1,27 @@
 /* ============================================================
-   style.css — look & feel del manuale 5315.pdf
-   Sans-serif leggero geometrico, titoli grassetto-corsivo
-   maiuscoli con riga di sottolineatura, corpo giustificato,
-   riferimenti incrociati color ruggine, tabelle minimali,
-   pagina "foglio" centrata.
-   Caricato DOPO gli <style> interni: vince nella cascata.
+   style.css — look & feel of the 5315.pdf manual
+   Light geometric sans-serif, bold-italic uppercase headings
+   with an underline rule, justified body text,
+   rust-coloured cross-references, minimal tables,
+   centred "sheet" page.
+   Loaded AFTER the inline <style> blocks: it wins in the cascade.
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
 
 :root {
-  --ink:        #1b1b1b;   /* testo */
+  --ink:        #1b1b1b;   /* text */
   --ink-soft:   #333333;
-  --rule:       #888888;   /* righe sottili */
+  --rule:       #888888;   /* thin rules */
   --rule-light: #dddddd;
-  --accent:     #c2541f;   /* ruggine: riferimenti/link */
+  --accent:     #c2541f;   /* rust: references/links */
   --accent-2:   #b5532a;
   --paper:      #ffffff;
-  --desk:       #e9e9e9;   /* sfondo "scrivania" */
+  --desk:       #e9e9e9;   /* "desk" background */
   --mono-bg:    #f6f6f6;
 }
 
-/* ---------- Pagina come foglio A4 ---------- */
+/* ---------- Page as an A4 sheet ---------- */
 html {
   background: var(--desk);
 }
@@ -44,7 +44,7 @@ body {
 
 body.scrollBeyondLastLine { margin-bottom: 40px; }
 
-/* ---------- Titoli: grassetto corsivo, maiuscolo, sottolineati ---------- */
+/* ---------- Headings: bold italic, uppercase, underlined ---------- */
 h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   font-style: italic;
@@ -85,7 +85,7 @@ h5, h6 {
   color: var(--ink-soft);
 }
 
-/* ---------- Corpo del testo ---------- */
+/* ---------- Body text ---------- */
 p {
   margin: 0.75em 0;
   text-align: justify;
@@ -99,7 +99,7 @@ strong, b {
 
 em, i { font-style: italic; }
 
-/* ---------- Link e riferimenti incrociati (ruggine) ---------- */
+/* ---------- Links and cross-references (rust) ---------- */
 a {
   color: var(--accent);
   text-decoration: none;
@@ -110,7 +110,7 @@ a:hover {
   text-decoration: underline;
 }
 
-/* ---------- Liste ---------- */
+/* ---------- Lists ---------- */
 ul, ol {
   margin: 0.6em 0;
   padding-left: 2em;
@@ -120,7 +120,7 @@ li { margin: 0.28em 0; }
 
 li::marker { color: var(--ink-soft); }
 
-/* ---------- Indice (Sommario): leader puntinati ---------- */
+/* ---------- Table of contents (Sommario): dotted leaders ---------- */
 h2#sommario + ol {
   list-style: none;
   padding-left: 0;
@@ -134,14 +134,14 @@ h2#sommario + ol a:hover {
   color: var(--accent);
 }
 
-/* ---------- Linea orizzontale ---------- */
+/* ---------- Horizontal rule ---------- */
 hr {
   border: 0;
   border-bottom: 1px solid var(--rule-light);
   margin: 2em 0;
 }
 
-/* ---------- Tabelle minimali ---------- */
+/* ---------- Minimal tables ---------- */
 table {
   border-collapse: collapse;
   width: 100%;
@@ -166,7 +166,7 @@ table > tbody > tr > td {
 
 table > tbody > tr:hover { background: #fafafa; }
 
-/* ---------- Citazioni ---------- */
+/* ---------- Blockquotes ---------- */
 blockquote {
   margin: 1em 0;
   padding: 0.4em 1em;
@@ -177,7 +177,7 @@ blockquote {
 
 blockquote p { text-align: left; }
 
-/* ---------- Codice ---------- */
+/* ---------- Code ---------- */
 code {
   font-family: 'Consolas', 'SFMono-Regular', Menlo, Monaco, 'Courier New', monospace;
   font-size: 0.9em;
@@ -191,7 +191,7 @@ code {
   border-radius: 3px;
 }
 
-/* blocchi: i disegni ASCII devono restare allineati */
+/* blocks: ASCII drawings must stay aligned */
 pre {
   background: var(--mono-bg);
   border: 1px solid var(--rule-light);
@@ -211,7 +211,7 @@ pre code {
 
 pre.hljs { color: var(--ink); }
 
-/* ---------- Immagini ---------- */
+/* ---------- Images ---------- */
 img {
   max-width: 100%;
   height: auto;
@@ -219,8 +219,8 @@ img {
   margin: 1em auto;
 }
 
-/* Didascalia = alt text in piccolo sotto l'immagine.
-   Funziona quando l'immagine è dentro <figure>…<figcaption>. */
+/* Caption = alt text in small type below the image.
+   Works when the image is inside <figure>…<figcaption>. */
 figure {
   margin: 1.4em auto;
   text-align: center;
@@ -238,10 +238,10 @@ figcaption,
   line-height: 1.3;
 }
 
-/* Fallback: per <img> "nude" (markdown ![alt](src)) mostra l'alt
-   subito sotto. content: attr(alt) viene reso solo dai browser che
-   supportano i pseudo-elementi sulle immagini; le immagini rotte lo
-   mostrano sempre. */
+/* Fallback: for "bare" <img> (markdown ![alt](src)) show the alt
+   right below. content: attr(alt) is rendered only by browsers that
+   support pseudo-elements on images; broken images always
+   show it. */
 img[alt]::after {
   content: attr(alt);
   display: block;
@@ -252,7 +252,7 @@ img[alt]::after {
   margin-top: 0.4em;
 }
 
-/* ---------- Stampa ---------- */
+/* ---------- Print ---------- */
 @media print {
   html { background: #fff; }
   body {
@@ -263,7 +263,7 @@ img[alt]::after {
   }
 }
 
-/* ---------- Schermi piccoli ---------- */
+/* ---------- Small screens ---------- */
 @media (max-width: 900px) {
   body {
     margin: 0;

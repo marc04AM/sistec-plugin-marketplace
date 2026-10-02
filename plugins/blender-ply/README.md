@@ -1,63 +1,63 @@
 # blender-ply
 
-Lavoro su modelli **PLY esportati da CAD** (in mm, colori per vertice, nessun materiale) dentro
-Blender, guidato da Claude tramite il bridge MCP di Blender (`mcp__Blender__execute_blender_code`,
-porta 9876). Ogni skill esegue uno script Python bundlato **dentro Blender** e restituisce un
-report JSON.
+Work on **CAD-exported PLY models** (in mm, per-vertex colours, no material) inside
+Blender, driven by Claude through the Blender MCP bridge (`mcp__Blender__execute_blender_code`,
+port 9876). Each skill runs a bundled Python script **inside Blender** and returns a
+JSON report.
 
-## Skill
+## Skills
 
-| Skill | Cosa fa | Modifica |
-| :---- | :------ | :------- |
-| `/blender-ply:visualizzaply` | dopo un import: colori per vertice visibili, clip calcolato sulla diagonale del modello, vista 3/4 in prospettiva centrata, *Zoom to Mouse Position* + *Auto Depth* | vista, clip, preferenze globali di zoom, materiale `<Oggetto>_Col` |
-| `/blender-ply:centrablender` | centra il modello sulla sagoma a schermo; inclinazione invariata, zoom allontanato solo se il modello non ci sta | solo la vista |
-| `/blender-ply:centraply` | porta il vertice selezionato (o il punto medio) su (0,0,0): origine oggetto = cursore 3D = origine mondo; `dry_run` per l'anteprima | la mesh (passo di undo "CentraPLY") |
-| `/blender-ply:fotografaply` | centra e salva un PNG su sfondo bianco senza overlay (viewport render, view transform `Standard`), poi ripristina | file `.png`; impostazioni di render solo durante lo scatto |
-| `/blender-ply:ply-colors` | ripristina i colori per vertice (Solid → `VERTEX`, materiale per Material Preview); `detect_ply_colors.py` è la versione read-only | vista, materiali nuovi (mai quelli esistenti) |
+| Skill | What it does | Changes |
+| :---- | :----------- | :------ |
+| `/blender-ply:view-ply` | after an import: vertex colours visible, clip computed from the model diagonal, centred 3/4 perspective view, *Zoom to Mouse Position* + *Auto Depth* | view, clip, global zoom preferences, `<Object>_Col` material |
+| `/blender-ply:center-blender` | centres the model on its on-screen silhouette; inclination unchanged, zoom backed off only if the model does not fit | the view only |
+| `/blender-ply:center-ply` | brings the selected vertex (or the midpoint) to (0,0,0): object origin = 3D cursor = world origin; `dry_run` for a preview | the mesh (undo step "CenterPLY") |
+| `/blender-ply:snapshot-ply` | centres and saves a PNG on a white background without overlays (viewport render, view transform `Standard`), then restores | `.png` file; render settings only during the shot |
+| `/blender-ply:ply-colors` | restores vertex colours (Solid → `VERTEX`, material for Material Preview); `detect_ply_colors.py` is the read-only version | view, new materials (never existing ones) |
 
 ## Hook
 
-| Evento | Script | Cosa fa |
-| :----- | :----- | :------ |
-| `PostToolUse` su `mcp__Blender__.*` | `hooks/ply-colors-nudge.py` | dopo un import PLY, o alla prima chiamata Blender della sessione, interroga Blender **in sola lettura** (`detect_ply_colors.py` sul socket 9876, timeout 2 s) e avvisa Claude solo se un modello con colori per vertice è davvero mostrato grigio. Non corregge nulla: la correzione passa da `/blender-ply:ply-colors`. Le altre chiamate escono subito dopo una regex. Se Blender non risponde resta in silenzio |
+| Event | Script | What it does |
+| :---- | :----- | :----------- |
+| `PostToolUse` on `mcp__Blender__.*` | `hooks/ply-colors-nudge.py` | after a PLY import, or on the first Blender call of the session, queries Blender **read-only** (`detect_ply_colors.py` over socket 9876, 2 s timeout) and warns Claude only if a model with vertex colours is actually shown grey. It fixes nothing: the fix goes through `/blender-ply:ply-colors`. Other calls exit right after a regex. If Blender does not answer it stays silent |
 
-L'hook segna la "prima chiamata della sessione" con un file in
-`%TEMP%\claude-blender-ply-colors\`; i marker più vecchi di 7 giorni vengono cancellati.
+The hook marks the "first call of the session" with a file in
+`%TEMP%\claude-blender-ply-colors\`; markers older than 7 days are deleted.
 
-## Regola opzionale
+## Optional rule
 
-`rules/blender-ply-colors.md` copre il caso che l'hook non vede: un modello importato
-dall'interfaccia di Blender **dopo** la prima chiamata MCP della sessione. Un plugin non può
-installare regole, quindi chi la vuole la copia a mano:
+`rules/blender-ply-colors.md` covers the case the hook cannot see: a model imported
+from Blender's UI **after** the session's first MCP call. A plugin cannot
+install rules, so anyone who wants it copies it by hand:
 
 ```powershell
-Copy-Item "<cartella del plugin>\rules\blender-ply-colors.md" "$env:USERPROFILE\.claude\rules\"
+Copy-Item "<plugin folder>\rules\blender-ply-colors.md" "$env:USERPROFILE\.claude\rules\"
 ```
 
-Senza la regola resta la description di `ply-colors`, che chiede già di controllare i colori a
-ogni ispezione della scena.
+Without the rule there is still the `ply-colors` description, which already asks to check the colours on
+every scene inspection.
 
-## Requisiti
+## Requirements
 
-- Blender con l'add-on MCP attivo e il server avviato (Preferences → Add-ons → MCP → Start).
-- Il server MCP di Blender configurato in Claude Code (tool `mcp__Blender__*`).
-- Blender in esecuzione **sulla stessa macchina** di Claude Code: gli script vengono letti da
-  Blender direttamente dalla cartella della skill (`${CLAUDE_SKILL_DIR}/scripts/…`), quindi il
-  codice non passa per la conversazione.
+- Blender with the MCP add-on enabled and the server started (Preferences → Add-ons → MCP → Start).
+- The Blender MCP server configured in Claude Code (`mcp__Blender__*` tools).
+- Blender running **on the same machine** as Claude Code: Blender reads the scripts
+  directly from the skill folder (`${CLAUDE_SKILL_DIR}/scripts/…`), so the
+  code does not travel through the conversation.
 
-## Note
+## Notes
 
-- Gli script sono idempotenti e vanno rilanciati a ogni turno: l'utente naviga, importa, entra in
-  Edit Mode tra una chiamata e l'altra.
-- Nessuna skill salva il `.blend` o esporta il PLY se l'utente non lo chiede.
-- La matematica del viewport comune (proiezione, centratura sulla sagoma, vertici nel mondo) sta in
-  `lib/view_projection.py` ed è usata da `centrablender`, `fotografaply` e `visualizzaply`.
-  `visualizzaply` riusa anche lo script di `ply-colors`. Gli script trovano entrambi partendo dal
-  proprio `__file__`, quindi la struttura del plugin va mantenuta.
-- Gli script di `ply-colors` restano autosufficienti di proposito: `detect_ply_colors.py` si può
-  inviare anche direttamente sul socket del bridge, dove `__file__` non c'è.
+- The scripts are idempotent and should be re-run on every turn: the user navigates, imports, enters
+  Edit Mode between one call and the next.
+- No skill saves the `.blend` or exports the PLY unless the user asks.
+- The shared viewport maths (projection, silhouette centring, world-space vertices) lives in
+  `lib/view_projection.py` and is used by `center-blender`, `snapshot-ply` and `view-ply`.
+  `view-ply` also reuses the `ply-colors` script. The scripts find both starting from their
+  own `__file__`, so the plugin structure must be kept.
+- The `ply-colors` scripts stay self-contained on purpose: `detect_ply_colors.py` can also be
+  sent directly over the bridge socket, where there is no `__file__`.
 
-## Installazione
+## Installation
 
 ```shell
 /plugin install blender-ply@sistec-plugins

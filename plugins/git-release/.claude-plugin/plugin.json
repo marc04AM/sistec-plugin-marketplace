@@ -1,7 +1,7 @@
 {
   "name": "git-release",
-  "description": "Strumenti di rilascio per le solution multi-repo Sistec: /git-release:gitize (diff → messaggio Conventional-Commits), /git-release:git-split-commits (staged → più commit), /git-release:git-amend-commits (staged → fold nei commit esistenti), /git-release:versionize (release note dai DLL buildati + git) e /git-release:package-release (packaging zip + repeat). Nessuna skill deploya o pubblica in produzione: il perimetro si ferma allo zip.",
-  "version": "0.3.0",
+  "description": "Release tools for Sistec multi-repo solutions: /git-release:gitize (diff → Conventional-Commits message), /git-release:git-split-commits (staged → several commits), /git-release:git-amend-commits (staged → folded into existing commits), /git-release:versionize (release note from built DLLs + git) and /git-release:package-release (zip packaging + repeat). No skill deploys or publishes to production: the scope stops at the zip.",
+  "version": "0.3.1",
   "author": {
     "name": "Sistec"
   },

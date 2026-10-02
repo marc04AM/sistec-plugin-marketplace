@@ -1,18 +1,18 @@
 ---
-name: centrablender
+name: center-blender
 description: >-
-  CentraBlender — in Blender, puts the visible 3D model in the middle of the screen by moving only
+  CenterBlender — in Blender, puts the visible 3D model in the middle of the screen by moving only
   the view, without changing the inclination and keeping the zoom (it zooms out only if the model
   does not fit). It does not touch geometry, objects, origins or selection. Use it when the user
-  invokes /blender-ply:centrablender or CentraBlender, and whenever they ask to centre the model on
+  invokes /blender-ply:center-blender or CenterBlender, and whenever they ask to centre the model on
   screen in Blender — "centra il modello sullo schermo", "mettilo al centro della vista", "il
   modello è spostato di lato / fuori schermo / non si vede tutto", "centra la vista sul pezzo
   senza ruotarla", "riportami il modello al centro", "centre the model", "the model is off screen"
-  — even if the skill is not named. Not for moving the origin (CentraPLY), for the first setup
-  after an import (VisualizzaPLY) or for saving an image (FotografaPLY).
+  — even if the skill is not named. Not for moving the origin (CenterPLY), for the first setup
+  after an import (ViewPLY) or for saving an image (SnapshotPLY).
 ---
 
-# CentraBlender
+# CenterBlender
 
 Goal: the visible model must sit **in the middle of the screen**, as the user is looking at it. The inclination the user chose stays theirs, and so does the zoom, unless the model does not fit on screen.
 
@@ -23,7 +23,7 @@ This changes the **view** only: no object moves, and origin, 3D cursor, selectio
 1. **Run the script** with `mcp__Blender__execute_blender_code`:
    ```python
    PARAMS = {}
-   p = r"${CLAUDE_SKILL_DIR}/scripts/centra_blender.py"
+   p = r"${CLAUDE_SKILL_DIR}/scripts/center_blender.py"
    g = {"PARAMS": PARAMS, "__file__": p}
    exec(compile(open(p, encoding="utf-8").read(), p, "exec"), g)
    result = g["result"]

@@ -1,18 +1,18 @@
 ---
-name: fotografaply
+name: snapshot-ply
 description: >-
-  FotografaPLY — centres the PLY model on Blender's screen keeping the inclination (and zoom) the
+  SnapshotPLY — centres the PLY model on Blender's screen keeping the inclination (and zoom) the
   user already set, makes the background white, removes grid, axes, overlays and gizmos, and saves
   a clean PNG of the model through a viewport render; then restores the view as it was. Use it
-  when the user invokes /blender-ply:fotografaply or FotografaPLY, and whenever they ask for a
+  when the user invokes /blender-ply:snapshot-ply or SnapshotPLY, and whenever they ask for a
   picture of a model in Blender — "fai una foto/uno screenshot/un'immagine/un render del
   modello", "salva un'immagine con sfondo bianco", "togli la griglia e salva il png", "centra e
   fotografa", "immagine per il manuale/documento", "take a picture of the model", "save a PNG with
   white background" — even if the skill is not named. Not for fixing view and colours after an
-  import (VisualizzaPLY).
+  import (ViewPLY).
 ---
 
-# FotografaPLY
+# SnapshotPLY
 
 Produces an image of the model as the user sees it in the viewport: same vertex colours, same inclination, but **centred**, on a **white background** and **without grid, axes, selection outlines or gizmos**.
 
@@ -20,12 +20,12 @@ The recipe was worked out in the grippers session (10 images `pinza_XX_viewport.
 
 ## Procedure
 
-1. **Let the user set up the framing.** The inclination (and usually the zoom) is their call. If the model has just been imported and is grey or invisible, run **VisualizzaPLY** first.
+1. **Let the user set up the framing.** The inclination (and usually the zoom) is their call. If the model has just been imported and is grey or invisible, run **ViewPLY** first.
 
 2. **Run the script** with `mcp__Blender__execute_blender_code`:
    ```python
    PARAMS = {}
-   p = r"${CLAUDE_SKILL_DIR}/scripts/fotografa_ply.py"
+   p = r"${CLAUDE_SKILL_DIR}/scripts/snapshot_ply.py"
    g = {"PARAMS": PARAMS, "__file__": p}
    exec(compile(open(p, encoding="utf-8").read(), p, "exec"), g)
    result = g["result"]

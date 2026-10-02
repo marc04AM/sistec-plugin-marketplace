@@ -1,10 +1,10 @@
 ---
-name: centraply
+name: center-ply
 description: >-
-  CentraPLY — in Blender, brings the selected vertex (or the midpoint of the selected vertices) to
+  CenterPLY — in Blender, brings the selected vertex (or the midpoint of the selected vertices) to
   the world origin and makes the object origin and the 3D cursor coincide there as well ("the
   three points that line up"), moving the mesh so that it also holds in the exported PLY. Use it
-  when the user invokes /blender-ply:centraply or CentraPLY, and whenever they ask to move the
+  when the user invokes /blender-ply:center-ply or CenterPLY, and whenever they ask to move the
   origin onto the selected vertex — "porta/sposta l'origine sul vertice selezionato", "metti
   l'origine del modello e del mondo su questo punto", "origine nel punto medio dei punti
   selezionati", "centra il modello sul vertice", "centro del foro come origine", "fai combaciare
@@ -13,7 +13,7 @@ description: >-
   takes an extra step, described in the skill.
 ---
 
-# CentraPLY
+# CenterPLY
 
 The goal, as the user has always meant it: **object origin = 3D cursor = world origin (0,0,0)**, all on the chosen point. The chosen point is the vertex selected in Blender, or the midpoint of the selected vertices.
 
@@ -33,7 +33,7 @@ Changing the reference, or moving only the origin with Set Origin, is not enough
 3. **Run the script** with `mcp__Blender__execute_blender_code`:
    ```python
    PARAMS = {}
-   p = r"${CLAUDE_SKILL_DIR}/scripts/centra_ply.py"
+   p = r"${CLAUDE_SKILL_DIR}/scripts/center_ply.py"
    g = {"PARAMS": PARAMS, "__file__": p}
    exec(compile(open(p, encoding="utf-8").read(), p, "exec"), g)
    result = g["result"]
@@ -49,7 +49,7 @@ Changing the reference, or moving only the origin with Set Origin, is not enough
    - zeroes the object translation, keeping rotation and scale;
    - puts the cursor at (0,0,0);
    - checks that the point has landed on (0,0,0);
-   - records a "CentraPLY" undo step (Ctrl+Z).
+   - records a "CenterPLY" undo step (Ctrl+Z).
 
 4. **Read the report.**
    - `ok` must be True.
@@ -66,7 +66,7 @@ Changing the reference, or moving only the origin with Set Origin, is not enough
 - **Do not leave Edit Mode.** Leaving it flushes and can merge duplicate vertices (21,724 → 21,723 on the Carro). The script works directly on the live bmesh and leaves the user where they are.
 - **Duplicates in CAD PLYs.** At edges each face has its own copy of the vertex, so one click often selects 2–3 coincident vertices. The script counts them once, otherwise they would skew the midpoint.
 - **Centre of a hole.** The midpoint of the ring vertices matches the centre only if they are equidistant; the script checks this. If they are not, say so, and if the bounding-box centre was what was needed, re-run with `mode="bbox"`.
-- **Orientation.** CentraPLY only translates. If the user also asks for the axes (for example "X on the short side, Y on the long side, Z out of the face"), one more step is needed:
+- **Orientation.** CenterPLY only translates. If the user also asks for the axes (for example "X on the short side, Y on the long side, Z out of the face"), one more step is needed:
   - find the flat faces with a coplanar flood-fill (`normal·n > 0.9999`) sorted by area, without using `link_faces` on the edge, because with duplicated vertices it sees only one plane;
   - build the basis with `basis = Matrix((X, Y, Z)).transposed()`;
   - apply `me.transform(basis.inverted())` to the already centred mesh.

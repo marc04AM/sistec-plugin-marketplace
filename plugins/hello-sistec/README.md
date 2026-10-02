@@ -1,23 +1,23 @@
 # hello-sistec
 
-Plugin di esempio del marketplace Sistec. Mostra come impacchettare insieme una
-skill, un agent e un hook.
+Example plugin for the Sistec marketplace. Shows how to package a skill, an
+agent and a hook together.
 
-## Componenti
+## Components
 
-| Componente | File | Cosa fa |
-| :--------- | :--- | :------ |
-| Skill | `skills/hello/SKILL.md` | `/hello-sistec:hello <nome>` saluta l'utente |
-| Agent | `agents/code-reviewer.md` | Agent `code-reviewer` per review del codice |
-| Hook | `hooks/hooks.json` | Logga ogni file modificato con Write/Edit |
+| Component | File | What it does |
+| :-------- | :--- | :----------- |
+| Skill | `skills/hello/SKILL.md` | `/hello-sistec:hello <name>` greets the user |
+| Agent | `agents/code-reviewer.md` | `code-reviewer` agent for code reviews |
+| Hook | `hooks/hooks.json` | Logs every file modified with Write/Edit |
 
-## Test rapido
+## Quick test
 
 ```bash
 claude --plugin-dir ./plugins/hello-sistec
 ```
 
-Poi in sessione:
+Then, in the session:
 
 ```shell
 /hello-sistec:hello Marco

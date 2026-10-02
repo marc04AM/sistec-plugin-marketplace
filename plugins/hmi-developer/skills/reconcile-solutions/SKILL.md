@@ -1,121 +1,121 @@
 ---
 name: reconcile-solutions
-description: Porta una feature/innovazione da una solution SOURCE dentro una solution DEST, con ambito una singola finalità. Usa git merge/cherry-pick dove la feature vive in un repo condiviso da entrambe le solution su branch diversi; altrimenti fa un port manuale cross-repo ri-applicando l'*intento* del cambiamento (non un diff testuale) sul codice divergente della dest. Pianifica tutto, conferma le decisioni non banali, verifica con build e lascia gli edit unstaged. Usala quando devi allineare due solution della stessa famiglia (tipicamente checkout su branch-milestone diversi) portando una specifica feature dall'una all'altra.
+description: Ports a feature/innovation from a SOURCE solution into a DEST solution, scoped to a single purpose. Uses git merge/cherry-pick where the feature lives in a repo shared by both solutions on different branches; otherwise does a manual cross-repo port by re-applying the *intent* of the change (not a textual diff) to the dest's divergent code. Plans everything, confirms non-trivial decisions, verifies with a build, and leaves the edits unstaged. Use it when you need to align two solutions of the same family (typically checkouts on different milestone branches) by porting a specific feature from one to the other.
 disable-model-invocation: true
 ---
 
-# reconcile-solutions — porta una feature da una solution a un'altra
+# reconcile-solutions — port a feature from one solution to another
 
-Porta le **innovazioni** di una solution SOURCE dentro una solution DEST, con ambito **una sola
-finalità/feature**. Le due solution sono tipicamente checkout della **stessa** famiglia di repo su
-branch-milestone diversi: dove la feature vive in un repo **condiviso**, la riconciliazione è un
-**git merge/cherry-pick**; dove il repo è **distinto** (o il codice è divergente), è un **port
-manuale semantico**.
+Ports the **innovations** of a SOURCE solution into a DEST solution, scoped to **a single
+purpose/feature**. The two solutions are typically checkouts of the **same** repo family on
+different milestone branches: where the feature lives in a **shared** repo, reconciliation is a
+**git merge/cherry-pick**; where the repo is **distinct** (or the code has diverged), it is a **semantic
+manual port**.
 
-Regola guida: *merge preferito quando esiste lo stesso repo su branch diversi; le decisioni
-banali/dipendenti procedono da sole; ogni decisione non banale si conferma.*
+Guiding rule: *merge is preferred when the same repo exists on different branches; trivial/dependent
+decisions proceed on their own; every non-trivial decision is confirmed.*
 
-## 1. Input (tutti richiesti)
+## 1. Input (all required)
 
-- **source** — la solution (`.sln`/`.slnx`/cartella) di cui si portano le innovazioni.
-- **dest** — la solution che le riceve.
-- **purpose** — la **feature/finalità** da riconciliare (il cambiamento specifico, **non** l'intero branch).
+- **source** — the solution (`.sln`/`.slnx`/folder) whose innovations are ported.
+- **dest** — the solution that receives them.
+- **purpose** — the **feature/purpose** to reconcile (the specific change, **not** the whole branch).
 
-Manca uno dei tre → chiedilo e fermati finché non è chiaro.
+One of the three missing → ask for it and stop until it is clear.
 
-## 2. Survey dei due repo-set (read-only) + classifica
+## 2. Survey both repo sets (read-only) + classify
 
-Per ogni solution risolvi root + sub-repo (multi-repo → la root non è un repo; ogni subfolder con
-`.git` lo è). Per ogni sub-repo su entrambi i lati registra: **branch** corrente, i **ref
-milestone/feature** rilevanti, un **MERGE_HEAD/rebase** in corso, la **dirtiness**. Poi classifica:
+For each solution resolve root + sub-repos (multi-repo → the root is not a repo; every subfolder with
+`.git` is). For each sub-repo on both sides record: current **branch**, the relevant **milestone/feature
+refs**, any in-progress **MERGE_HEAD/rebase**, the **dirtiness**. Then classify:
 
-- **SHARED** — stesso repo su entrambi i lati: stessa origin **oppure** storia condivisa (esiste un
-  `git merge-base`) → candidato a git-merge.
-- **DISTINCT** — controparte con origin diversa **e** nessuna storia condivisa → solo port manuale.
+- **SHARED** — same repo on both sides: same origin **or** shared history (a
+  `git merge-base` exists) → git-merge candidate.
+- **DISTINCT** — counterpart with a different origin **and** no shared history → manual port only.
 
-Una dest **dirty** o con un **merge in corso** → chiudila/puliscila prima (vedi *Chiudere un merge in
-sicurezza*); se non si può finire in sicurezza → report e **stop**.
+A **dirty** dest, or one with a **merge in progress** → close/clean it first (see *Closing a merge
+safely*); if it cannot be finished safely → report and **stop**.
 
-## 3. Trova la commit-footprint della feature
+## 3. Find the feature's commit footprint
 
-Sul SOURCE, trova i commit che compongono la **purpose** oltre la base milestone
-(`git log <base>..<feature-branch>`), poi `git show --stat` per avere **file esatti + in quali repo**
-la feature tocca. La purpose — non l'intero branch — definisce l'ambito.
+On the SOURCE, find the commits that make up the **purpose** beyond the milestone base
+(`git log <base>..<feature-branch>`), then `git show --stat` to get the **exact files + which repos**
+the feature touches. The purpose — not the whole branch — defines the scope.
 
-## 4. Decisione merge-vs-port (per ogni repo toccato)
+## 4. Merge-vs-port decision (for each touched repo)
 
-- **git merge / cherry-pick** *solo* quando il repo è lo **stesso SHARED** su entrambi i lati. Merge
-  di branch intero solo se **non over-porta**; se il branch source porta anche lavoro estraneo →
-  **cherry-pick** dei soli commit della feature. → non banale: **conferma** la scelta.
-- **Port manuale** quando il repo è **DISTINCT** (repo diverso → nessuna storia condivisa da mergiare):
-  ri-crea il cambiamento nell'albero della dest.
-- Un repo **SHARED che la feature non tocca** → niente da fare lì.
+- **git merge / cherry-pick** *only* when the repo is the **same SHARED** repo on both sides. Whole-branch
+  merge only if it **does not over-port**; if the source branch also carries unrelated work →
+  **cherry-pick** only the feature's commits. → non-trivial: **confirm** the choice.
+- **Manual port** when the repo is **DISTINCT** (different repo → no shared history to merge):
+  re-create the change in the dest tree.
+- A **SHARED repo the feature does not touch** → nothing to do there.
 
-### Chiudere un merge in sicurezza
+### Closing a merge safely
 
-Quando completi un merge, finalizzalo come **un singolo commit di merge a due genitori**
-(`git commit --no-edit`, usa `MERGE_MSG`) — **mai** spezzarlo in commit ordinari: appiattirebbe il
-merge e **distruggerebbe il link a due genitori**. Se ci sono **path non risolti** (conflitti), la
-risoluzione è dell'utente → report e stop; non fare stage/resolve/commit al suo posto. **Mai**
-`reset --hard`, `push --force`, o rebase di commit già pushati.
+When you complete a merge, finalize it as **a single two-parent merge commit**
+(`git commit --no-edit`, uses `MERGE_MSG`) — **never** split it into ordinary commits: that would flatten the
+merge and **destroy the two-parent link**. If there are **unresolved paths** (conflicts), resolution
+belongs to the user → report and stop; do not stage/resolve/commit on their behalf. **Never**
+`reset --hard`, `push --force`, or rebase already-pushed commits.
 
-## 5. Mappa i path + enumera i call site nella dest
+## 5. Map the paths + enumerate the call sites in the dest
 
-Mappa ogni path source toccato al suo equivalente nella dest (progetto/cartella omonimi sotto la root
-dest; il layer applicativo spesso differisce — es. multi-cella `AB/`+`C/` vs `HMI/` singolo). **Grep
-la dest** per il/i simbolo/i che la feature cambia/rimuove → enumera i **call site reali** da migrare.
+Map every touched source path to its equivalent in the dest (same-named project/folder under the dest
+root; the application layer often differs — e.g. multi-cell `AB/`+`C/` vs single `HMI/`). **Grep
+the dest** for the symbol(s) the feature changes/removes → enumerate the **actual call sites** to migrate.
 
-## 6. Classifica ogni edit — banale vs non banale
+## 6. Classify each edit — trivial vs non-trivial
 
-- **Banale/dipendente → automatico:** file con eredità condivisa che portano quasi identici; rename
-  meccanici; file nuovi le cui dipendenze esistono già nella dest.
-- **Non banale → conferma (`AskUserQuestion`):** un file condiviso che è **divergente** nella dest (va
-  ri-applicato **semanticamente**, non testualmente); un call site della dest **senza** controparte
-  source; la scelta merge-vs-cherry-pick; la **cancellazione** di un tipo migrato-via.
+- **Trivial/dependent → automatic:** files with shared ancestry that port almost identically; mechanical
+  renames; new files whose dependencies already exist in the dest.
+- **Non-trivial → confirm (`AskUserQuestion`):** a shared file that has **diverged** in the dest (must be
+  re-applied **semantically**, not textually); a dest call site **without** a source
+  counterpart; the merge-vs-cherry-pick choice; the **deletion** of a migrated-away type.
 
-## 7. Piano + gate di approvazione (prima di qualsiasi edit)
+## 7. Plan + approval gate (before any edit)
 
-Presenta il piano completo — decisione merge/port per-repo, i gruppi di file (auto vs conferma), e il
-passo di verifica — e **gate** (`Proceed` / correggi / solo-piano). Read-only fino a qui.
+Present the complete plan — per-repo merge/port decision, the file groups (auto vs confirm), and the
+verification step — and **gate** (`Proceed` / correct / plan-only). Read-only up to this point.
 
-Struttura minima del piano (e del report finale allo Step 9):
+Minimum plan structure (and of the final report in Step 9):
 
 ```
-## Riconciliazione: <purpose>   (SOURCE → DEST)
-### <repo> — [SHARED merge | SHARED cherry-pick | DISTINCT port | nessuna azione]
-- File auto: <elenco>
-- File da confermare: <elenco + perché>
-### Verifica
-- build dest 0 errori nuovi · 0 riferimenti residui · edit lasciati unstaged
+## Reconciliation: <purpose>   (SOURCE → DEST)
+### <repo> — [SHARED merge | SHARED cherry-pick | DISTINCT port | no action]
+- Auto files: <list>
+- Files to confirm: <list + why>
+### Verification
+- dest build 0 new errors · 0 leftover references · edits left unstaged
 ```
 
-## 8. Esegui (dopo approvazione)
+## 8. Execute (after approval)
 
-- **Baseline di build della dest** — prima di editare, builda la dest e registra errori/warning
-  preesistenti, così a fine lavoro distingui i problemi **nuovi** da quelli già presenti.
-- **Pre-check dipendenze di build** — prima di aggiungere file portati, verifica che i tipi/extension
-  che richiedono esistano già sul branch della dest (evita sorprese di build rotta).
-- **Auto-applica** il gruppo banale; per ogni **file condiviso divergente**, diffa la versione dest e
-  ri-applica l'**intento** del cambiamento (non patchare alla cieca un diff stale).
-- **Conferma ogni sito non banale** man mano che lo raggiungi, poi applica.
-- **Attenzione alle firme delle factory** old→new: l'ordine degli argomenti può cambiare nella
-  migrazione → passa **argomenti nominati** per stare al sicuro.
-- **Rimanda la cancellazione** di un tipo migrato-via finché **tutti** i caller (inclusi quelli gated)
-  sono migrati.
-- Path merge/cherry-pick: finalizza come un solo commit gated a due genitori (vedi sopra).
+- **Dest build baseline** — before editing, build the dest and record pre-existing errors/warnings,
+  so at the end you can tell **new** problems from those already there.
+- **Build-dependency pre-check** — before adding ported files, verify that the types/extensions
+  they require already exist on the dest branch (avoids broken-build surprises).
+- **Auto-apply** the trivial group; for every **divergent shared file**, diff the dest version and
+  re-apply the **intent** of the change (do not blindly patch a stale diff).
+- **Confirm each non-trivial site** as you reach it, then apply.
+- **Watch out for old→new factory signatures**: argument order may change in the
+  migration → pass **named arguments** to be safe.
+- **Defer the deletion** of a migrated-away type until **all** callers (including the gated ones)
+  have been migrated.
+- Merge/cherry-pick path: finalize as a single gated two-parent commit (see above).
 
-## 9. Verifica + report
+## 9. Verify + report
 
-- **Builda la dest** (`dotnet build <dest .sln/.slnx>`), confrontando con la baseline dello Step 8:
-  attesi 0 errori **nuovi**. Se la build fallisce, riporta gli errori, **lascia gli edit unstaged** e
-  non auto-riparare oltre l'intento della feature (niente rifacimenti fuori ambito).
-- **Zero riferimenti residui** a un simbolo rimosso (una nota doc `<c>…</c>` è innocua).
-- **Lascia tutti gli edit unstaged** — riporta il change set (`git status --porcelain`) per la review.
-- **Riporta la divergenza** creata tra le due solution, per agevolare il sync successivo.
+- **Build the dest** (`dotnet build <dest .sln/.slnx>`), comparing against the Step 8 baseline:
+  0 **new** errors expected. If the build fails, report the errors, **leave the edits unstaged**, and
+  do not auto-repair beyond the feature's intent (no out-of-scope rework).
+- **Zero leftover references** to a removed symbol (a `<c>…</c>` doc note is harmless).
+- **Leave all edits unstaged** — report the change set (`git status --porcelain`) for review.
+- **Report the divergence** created between the two solutions, to ease the next sync.
 
-## Note
+## Notes
 
-- Read-only fino al gate dello Step 7; tutto ciò che segue è gated e lasciato unstaged per la review.
-- Multi-repo: una feature può attraversare più repo con verdetti merge/port diversi — decidi per-repo.
-- Se la feature SOURCE è **non committata**, un git merge non può trasportarla → committala prima sul
-  source (chiedi), o ripiega sul port manuale.
+- Read-only until the Step 7 gate; everything after it is gated and left unstaged for review.
+- Multi-repo: a feature can span several repos with different merge/port verdicts — decide per repo.
+- If the SOURCE feature is **uncommitted**, a git merge cannot carry it → commit it on the
+  source first (ask), or fall back to the manual port.
